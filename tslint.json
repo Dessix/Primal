@@ -6,6 +6,7 @@
     "member-ordering": [
       false
     ],
+    "no-string-literal": false,
     "whitespace": [
       false
     ],
@@ -13,8 +14,7 @@
     "no-trailing-whitespace": false,
     "forin": false,
     "interface-name": [
-      true,
-      "always-prefix"
+      false
     ],
     "no-console": [
       false

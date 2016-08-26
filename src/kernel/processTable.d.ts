@@ -1,7 +1,13 @@
-type ProcessMemory = any;
+type ProcessMemory = Object;
 type ProcessId = number;
-type SerializedProcessTable = Array<[ProcessId, ProcessId, string]>;
+type SerializedProcess = [ProcessId, ProcessId, string];
+
+interface SerializedProcessTable {
+    lastPidRun: number;
+    table: Array<SerializedProcess>;
+}
+
 interface Memory {
-    proc: SerializedProcessTable;
-    procmem: { [pid: number /*ProcessId*/]: ProcessMemory | undefined };
+    proc: SerializedProcessTable | undefined;
+    pmem: { [pid: number /*ProcessId*/]: ProcessMemory | undefined } | undefined;
 }

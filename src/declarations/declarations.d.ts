@@ -1,11 +1,9 @@
 // tslint:disable-next-line: class-name
 interface global {
-    debug: any;
-    logdump: any;
-    warnMode: any;
-    infoMode: any;
-    debugMode: any;
-    traceMode: any;
+    kernel: {
+        spawnProcessByClassName(processName: string, parentPid?: number): ProcessId | undefined;
+    };
+    reboot(): void;
     [key: string]: any;
 }
 
@@ -22,4 +20,9 @@ declare const enum Direction {
     BOTTOM_LEFT = 6,
     LEFT = 7,
     TOP_LEFT = 8,
+}
+
+declare interface CreepMemory {
+    role: string;
+    [key: string]: any;
 }
