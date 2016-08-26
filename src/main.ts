@@ -6,7 +6,7 @@ import { Kernel } from "./kernel/kernel";
 Processes.RegisterAll();
 
 const kernel = global.kernel = new Kernel();
-global.reboot = function() {
+global.reset = function() {
     console.log("Ω Rebooting");
     Memory.proc = KernelSerializer.createBlankProcessTable();
     Memory.pmem = {};
@@ -16,6 +16,7 @@ global.reboot = function() {
 };
 
 export function loop() {
+    PathFinder.use(true);
     console.log("Ω Load");
     {
         let proc = Memory.proc;
@@ -27,7 +28,7 @@ export function loop() {
         kernel.loadProcessTable(KernelSerializer.deserializeProcessTable(proc));
     }
     console.log("Ω Execute");
-    kernel.run(Game.cpu.limit * 0.9);
+    kernel.run(Game.cpu.limit * 0.8);
     console.log("Ω Save");
     Memory.proc = KernelSerializer.serializeProcessTable(kernel.getProcessTable());
 }

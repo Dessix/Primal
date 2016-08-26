@@ -3,7 +3,7 @@ interface global {
     kernel: {
         spawnProcessByClassName(processName: string, parentPid?: number): ProcessId | undefined;
     };
-    reboot(): void;
+    reset(): void;
     [key: string]: any;
 }
 
