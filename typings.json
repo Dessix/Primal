@@ -1,0 +1,7 @@
+{
+  "name": "prime",
+  "globalDependencies": {
+    "lodash": "registry:dt/lodash#3.10.0+20160720001309",
+    "screeps": "github:screepers/Screeps-Typescript-Declarations/dist/screeps.d.ts#TS2"
+  }
+}

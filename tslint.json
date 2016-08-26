@@ -1,0 +1,50 @@
+{
+  "extends": [
+    "tslint:recommended"
+  ],
+  "rules": {
+    "member-ordering": [
+      false
+    ],
+    "whitespace": [
+      false
+    ],
+    "no-empty": false,
+    "no-trailing-whitespace": false,
+    "forin": false,
+    "interface-name": [
+      true,
+      "always-prefix"
+    ],
+    "no-console": [
+      false
+    ],
+    "align": [
+      false
+    ],
+    "curly": true,
+    "variable-name": [
+      true,
+      "ban-keywords",
+      "check-format",
+      "allow-pascal-case",
+      "allow-leading-underscore"
+    ],
+    "comment-format": [
+      false
+    ],
+    "no-unused-variable": [
+      false
+    ],
+    "no-unused-expression": false,
+    "no-consecutive-blank-lines": false,
+    "new-parens": false,
+    "semicolon": [
+      true,
+      "always"
+    ],
+    "max-line-length": [
+      256
+    ]
+  }
+}

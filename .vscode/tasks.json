@@ -1,0 +1,61 @@
+{
+  "version": "0.1.0",
+  "command": "npm",
+  "isShellCommand": true,
+  "showOutput": "silent",
+  "args": [
+    "run"
+  ],
+  "tasks": [
+    {
+      "taskName": "build",
+      "isBuildCommand": true,
+      "problemMatcher": "$tsc"
+    },
+    {
+      "taskName": "test",
+      "isTestCommand": true,
+      "showOutput": "always",
+      "problemMatcher": {
+        "owner": "mocha",
+        "fileLocation": [
+          "absolute"
+        ],
+        "pattern": [
+          {
+            "regexp": "^\\s*\\d+\\)\\s+(.+):$",
+            "message": 1
+          },
+          {
+            "regexp": "^\\s+.*$"
+          },
+          {
+            "regexp": "^\\s+.*$"
+          },
+          {
+            "regexp": "^\\s+.*$"
+          },
+          {
+            "regexp": "^\\s+.*$"
+          },
+          {
+            "regexp": "^\\s+.*$"
+          },
+          {
+            "regexp": "\\s+at\\s(.*)\\s\\((.*?:.*?):(\\d+):(\\d+)\\)",
+            "file": 2,
+            "line": 3,
+            "column": 4
+          }
+        ]
+      }
+    },
+    {
+      "taskName": "clean",
+      "args": [
+        "run"
+      ],
+      "showOutput": "silent"
+    }
+  ]
+}
