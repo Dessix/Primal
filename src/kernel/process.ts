@@ -15,6 +15,7 @@ export abstract class Process {
     public parentPid: ProcessId;
     public kernel: Kernel | null;
     public frequency: number = 1;
+    public spawnedChildren: ProcessId[] | undefined;
     public get kernelOrThrow(): Kernel {
         if (this.kernel === null) {
             throw new Error("Kernel not available!");
@@ -22,6 +23,14 @@ export abstract class Process {
         return this.kernel;
     }
     public status: ProcessStatus = ProcessStatus.RUN;
+    public spawnChildProcess(processCtor: ProcessConstructor) {
+        const childPid = this.kernelOrThrow.spawnProcessLive(processCtor, this.pid);
+        if (this.spawnedChildren === undefined) {
+            this.spawnedChildren = [];
+        }
+        this.spawnedChildren.push(childPid);
+        return childPid;
+    }
 
     public static Register(className: string, processCtor: ProcessConstructor): void {
         ProcessRegistry.register(className, processCtor);
@@ -34,5 +43,6 @@ export abstract class Process {
 
     public abstract run(): ProcessMemory | undefined;
 
-    public abstract reloadFromMemory(processMemory: ProcessMemory | undefined): void;
+    public reloadFromMemory(processMemory: ProcessMemory | undefined): void {
+    };
 }

@@ -1,3 +1,4 @@
+import { PCleanMemory } from "./../processes/cleanMemory";
 import { PRoot } from "../processes/root";
 import { PBootstrap } from "../processes/bootstrap";
 import { PHarvest } from "../processes/harvest";
@@ -17,6 +18,7 @@ export class Processes {
         PHarvest,
         PUpgrade,
         PBootstrap,
+        PCleanMemory,
     ];
 
     public static RegisterAll(): void {

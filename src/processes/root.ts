@@ -1,9 +1,11 @@
+import { PCleanMemory } from "./cleanMemory";
 import { PBootstrap } from "./bootstrap";
 import { Kernel } from "./../kernel/kernel";
 import { Process, ProcessStatus } from "../kernel/process";
 
 type RootMemory = {
-    bootstrapped: boolean
+    bootstrapped?: boolean,
+    memoryCleanerPid?: ProcessId,
 };
 
 export class PRoot extends Process {
@@ -20,8 +22,11 @@ export class PRoot extends Process {
         const pmem = this.pmem;
         if (!pmem.bootstrapped && kernel.getProcessCount() <= 1) {
             console.log("Processes empty! Bootstrapping!");
-            kernel.spawnProcess(PBootstrap, this.pid);
+            this.spawnChildProcess(PBootstrap);
             pmem.bootstrapped = true;
+        }
+        if (pmem.memoryCleanerPid === undefined) {
+            pmem.memoryCleanerPid = this.spawnChildProcess(PCleanMemory);
         }
         return pmem;
     }

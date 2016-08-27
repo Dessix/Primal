@@ -1,9 +1,8 @@
-// tslint:disable-next-line: class-name
-interface global {
+interface Global {
     [key: string]: any;
 }
 
-declare var global: global;
+declare var global: Global;
 
 type CreepBodyPart = "move" | "work" | "carry" | "attack" | "ranged_attack" | "tough" | "heal" | "claim";
 

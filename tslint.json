@@ -36,6 +36,7 @@
     "no-unused-variable": [
       false
     ],
+    "switch-default": false,
     "no-unused-expression": false,
     "no-consecutive-blank-lines": false,
     "new-parens": false,
