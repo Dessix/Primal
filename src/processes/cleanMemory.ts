@@ -16,7 +16,6 @@ export class PCleanMemory extends Process {
     }
 
     public cleanMemory(): void {
-        console.log("Clean!");
         const gameAccessible = <{ [name: string]: any }>Game;
         for (let key of ["creeps", "spawns', 'rooms", "flags"]) {
             const memK = Memory[key];
