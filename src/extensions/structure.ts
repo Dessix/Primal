@@ -1,8 +1,5 @@
 import { safeExtendPrototype } from "../util/reflection";
 
-/**
- * Provides structure memory.
- */
 class StructureX extends OwnedStructure {
 
     public get memory(): Object | undefined {

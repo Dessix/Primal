@@ -9,7 +9,7 @@ export class PUpgrade extends Process {
         super(pid, parentPid);
     }
 
-    public run(_pmem: ProcessMemory | undefined): ProcessMemory | undefined {
+    public run(): ProcessMemory | undefined {
         let pmem = this.pmem;
         console.log("Upgrade");
 

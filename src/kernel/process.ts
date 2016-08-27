@@ -14,6 +14,12 @@ export abstract class Process {
     public pid: ProcessId;
     public parentPid: ProcessId;
     public kernel: Kernel | null;
+    public get kernelOrThrow(): Kernel {
+        if (this.kernel === null) {
+            throw new Error("Kernel not available!");
+        }
+        return this.kernel;
+    }
     public status: ProcessStatus = ProcessStatus.RUN;
 
     public static Register(className: string, processCtor: ProcessConstructor): void {
@@ -25,7 +31,7 @@ export abstract class Process {
         this.parentPid = parentPid;
     }
 
-    public abstract run(processMemory: ProcessMemory | undefined): ProcessMemory | undefined;
+    public abstract run(): ProcessMemory | undefined;
 
     public abstract reloadFromMemory(processMemory: ProcessMemory | undefined): void;
 }

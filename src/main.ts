@@ -1,23 +1,49 @@
 import "./extensions/";//Apply extension modules
-import { Processes } from "./processes/processes";
+import { Processes } from "./kernel/processes";
 import { KernelSerializer } from "./kernel/kernelSerializer";
 import { Kernel } from "./kernel/kernel";
 
 Processes.RegisterAll();
 
+interface global {// tslint:disable-line: class-name
+    kernel: {
+        spawnProcessByClassName(processName: string, parentPid?: number): ProcessId | undefined;
+    };
+    launchNew(className: string): number | undefined;
+    reset(): void;
+}
+declare const global: global;
+
+if (Memory.config === undefined) {
+    Memory.config = {
+        noisy: false,
+    };
+}
+
 const kernel = global.kernel = new Kernel();
-global.reset = function() {
-    console.log("Ω Rebooting");
+
+//Command-line calls
+global.reset = function (): void {
+    console.log("Ω Rebooting...");
     Memory.proc = KernelSerializer.createBlankProcessTable();
     Memory.pmem = {};
     kernel.reboot();
-    console.log("Ω Initializing Root");
+    console.log("Ω Initializing Root...");
     Memory.proc.table.push([0, 0, "Root"]);
+};
+
+global.launchNew = function (className: string): number | undefined {
+    const procId = kernel.spawnProcessByClassName(className, 0);
+    if (procId === undefined) {
+        return;
+    }
+    Memory.proc = KernelSerializer.serializeProcessTable(kernel.getProcessTable());
+    return procId;
 };
 
 export function loop() {
     PathFinder.use(true);
-    console.log("Ω Load");
+    if (Memory.config.noisy) { console.log("Ω Load"); }
     {
         let proc = Memory.proc;
         if (proc === undefined) {
@@ -27,8 +53,8 @@ export function loop() {
         }
         kernel.loadProcessTable(KernelSerializer.deserializeProcessTable(proc));
     }
-    console.log("Ω Execute");
+    if (Memory.config.noisy) { console.log("Ω Execute"); }
     kernel.run(Game.cpu.limit * 0.8);
-    console.log("Ω Save");
+    if (Memory.config.noisy) { console.log("Ω Save"); }
     Memory.proc = KernelSerializer.serializeProcessTable(kernel.getProcessTable());
 }

@@ -8,13 +8,12 @@ export class PHarvest extends Process {
         super(pid, parentPid);
     }
 
-    public run(_pmem: ProcessMemory | undefined): ProcessMemory | undefined {
+    public run(): ProcessMemory | undefined {
         console.log("Harvest");
 
         for (let creepName of Object.keys(Game.creeps)) {
             const creep = Game.creeps[creepName];
-            const cmem = <CreepMemory>creep.memory;
-            if (cmem.role !== "harv") {
+            if (creep.role !== "harv") {
                 continue;
             }
             console.log("Harvest with " + creep.name);

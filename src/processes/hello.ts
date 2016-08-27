@@ -9,11 +9,11 @@ export class PHello extends Process {
         super(pid, parentPid);
     }
 
-    public run(_pmem: ProcessMemory | undefined): ProcessMemory | undefined {
+    public run(): ProcessMemory | undefined {
         let pmem = this.pmem;
         console.log(`Hello world!${pmem > 0 ? ` ${pmem}` : ""}`);
         ++pmem;
-        return this.pmem = pmem;
+        return pmem;
     }
     
     public reloadFromMemory(pmem: ProcessMemory | undefined): void {

@@ -1,15 +1,19 @@
 // tslint:disable-next-line: class-name
 interface global {
-    kernel: {
-        spawnProcessByClassName(processName: string, parentPid?: number): ProcessId | undefined;
-    };
-    reset(): void;
     [key: string]: any;
 }
 
 declare var global: global;
 
 type CreepBodyPart = "move" | "work" | "carry" | "attack" | "ranged_attack" | "tough" | "heal" | "claim";
+
+interface CoreConfiguration {
+    noisy: boolean;
+}
+
+interface Memory {
+    config: CoreConfiguration;
+}
 
 declare const enum Direction {
     TOP = 1,
@@ -20,9 +24,4 @@ declare const enum Direction {
     BOTTOM_LEFT = 6,
     LEFT = 7,
     TOP_LEFT = 8,
-}
-
-declare interface CreepMemory {
-    role: string;
-    [key: string]: any;
 }
