@@ -13,12 +13,12 @@ export class PBootstrap extends Process {
 
     public constructor(pid: ProcessId, parentPid: ProcessId) {
         super(pid, parentPid);
+        this.frequency = 5;
     }
 
     public run(): ProcessMemory | undefined {
-        const kernel = this.kernel;
-        if (kernel === null) { throw new Error("Kernel not found!"); }
-
+        const kernel = this.kernelOrThrow;
+        console.log("Bootstrap tick");
         const pmem = this.pmem;
         if (pmem.harvestPid === undefined) {
             console.log("Bootstrap spawning Harvest...");

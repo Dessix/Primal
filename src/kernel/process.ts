@@ -14,6 +14,7 @@ export abstract class Process {
     public pid: ProcessId;
     public parentPid: ProcessId;
     public kernel: Kernel | null;
+    public frequency: number = 1;
     public get kernelOrThrow(): Kernel {
         if (this.kernel === null) {
             throw new Error("Kernel not available!");
