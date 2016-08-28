@@ -1,3 +1,4 @@
+import { RecordStats } from "./util/stats";
 import "./extensions/";//Apply extension modules
 import { Processes } from "./kernel/processes";
 import { KernelSerializer } from "./kernel/kernelSerializer";
@@ -36,7 +37,7 @@ global.reset = function (): void {
 Object.defineProperty(global, "config", {
     get: () => {
         return Memory.config;
-    }
+    },
 });
 
 global.launchNew = function (className: string): number | undefined {
@@ -64,4 +65,5 @@ export function loop() {
     kernel.run(Game.cpu.limit * 0.8);
     if (Memory.config.noisy) { console.log("Ω Save"); }
     Memory.proc = KernelSerializer.serializeProcessTable(kernel.getProcessTable());
+    RecordStats();
 }

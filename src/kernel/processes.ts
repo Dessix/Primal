@@ -1,3 +1,5 @@
+import { PRepair } from "./../processes/repair";
+import { PBuild } from "./../processes/build";
 import { PCleanMemory } from "./../processes/cleanMemory";
 import { PRoot } from "../processes/root";
 import { PBootstrap } from "../processes/bootstrap";
@@ -19,6 +21,8 @@ export class Processes {
         PUpgrade,
         PBootstrap,
         PCleanMemory,
+        PBuild,
+        PRepair,
     ];
 
     public static RegisterAll(): void {
