@@ -1,7 +1,7 @@
 import { Kernel } from "./kernel";
 import { ProcessRegistry } from "./processRegistry";
 
-export type ProcessConstructor = (new (_pid: ProcessId, _parentPid: ProcessId) => Process);
+export type ProcessConstructor = ((new (_pid: ProcessId, _parentPid: ProcessId) => Process) & { readonly className: string });
 export enum ProcessStatus {
     TERM = -2,
     EXIT = -1,

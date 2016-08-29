@@ -4,15 +4,6 @@ import { Processes } from "./kernel/processes";
 import { KernelSerializer } from "./kernel/kernelSerializer";
 import { Kernel } from "./kernel/kernel";
 
-interface Global {// tslint:disable-line: class-name
-    kernel: {
-        spawnProcessByClassName(processName: string, parentPid?: number): ProcessId | undefined;
-    };
-    launchNew(className: string): number | undefined;
-    reset(): void;
-    config: CoreConfiguration;
-}
-declare const global: Global;
 
 Processes.RegisterAll();
 
@@ -22,7 +13,7 @@ if (Memory.config === undefined) {
     };
 }
 
-const kernel = global.kernel = new Kernel();
+const kernel = global.k = global.kernel = new Kernel();
 
 //Command-line calls
 global.reset = function (): void {
@@ -34,12 +25,7 @@ global.reset = function (): void {
     Memory.proc.table.push([0, 0, "Root"]);
 };
 
-Object.defineProperty(global, "config", {
-    get: () => {
-        return Memory.config;
-    },
-});
-
+global.id = Game.getObjectById;
 global.launchNew = function (className: string): number | undefined {
     const procId = kernel.spawnProcessByClassName(className, 0);
     if (procId === undefined) {
@@ -49,7 +35,12 @@ global.launchNew = function (className: string): number | undefined {
     return procId;
 };
 
+if (!global.config) { Object.defineProperty(global, "config", { get: () => Memory.config }); }
+if (!global.c) { Object.defineProperty(global, "c", { get: () => Game.creeps }); }
+if (!global.s) { Object.defineProperty(global, "s", { get: () => Game.spawns }); }
+
 export function loop() {
+    global.volatile = {};
     PathFinder.use(true);
     if (Memory.config.noisy) { console.log("Ω Load"); }
     {

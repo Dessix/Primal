@@ -22,6 +22,8 @@
     "align": [
       false
     ],
+    "no-conditional-assignment": false,
+    "no-bitwise": false,
     "curly": true,
     "variable-name": [
       true,

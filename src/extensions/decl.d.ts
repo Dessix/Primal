@@ -3,11 +3,11 @@ interface Memory {
 }
 
 interface CreepMemory {
-    role: string;
+    role?: string;
     [key: string]: any;
 }
 
 interface Creep {
-    cmem: CreepMemory,
-    role: string | undefined;
+    cmem: CreepMemory;
+    role?: string;
 }

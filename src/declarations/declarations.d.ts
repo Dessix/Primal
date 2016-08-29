@@ -1,5 +1,23 @@
+
+interface Volatile {
+    [key: string]: any;
+}
+
 interface Global {
     [key: string]: any;
+    kernel: {
+        spawnProcessByClassName(processName: string, parentPid?: number): ProcessId | undefined;
+    };
+    k: {
+        spawnProcessByClassName(processName: string, parentPid?: number): ProcessId | undefined;
+    }; 
+    launchNew(className: string): number | undefined;
+    reset(): void;
+    config: CoreConfiguration;
+    c: { [creepName: string]: Creep | undefined };
+    s: { [spawnName: string]: Spawn | undefined };
+    id: (id: string) => RoomObject | null;
+    volatile: Volatile;
 }
 
 declare var global: Global;
