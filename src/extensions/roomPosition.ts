@@ -6,6 +6,7 @@ class RoomPositionX extends RoomPosition {
         const dxy = other.y - this.y;
         return (dxl * dxl) + (dxy * dxy);
     }
+    
     public getClosest<T extends { pos: RoomPosition }>(this: RoomPosition, targets: T[]): T | undefined {
         if (targets.length === 0) {
             return undefined;
@@ -20,6 +21,23 @@ class RoomPositionX extends RoomPosition {
             }
         }
         return closest;
+    }
+
+    private room_name_to_coords(pos: RoomPosition) {
+        const tokenizedName = <RegExpMatchArray>pos.roomName.match(/[WNSE]|\d+/g);
+        // 0 = W-/E+, 1 = x, 2 = N-/S+, 3 = y
+        const roomX = <number>(tokenizedName[0] === "W" ? -tokenizedName[1] : tokenizedName[1] + 1);
+        const roomY = <number>(tokenizedName[2] === "N" ? -tokenizedName[3] : tokenizedName[3] + 1);
+        const x = (50 * roomX) + pos.x;
+        const y = (50 * roomY) + pos.y;
+        return { x: x, y: y };
+    }
+
+    public dist(this: RoomPositionX, other: RoomPosition) {
+        const thisCoordinate = this.room_name_to_coords(this);
+        const otherCoordinate = this.room_name_to_coords(other);
+        const dist = Math.abs(otherCoordinate.x - thisCoordinate.x) + Math.abs(otherCoordinate.y - thisCoordinate.y);
+        return dist;
     }
 }
 

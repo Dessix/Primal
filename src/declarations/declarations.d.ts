@@ -16,6 +16,7 @@ interface Global {
     config: CoreConfiguration;
     c: { [creepName: string]: Creep | undefined };
     s: { [spawnName: string]: Spawn | undefined };
+    f: { [flagName: string]: Flag | undefined };
     id: (id: string) => RoomObject | null;
     volatile: Volatile;
 }

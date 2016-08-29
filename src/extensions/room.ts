@@ -31,5 +31,5 @@ function fastFind<T>(this: RoomWithSlowFind, type: number, opts?: { filter: Obje
     }
 }
 
-(<{ slowFind?: any }>Room.prototype).slowFind = slowFind;
+(<RoomWithSlowFind>Room.prototype).slowFind = slowFind;
 Room.prototype.find = fastFind;
