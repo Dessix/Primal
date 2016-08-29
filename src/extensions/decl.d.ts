@@ -3,7 +3,7 @@ interface Memory {
 }
 
 interface CreepMemory {
-    spawnName?: string;
+    spawnName: string;
     role?: string;
     [key: string]: any;
 }
@@ -11,4 +11,9 @@ interface CreepMemory {
 interface Creep {
     cmem: CreepMemory;
     role?: string;
+}
+
+interface RoomPosition {
+    getRangeToSqr(this: RoomPosition, other: RoomPosition): number;
+    getClosest<T extends { pos: RoomPosition }>(this: RoomPosition, targets: T[]): T | undefined;
 }
