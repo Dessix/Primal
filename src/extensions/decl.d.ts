@@ -3,6 +3,7 @@ interface Memory {
 }
 
 interface CreepMemory {
+    spawnName?: string;
     role?: string;
     [key: string]: any;
 }
