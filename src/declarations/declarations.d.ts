@@ -10,7 +10,7 @@ interface Global {
     };
     k: {
         spawnProcessByClassName(processName: string, parentPid?: number): ProcessId | undefined;
-    }; 
+    };
     launchNew(className: string): number | undefined;
     reset(): void;
     config: CoreConfiguration;
@@ -18,6 +18,8 @@ interface Global {
     s: { [spawnName: string]: Spawn | undefined };
     f: { [flagName: string]: Flag | undefined };
     id: (id: string) => RoomObject | null;
+    sinspect: (val: any) => string;
+    inspect: (val: any) => void;
 
     /** 
      * Resets every reinitialization 
@@ -36,6 +38,7 @@ type CreepBodyPart = "move" | "work" | "carry" | "attack" | "ranged_attack" | "t
 
 interface CoreConfiguration {
     noisy: boolean;
+    profile: boolean;
 }
 
 interface Memory {
