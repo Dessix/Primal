@@ -18,7 +18,16 @@ interface Global {
     s: { [spawnName: string]: Spawn | undefined };
     f: { [flagName: string]: Flag | undefined };
     id: (id: string) => RoomObject | null;
+
+    /** 
+     * Resets every reinitialization 
+     */
     volatile: Volatile;
+
+    /**
+     * Resets once at the beginning of each tick
+     */
+    tickVolatile: Volatile;
 }
 
 declare var global: Global;
