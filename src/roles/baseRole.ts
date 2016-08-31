@@ -11,4 +11,7 @@ export abstract class BaseRole {
         this.creep.memory = value;
     }
     public abstract run(): void;
+    public static generateName(roleCtor: { RoleTag: string }) {
+        return roleCtor.RoleTag + Game.time.toString(16).slice(-2);
+    }
 }
