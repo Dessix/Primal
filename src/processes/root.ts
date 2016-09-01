@@ -12,6 +12,8 @@ export class PRoot extends Process {
     public static className: string = "Root";
     public get className(): string { return PRoot.className; }
     private pmem: RootMemory;
+    public readonly baseHeat: number = 1000; 
+    public readonly service: boolean = true;
 
     public constructor(pid: ProcessId, parentPid: ProcessId) {
         super(pid, parentPid);

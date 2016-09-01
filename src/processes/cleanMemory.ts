@@ -4,10 +4,10 @@ import { Process } from "../kernel/process";
 export class PCleanMemory extends Process {
     public static className: string = "CleanMem";
     public get className(): string { return PCleanMemory.className; }
+    public readonly baseHeat: number = 5;
 
     public constructor(pid: ProcessId, parentPid: ProcessId) {
         super(pid, parentPid);
-        this.frequency = 2;
     }
 
     public run(): ProcessMemory | undefined {

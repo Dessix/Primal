@@ -14,21 +14,19 @@ export abstract class Process {
     public pid: ProcessId;
     public parentPid: ProcessId;
     public kernel: Kernel | null;
-    public frequency: number = 1;
-    public spawnedChildren: ProcessId[] | undefined;
+    public readonly baseHeat: number = 10;
+    public status: ProcessStatus = ProcessStatus.RUN;
+    public readonly service: boolean = false;
+
     public get kernelOrThrow(): Kernel {
         if (this.kernel === null) {
             throw new Error("Kernel not available!");
         }
         return this.kernel;
     }
-    public status: ProcessStatus = ProcessStatus.RUN;
+    
     public spawnChildProcess(processCtor: ProcessConstructor) {
-        const childPid = this.kernelOrThrow.spawnProcessLive(processCtor, this.pid);
-        if (this.spawnedChildren === undefined) {
-            this.spawnedChildren = [];
-        }
-        this.spawnedChildren.push(childPid);
+        const childPid = this.kernelOrThrow.spawnProcess(processCtor, this.pid);
         return childPid;
     }
 
