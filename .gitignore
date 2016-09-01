@@ -1,5 +1,7 @@
 dist
 node_modules
 secrets.js
+secrets.*
+!secrets.default.js
 typings
 .idea
