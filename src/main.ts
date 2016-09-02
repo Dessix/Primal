@@ -8,21 +8,14 @@ import * as Profiler from "../lib/screeps-profiler";
 import { DefaultConfig } from "./util/config";
 
 Memory.config = DefaultConfig.apply(Memory.config);
+if (Memory.involatile === undefined) { Memory.involatile = {}; }
 
 //Enable profiler if configured
 if (Memory.config.profile) { Profiler.enable(); }
 
 Processes.RegisterAll();
-
-
-const kernel = global.k = global.kernel = new Kernel();
-global.volatile = {};
-
-//Command-line calls
-global.reset = function (): void {
-    console.log("Ω Rebooting...");
-    Memory.proc = KernelSerializer.createBlankProcessTable();
-    delete Memory.pmem;
+function spawnNewProcessTable() {
+    const processTable = KernelSerializer.createBlankProcessTable();
     console.log("Ω spawned new process table");
     const procInst: SerializedProcess = {
         className: "Root",
@@ -31,13 +24,25 @@ global.reset = function (): void {
         heat: 1000,
         service: true,
     };
-    Memory.proc.push(procInst);
+    processTable.push(procInst);
+    return processTable;
+}
+
+const kernel = global.k = global.kernel = new Kernel();
+global.volatile = {};
+
+//Command-line calls
+global.reset = function (): void {
+    console.log("Ω Rebooting...");
+    Memory.proc = spawnNewProcessTable();
+    delete Memory.pmem;
 };
 
 global.sinspect = inspect;
 global.inspect = (val: any) => inspect(val);
 
-global.id = Game.getObjectById;
+global.id = new Proxy(Game.getObjectById, { get: function (target, name) { return target(name.toString()); } });
+
 global.launchNew = function (className: string): number | undefined {
     const procId = kernel.spawnProcessByClassName(className, 0);
     if (procId === undefined) {
@@ -56,23 +61,11 @@ function mainLoop() {
     global.tickVolatile = {};
     if (Memory.config.noisy) { console.log("Ω Load"); }
     {
-        let proc: SerializedProcessTable | undefined = Memory.proc;
-        if (proc === undefined) {
-            proc = KernelSerializer.createBlankProcessTable();
-            console.log("Ω spawned new process table");
-            const procInst: SerializedProcess = {
-                className: "Root",
-                pid: 0,
-                parentPid: 0,
-                heat: 1000,
-                service: true,
-            };
-            proc.push(procInst);
-        }
+        let proc = Memory.proc || spawnNewProcessTable();
         kernel.loadProcessTable(KernelSerializer.deserializeProcessTable(proc));
     }
     if (Memory.config.noisy) { console.log("Ω Execute"); }
-    kernel.run(Game.cpu.limit * 0.9);
+    kernel.run(Game.cpu.limit * 0.85);
     if (Memory.config.noisy) { console.log("Ω Save"); }
     Memory.proc = KernelSerializer.serializeProcessTable(kernel.getProcessTable());
     RecordStats();

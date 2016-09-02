@@ -1,48 +1,88 @@
 import { safeExtendPrototype } from "../util/reflection";
-
 interface RoomWithSlowFind extends Room {
     slowFind<T>(type: number, opts?: { filter: Object | Function | string }): T[];
     fastFindObject: { filter: Object | Function | string };
 }
 
-const slowfindroom = (<RoomWithSlowFind>Room.prototype);
-if (slowfindroom.slowFind === undefined) {
+
+{
+    const slowfindroom = <RoomWithSlowFind>Room.prototype;
+    if (slowfindroom.slowFind === undefined) {
 
 
-    const slowFind = Room.prototype.find;
-    const fastFindObject = <{ filter: Object | Function | string }>{};//Default to this for perf bonus
+        const slowFind = Room.prototype.find;
+        const fastFindObject = <{ filter: Object | Function | string }>{};//Default to this for perf bonus
 
-    //TODO: check if even useful, as find supposedly caches base results
-    function fastFind<T>(this: RoomWithSlowFind, type: number, opts?: { filter: Object | Function | string }): T[] {
-        const volatile = global.tickVolatile;
+        //TODO: check if even useful, as find supposedly caches base results
+        function fastFind<T>(this: RoomWithSlowFind, type: number, opts?: { filter: ((object: T) => boolean) | Object | string }): T[] {
+            const volatile = global.tickVolatile;
 
-        //cache for finds
-        let volatileFind = volatile["find"];
-        if (volatileFind === undefined) { volatile["find"] = volatileFind = {}; }
+            //cache for finds
+            let volatileFind = volatile["find"];
+            if (volatileFind === undefined) { volatile["find"] = volatileFind = {}; }
 
-        //cache for this room
-        let volatileRoomFind = volatileFind[Room.name];
-        if (volatileRoomFind === undefined) { volatileFind["find"] = volatileRoomFind = {}; }
+            //cache for this room
+            let volatileRoomFind = volatileFind[Room.name];
+            if (volatileRoomFind === undefined) { volatileFind["find"] = volatileRoomFind = {}; }
 
-        //cache for type
-        let cached = volatileRoomFind[type];
-        if (cached) {
-            return cached;
-        } else {
-            volatileRoomFind[type] = cached = this.slowFind<T>(type, this.fastFindObject);
+            //cache for type
+            let cached = <T[]>volatileRoomFind[type];
+            if (cached) {
+                return cached;
+            } else {
+                volatileRoomFind[type] = cached = this.slowFind<T>(type, this.fastFindObject);
+            }
+
+            if (opts && opts.filter) {
+                if (typeof opts.filter === "function") {
+                    return cached.filter(opts.filter);
+                } else {
+                    return _.filter<Object | string, T>(cached, opts.filter);
+                }
+            } else {
+                return cached;
+            }
         }
 
-        if (opts) {
-            return _.filter<Function | Object | string, T>(cached, opts.filter);
-        } else {
-            return cached;
-        }
+        slowfindroom.fastFindObject = fastFindObject;
+        slowfindroom.slowFind = slowFind;
+        Room.prototype.find = fastFind;
     }
-
-    slowfindroom.fastFindObject = fastFindObject;
-    slowfindroom.slowFind = slowFind;
-    Room.prototype.find = fastFind;
 }
+
+interface RoomWithSlowFindExitTo extends Room {
+    slowFindExitTo(room: string | Room): number;
+}
+
+{
+    const roomWithSlowFindExit = <RoomWithSlowFindExitTo>Room.prototype;
+    if (roomWithSlowFindExit.slowFindExitTo === undefined) {
+        const slowFind = Room.prototype.findExitTo;
+        const fastFindObject = <{ filter: Object | Function | string }>{};//Default to this for perf bonus
+
+        function fastFindExitTo(room: string | Room): number {
+            const involatile = Memory.involatile;
+            let exitDirs = involatile["exitDirs"];
+            if (exitDirs === undefined) {
+                Memory["exitDirs"] = exitDirs = {};
+            }
+            let roomEntry = exitDirs[this.name];
+            if (roomEntry === undefined) {
+                exitDirs[this.name] = roomEntry = {};
+            }
+            const target = room instanceof Room ? room.name : room;
+            let targetRoomEntry = roomEntry[target];
+            if (targetRoomEntry === undefined) {
+                roomEntry[target] = targetRoomEntry = roomWithSlowFindExit.slowFindExitTo(room);
+            }
+            return targetRoomEntry;
+        }
+
+        roomWithSlowFindExit.slowFindExitTo = slowFind;
+        Room.prototype.findExitTo = fastFindExitTo;
+    }
+}
+
 
 class RoomX extends Room {
     public findFirstStructureOfType<T extends Structure>(this: Room, structureType: string, onlyMine: boolean = true): T | undefined {

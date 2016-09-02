@@ -44,6 +44,11 @@ interface CoreConfiguration {
 
 interface Memory {
     config: CoreConfiguration;
+
+    /**
+     * Does not reset, but is not guaranteed to survive
+     */
+    involatile: Volatile;
 }
 
 declare const enum Direction {
