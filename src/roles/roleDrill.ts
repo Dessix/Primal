@@ -137,6 +137,10 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
             chosenBody = [MOVE, CARRY, WORK, WORK, WORK, WORK, WORK, WORK];
         } else if (energyAvailable >= 600) {
             chosenBody = [MOVE, CARRY, WORK, WORK, WORK, WORK, WORK];
+        } else if (energyAvailable >= 500) {
+            chosenBody = [MOVE, CARRY, WORK, WORK, WORK, WORK];
+        } else if (energyAvailable >= 400) {
+            chosenBody = [MOVE, CARRY, WORK, WORK, WORK];
         } else if (energyAvailable >= 300) {
             chosenBody = [MOVE, CARRY, WORK, WORK];
         } else if (energyAvailable >= 200) {

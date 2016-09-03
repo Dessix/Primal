@@ -36,23 +36,35 @@ export class RoleUpgrader extends BaseRole<UpgraderMemory> {
 
     private performHarvest(creep: Creep, cmem: UpgraderMemory): void {
         const spawn = Game.spawns[cmem.spawnName];
-        
+
         let container: StructureContainer | undefined;
-        
-        //Marked storage containers
-        const flags = spawn.room.find<Flag>(FIND_FLAGS);
-        for (let flag of flags) {
-            if (
-                flag.color !== COLOR_GREY || flag.secondaryColor !== COLOR_YELLOW
-            ) {
-                continue;
+
+        {
+            const containers = new Array<StructureContainer>();
+            //Try flagged storage containers
+            const flags = spawn.room.find<Flag>(FIND_FLAGS);
+            for (let flag of flags) {
+                if (
+                    flag.color !== COLOR_GREY || flag.secondaryColor !== COLOR_YELLOW
+                ) {
+                    continue;
+                }
+                const testContainer = flag.lookForStructureAtPosition<StructureContainer>(STRUCTURE_CONTAINER);
+                if (testContainer !== undefined && testContainer.store["energy"] > 0) {
+                    containers.push(testContainer);
+                }
             }
-            const testContainer = flag.lookForStructureAtPosition<StructureContainer>(STRUCTURE_CONTAINER);
-            if (testContainer !== undefined && testContainer.store["energy"] > creep.carryCapacity) {
-                container = testContainer;
+
+            if (containers.length !== 0) {
+                if (containers.length === 1) {
+                    container = containers[0];
+                } else {
+                    const fullest = containers.sort(function (a, b) { return b.store["energy"] - a.store["energy"]; })[0];
+                    container = fullest;
+                }
             }
         }
-        
+
         if (container === undefined) {
             //Try any container
             container = spawn.room.findFirstStructureOfTypeMatching<StructureContainer>(STRUCTURE_CONTAINER, c => c.store.energy > 0, false);
@@ -71,7 +83,8 @@ export class RoleUpgrader extends BaseRole<UpgraderMemory> {
     }
 
     public onRun(creep: Creep, cmem: UpgraderMemory): void {
-        if (creep.spawning) { return; } if (cmem.upgrading && creep.carry.energy === 0) {
+        if (creep.spawning) { return; }
+        if (cmem.upgrading && creep.carry.energy === 0) {
             cmem.upgrading = false;
             creep.say("harvesting");
         }
@@ -94,14 +107,26 @@ export class RoleUpgrader extends BaseRole<UpgraderMemory> {
 
             const spawn = Game.spawns[cmem.spawnName];
             let container: StructureContainer | undefined;
-            const flags = spawn.room.find<Flag>(FIND_FLAGS);
-            for (let flag of flags) {
-                if (flag.color !== COLOR_GREY || flag.secondaryColor !== COLOR_YELLOW) {
-                    continue;
+
+            {
+                const containers = new Array<StructureContainer>();
+                //Try flagged storage containers
+                const flags = spawn.room.find<Flag>(FIND_FLAGS);
+                for (let flag of flags) {
+                    if (
+                        flag.color !== COLOR_GREY || flag.secondaryColor !== COLOR_YELLOW
+                    ) {
+                        continue;
+                    }
+                    const testContainer = flag.lookForStructureAtPosition<StructureContainer>(STRUCTURE_CONTAINER);
+                    if (testContainer !== undefined && testContainer.store["energy"] > 0) {
+                        containers.push(testContainer);
+                    }
                 }
-                const testContainer = flag.lookForStructureAtPosition<StructureContainer>(STRUCTURE_CONTAINER);
-                if (testContainer !== undefined && testContainer.store["energy"] > 0) {
-                    container = testContainer;
+
+                if (containers.length !== 0) {
+                    const closest = <StructureContainer>creep.pos.getClosest(containers);
+                    container = closest;
                 }
             }
 

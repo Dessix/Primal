@@ -44,15 +44,27 @@ export class RoleRepairer extends BaseRole<RepairerMemory> {
 
         let container: StructureContainer | undefined;
 
-        //Marked storage containers
+        const containers = new Array<StructureContainer>();
+        //Try flagged storage containers
         const flags = spawn.room.find<Flag>(FIND_FLAGS);
         for (let flag of flags) {
-            if (flag.color !== COLOR_GREY || flag.secondaryColor !== COLOR_YELLOW) {
+            if (
+                flag.color !== COLOR_GREY || flag.secondaryColor !== COLOR_YELLOW
+            ) {
                 continue;
             }
             const testContainer = flag.lookForStructureAtPosition<StructureContainer>(STRUCTURE_CONTAINER);
-            if (testContainer !== undefined && testContainer.store["energy"] > creep.carryCapacity) {
-                container = testContainer;
+            if (testContainer !== undefined && testContainer.store["energy"] > 0) {
+                containers.push(testContainer);
+            }
+        }
+
+        if (containers.length !== 0) {
+            if (containers.length === 1) {
+                container = containers[0];
+            } else {
+                const fullest = containers.sort(function (a, b) { return b.store["energy"] - a.store["energy"]; })[0];
+                container = fullest;
             }
         }
 
@@ -80,7 +92,14 @@ export class RoleRepairer extends BaseRole<RepairerMemory> {
 
         // if creep is supposed to repair something
         if (!cmem.repr_working) {
-            this.getEnergy(creep, cmem);
+            if (creep.carry.energy < creep.carryCapacity) {
+                this.getEnergy(creep, cmem);
+            } else {
+                const idleFlag = Game.spawns[cmem.spawnName].room.find<Flag>(FIND_FLAGS).find(x => x.color === COLOR_BROWN && x.secondaryColor === COLOR_BROWN);
+                if (idleFlag !== undefined) {
+                    creep.moveTo(idleFlag);
+                }
+            }
             return;
         }
         // find closest structure with less than max hits
@@ -90,8 +109,8 @@ export class RoleRepairer extends BaseRole<RepairerMemory> {
         const structuresNeedingRepair = creep.room.find<Structure>(FIND_STRUCTURES)
             .filter(s => s.hits < s.hitsMax && (
                 (s.structureType !== STRUCTURE_WALL && s.structureType !== STRUCTURE_RAMPART) ||
-                (s.structureType === STRUCTURE_WALL && s.hits < 3000 * ctrlLvl) &&
-                (s.structureType === STRUCTURE_RAMPART && s.hits < 3000 * ctrlLvl)
+                (s.structureType === STRUCTURE_WALL && s.hits < 5000 * ctrlLvl) &&
+                (s.structureType === STRUCTURE_RAMPART && s.hits < 5000 * ctrlLvl)
             ))
             .sort(function (a, b) {
                 if (a.structureType === STRUCTURE_WALL) {
@@ -126,8 +145,10 @@ export class RoleRepairer extends BaseRole<RepairerMemory> {
                 creep.moveTo(structure);
             }
         } else {// if we can't fine one
-            // look for construction sites
-            RoleBuilder.Instance.run(creep);
+            const idleFlag = Game.spawns[cmem.spawnName].room.find<Flag>(FIND_FLAGS).find(x => x.color === COLOR_BROWN && x.secondaryColor === COLOR_BROWN);
+            if (idleFlag !== undefined) {
+                creep.moveTo(idleFlag);
+            }
             cmem.repr_working = false;
         }
 

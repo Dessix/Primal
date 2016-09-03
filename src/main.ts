@@ -83,10 +83,13 @@ function mainLoop() {
         kernel.loadProcessTable(KernelSerializer.deserializeProcessTable(proc));
     }
     if (Memory.config.noisy) { console.log("Ω Execute"); }
-    kernel.run(Game.cpu.limit * 0.85);
+    kernel.run(Game.cpu.limit * 0.75);
     if (Memory.config.noisy) { console.log("Ω Save"); }
     Memory.proc = KernelSerializer.serializeProcessTable(kernel.getProcessTable());
     RecordStats();
+
+    //TODO: Temporary, remove after RCL3
+    Game.rooms["W14N53"].createConstructionSite(36, 17, STRUCTURE_TOWER);
 };
 
 export const loop = !Memory.config.profile ? mainLoop : Profiler.wrap(mainLoop);

@@ -36,7 +36,16 @@ export class PHarvest extends Process {
             if (spawn.spawning) { continue; }
             const room = spawn.room;
             const energyAvailable = spawn.room.energyAvailable;
+            const energyCapacityAvailable = spawn.room.energyCapacityAvailable;
             if (numDrills >= 1 && numCouriers < 2) {
+                if (numCouriers >= 1 && numDrills >= 1) {
+                    if (energyCapacityAvailable === 300 && energyAvailable < energyCapacityAvailable) {
+                        break;
+                    } else if (energyCapacityAvailable > 450 && energyAvailable < energyCapacityAvailable) {
+                        break;
+                    }
+                    //Prefer larger spawns!
+                }
                 const chosenBody = RoleCourier.chooseBody(energyAvailable);
                 if (chosenBody !== undefined) {
                     const creepMemory: CreepMemory = {
@@ -56,6 +65,14 @@ export class PHarvest extends Process {
                     }
                 }
             } else if (numDrills < 2) {
+                if (numCouriers >= 1 && numDrills >= 1) {
+                    if (energyCapacityAvailable === 300 && energyAvailable < energyCapacityAvailable) {
+                        break;
+                    } else if (energyCapacityAvailable > 450 && energyAvailable < energyCapacityAvailable) {
+                        break;
+                    }
+                    //Prefer larger spawns!
+                }
                 const chosenBody = RoleDrill.chooseBody(energyAvailable);
                 if (chosenBody !== undefined) {
                     //TODO: Get source info from MiningScanner and have it manage the complexities of making sure variables are set

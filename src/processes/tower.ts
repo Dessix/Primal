@@ -10,6 +10,7 @@ export class PTower extends Process {
     public static className: string = "Tower";
     public get className(): string { return PTower.className; }
     public readonly TowerScanTickrate: number = 15;
+    public readonly baseHeat: number = 15; 
     private pmem: TowerMemory;
 
     public constructor(pid: ProcessId, parentPid: ProcessId) {

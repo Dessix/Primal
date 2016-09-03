@@ -43,17 +43,29 @@ export class RoleBuilder extends BaseRole<BuilderMemory> {
 
         let container: StructureContainer | undefined;
 
-        //Try flagged storage containers
-        const flags = spawn.room.find<Flag>(FIND_FLAGS);
-        for (let flag of flags) {
-            if (
-                flag.color !== COLOR_GREY || flag.secondaryColor !== COLOR_YELLOW
-            ) {
-                continue;
+        {
+            const containers = new Array<StructureContainer>();
+            //Try flagged storage containers
+            const flags = spawn.room.find<Flag>(FIND_FLAGS);
+            for (let flag of flags) {
+                if (
+                    flag.color !== COLOR_GREY || flag.secondaryColor !== COLOR_YELLOW
+                ) {
+                    continue;
+                }
+                const testContainer = flag.lookForStructureAtPosition<StructureContainer>(STRUCTURE_CONTAINER);
+                if (testContainer !== undefined && testContainer.store["energy"] > 0) {
+                    containers.push(testContainer);
+                }
             }
-            const testContainer = flag.lookForStructureAtPosition<StructureContainer>(STRUCTURE_CONTAINER);
-            if (testContainer !== undefined && testContainer.store["energy"] > 0) {
-                container = testContainer;
+
+            if (containers.length !== 0) {
+                if (containers.length === 1) {
+                    container = containers[0];
+                } else {
+                    const fullest = containers.sort(function(a, b) { return b.store["energy"] - a.store["energy"]; })[0];
+                    container = fullest;
+                }
             }
         }
 
@@ -90,10 +102,10 @@ export class RoleBuilder extends BaseRole<BuilderMemory> {
                 if (creep.carry.energy < creep.carryCapacity) {
                     this.getResources(creep, cmem);
                 } else {
-                    // const idleFlag = Game.spawns[cmem.spawnName].room.find<Flag>(FIND_FLAGS).find(x => x.color === COLOR_BROWN && x.secondaryColor === COLOR_BROWN);
-                    // if (idleFlag !== undefined) {
-                    //     creep.moveTo(idleFlag);
-                    // }
+                    const idleFlag = Game.spawns[cmem.spawnName].room.find<Flag>(FIND_FLAGS).find(x => x.color === COLOR_BROWN && x.secondaryColor === COLOR_BROWN);
+                    if (idleFlag !== undefined) {
+                        creep.moveTo(idleFlag);
+                    }
                 }
             }
         } else {

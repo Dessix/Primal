@@ -113,6 +113,7 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
             return _.max<Resource>(dropped, _dropped => _dropped.amount);
         }
 
+        let containers: StructureContainer[] = [];
         {
             const flags = spawn.room.find<Flag>(FIND_FLAGS);
             for (let flag of flags) {
@@ -121,8 +122,18 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
                 }
                 const container = flag.pos.lookForStructure<StructureContainer>(STRUCTURE_CONTAINER);
                 if (container !== undefined && container.store["energy"] > 0) {
-                    return container;
+                    containers.push(container);
                 }
+            }
+        }
+
+        
+        if (containers.length !== 0) {
+            if (containers.length === 1) {
+                return containers[0];
+            } else {
+                const fullest = containers.sort(function(a, b) { return b.store["energy"] - a.store["energy"]; })[0];
+                return fullest;
             }
         }
 
@@ -135,7 +146,7 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
         //     }
         // }
 
-        return;
+        //return;
     }
 
     private handlePickup(creep: Creep, cmem: CourierMemory): CourierState | undefined {
@@ -287,7 +298,7 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
         if (isFull) {
             const nearbyPossibleReceivers = spawn.room.find<Creep>(FIND_MY_CREEPS)
                 .filter(c => c.role !== RoleBootstrapMiner.RoleTag && c.carry.energy < c.carryCapacity);
-            
+
             const builderOrRepairer = nearbyPossibleReceivers.find(c => c.role === RoleBuilder.RoleTag || c.role === RoleRepairer.RoleTag);
             if (builderOrRepairer !== undefined) {
                 if (creep.transfer(builderOrRepairer, "energy") === ERR_NOT_IN_RANGE) {
