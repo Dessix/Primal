@@ -8,13 +8,14 @@ import "./extensions/";//Apply extension modules
 import { Processes } from "./kernel/processes";
 import { KernelSerializer } from "./kernel/kernelSerializer";
 import { Kernel } from "./kernel/kernel";
-import { inspect } from "./util/inspect";
+//import { inspect } from "../lib/inspect";
 import * as Profiler from "../lib/screeps-profiler";
 import { DefaultConfig } from "./util/config";
 import { FsmRole } from "./roles/fsmRole";
 
 Memory.config = DefaultConfig.apply(Memory.config);
 if (Memory.involatile === undefined) { Memory.involatile = {}; }
+if (Memory.sources === undefined) { Memory.sources = {}; }
 
 //Enable profiler if configured
 if (Memory.config.profile) {
@@ -52,6 +53,8 @@ global.reset = function (): void {
     Memory.proc = spawnNewProcessTable();
     delete Memory.pmem;
 };
+
+const inspect = (val: any) => JSON.stringify(val, undefined, 2);
 
 global.sinspect = inspect;
 global.inspect = (val: any) => inspect(val);

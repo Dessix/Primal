@@ -1,6 +1,7 @@
+import { RoleCourier } from "./../roles/roleCourier";
+import { RoleDrill } from "./../roles/roleDrill";
 import { RoleUpgrader } from "./../roles/roleUpgrader";
 import { RoleRepairer } from "./../roles/roleRepairer";
-import { RoleBootstrapMiner } from "./../roles/roleBootstrapMiner";
 import { Process, ProcessStatus } from "../kernel/process";
 
 export class PRepair extends Process {
@@ -15,14 +16,16 @@ export class PRepair extends Process {
     public run(): ProcessMemory | undefined {
         let pmem = this.pmem;
 
+        let numDrills = 0;
+        let numCouriers = 0;
         let numUpgraders = 0;
-        let numMiners = 0;
         let numRepairers = 0;
         const repairer = RoleRepairer.Instance;
         for (let creepName in Game.creeps) {
             const creep = Game.creeps[creepName];
             const cmem = <CreepMemory & { working: boolean }>creep.memory;
-            if (cmem.role === RoleBootstrapMiner.RoleTag) { ++numMiners; continue; }
+            if (cmem.role === RoleDrill.RoleTag) { ++numDrills; continue; }
+            if (cmem.role === RoleCourier.RoleTag) { ++numCouriers; continue; }
             if (cmem.role === RoleUpgrader.RoleTag) { ++numUpgraders; continue; }
             if (cmem.role !== RoleRepairer.RoleTag) { continue; }
             ++numRepairers;
@@ -31,7 +34,7 @@ export class PRepair extends Process {
             repairer.run(creep);
         }
         //console.log(`${numMiners} : ${numUpgraders} : ${numRepairers}`);
-        if (numMiners >= 2 && numUpgraders >= 1 && numRepairers < 2) {
+        if (numDrills >= 1 && numCouriers >= 1 && numUpgraders >= 1 && numRepairers < 2) {
             for (let spawnName in Game.spawns) {
                 const spawn = Game.spawns[spawnName];
                 const energyAvailable = spawn.room.energyAvailable;

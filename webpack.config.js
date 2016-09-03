@@ -30,6 +30,7 @@ module.exports = {
         extensions: ["", ".webpack.js", ".web.js", ".ts", ".tsx", ".js"]
     },
     module: {
+        noParse: [/lib[\\\/]inspect[\\\/]index\.js$/],
         preLoaders: [
             {
                 test: /\.tsx?$/,

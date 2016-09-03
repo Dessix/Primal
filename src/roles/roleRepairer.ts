@@ -1,3 +1,4 @@
+import { RoleBuilder } from "./roleBuilder";
 import { BaseRole } from "./baseRole";
 
 interface RepairerMemory extends CreepMemory {
@@ -38,9 +39,12 @@ export class RoleRepairer extends BaseRole<RepairerMemory> {
         return <CreepBodyPart[]>chosenBody;
     }
 
-    private performHarvest(creep: Creep, cmem: RepairerMemory): void {
+    private getEnergy(creep: Creep, cmem: RepairerMemory): void {
         const spawn = Game.spawns[cmem.spawnName];
+
         let container: StructureContainer | undefined;
+
+        //Marked storage containers
         const flags = spawn.room.find<Flag>(FIND_FLAGS);
         for (let flag of flags) {
             if (flag.color !== COLOR_GREY || flag.secondaryColor !== COLOR_YELLOW) {
@@ -52,14 +56,14 @@ export class RoleRepairer extends BaseRole<RepairerMemory> {
             }
         }
 
+        if (container === undefined) {
+            //Try any container
+            container = spawn.room.findFirstStructureOfTypeMatching<StructureContainer>(STRUCTURE_CONTAINER, c => c.store.energy > 0, false);
+        }
+
         if (container !== undefined) {
             if (container.transfer(creep, "energy") === ERR_NOT_IN_RANGE) {
                 creep.moveTo(container);
-            }
-        } else {
-            let sources = creep.room.find<Source>(FIND_SOURCES).filter(s => s.pos.lookFor<Flag>(LOOK_FLAGS).find(f => f.color === COLOR_GREEN && f.secondaryColor === COLOR_YELLOW) === undefined);
-            if (creep.harvest(sources[0]) === ERR_NOT_IN_RANGE) {
-                creep.moveTo(sources[0]);
             }
         }
     }
@@ -76,13 +80,34 @@ export class RoleRepairer extends BaseRole<RepairerMemory> {
 
         // if creep is supposed to repair something
         if (!cmem.repr_working) {
-            this.performHarvest(creep, cmem);
+            this.getEnergy(creep, cmem);
             return;
         }
         // find closest structure with less than max hits
         // Exclude walls because they have way too many max hits and would keep
         // our repairers busy forever. We have to find a solution for that later.
         const ctrlLvl = creep.room.controller.level;
+        const structuresNeedingRepair = creep.room.find<Structure>(FIND_STRUCTURES)
+            .filter(s => s.hits < s.hitsMax && (
+                (s.structureType !== STRUCTURE_WALL && s.structureType !== STRUCTURE_RAMPART) ||
+                (s.structureType === STRUCTURE_WALL && s.hits < 3000 * ctrlLvl) &&
+                (s.structureType === STRUCTURE_RAMPART && s.hits < 3000 * ctrlLvl)
+            ))
+            .sort(function (a, b) {
+                if (a.structureType === STRUCTURE_WALL) {
+                    return 1;
+                } else if (b.structureType === STRUCTURE_WALL) {
+                    return -1;
+                }
+                if (a.structureType === STRUCTURE_RAMPART) {
+                    return 1;
+                } else if (b.structureType === STRUCTURE_RAMPART) {
+                    return 1;
+                }
+                return (a.hits / a.hitsMax) - (b.hits / b.hitsMax);
+            })
+            ;
+
         const structure = creep.pos.findClosestByRange<Structure>(FIND_STRUCTURES, {
             // the second argument for findClosestByPath is an object which takes
             // a property called filter which can be a function
@@ -102,15 +127,7 @@ export class RoleRepairer extends BaseRole<RepairerMemory> {
             }
         } else {// if we can't fine one
             // look for construction sites
-            //roleBuilder.run(creep);
-            if (creep.carry.energy < creep.carryCapacity) {
-                this.performHarvest(creep, cmem);
-            } else {
-                const idleFlag = Game.spawns[cmem.spawnName].room.find<Flag>(FIND_FLAGS).find(x => x.color === COLOR_BROWN && x.secondaryColor === COLOR_BROWN);
-                if (idleFlag !== undefined) {
-                    creep.moveTo(idleFlag);
-                }
-            }
+            RoleBuilder.Instance.run(creep);
             cmem.repr_working = false;
         }
 

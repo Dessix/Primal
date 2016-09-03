@@ -1,24 +1,60 @@
+import { MiningScanner } from "./../util/miningScanner";
 import { FsmRole, StateHandlerList } from "./fsmRole";
 
 enum DrillState {
-    Initialize,
-    MoveToHomeRoom,
-    ScanHomeRoom,
-    MoveToSource,
-    Harvest,
-    WaitForSourceRegen,
+    Initialize = 0,
+    MoveToHomeRoomForScan = 1,
+    ScanHomeRoom = 2,
+    MoveToSource = 3,
+    Harvest = 4,
+    WaitForSourceRegen = 5,
 }
+
 
 interface DrillMemory extends CreepMemory {
     drill_state?: DrillState;
     homeRoomName: string;
     sourceIndex: number;
 
-    pathCache?: RoomPosition;
+    pathCache?: string;
+    sourceId?: string;
 }
+
 
 export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
     public static RoleTag: string = "drll";
+
+    private static shittySerializePath(path: RoomPosition[]): string {
+        const output = new Array<String>(path.length);
+        let currentRoomName: string | undefined;
+        for (let i = 0, n = path.length; i < n; ++i) {
+            const step = path[i];
+            if (currentRoomName === step.roomName) {
+                output[i] = `${step.x.toString(36)},${step.y.toString(36)}`;
+            } else {
+                currentRoomName = step.roomName;
+                output[i] = `${step.x.toString(36)},${step.y.toString(36)},${currentRoomName}`;
+            }
+        }
+        return output.join(";");
+    }
+
+    private static shittyDeserializePath(encoded: string): RoomPosition[] {
+        const split = encoded.split(";");
+        const output = new Array<RoomPosition>(split.length);
+        let lastReadRoomName: string | undefined;
+        for (let i = 0, n = split.length; i < n; ++i) {
+            const [x, y, roomName] = split[i].split(",");
+            if (roomName !== undefined) {
+                lastReadRoomName = roomName;
+            }
+            if (lastReadRoomName === undefined) {
+                throw new Error("Format incorrect on path- did not start with a leading room");
+            }
+            output[i] = new RoomPosition(Number.parseInt(x, 36), Number.parseInt(y, 36), lastReadRoomName);
+        }
+        return output;
+    }
 
     public constructor() {
         super(DrillState.Initialize, (mem, val) => mem.drill_state = val, (mem) => mem.drill_state);
@@ -36,18 +72,54 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
     protected provideStates(): StateHandlerList<DrillMemory, DrillState> {
         return {
             [DrillState.Initialize]: this.handleInitialize,
+            [DrillState.MoveToSource]: this.handleMoveToSource,
+            [DrillState.Harvest]: this.handleHarvest,
+            [DrillState.WaitForSourceRegen]: this.handleWaitForSourceRegen,
+            //TODO: Implement others
         };
     }
 
     protected onTransition(creep: Creep, cmem: DrillMemory, prev: DrillState, next: DrillState) {
         if (prev !== next) {
             delete cmem.pathCache;
+            delete cmem.sourceId;
         }
     }
 
-    private static GetSourceByIndex(room: Room, sourceIndex: number) {
-        const sources = room.find<Source>(FIND_SOURCES);
-        return sources[sourceIndex % sources.length];
+    private static getContainerOnPosition(pos: RoomPosition) {
+        return pos.lookForStructure<StructureContainer>(STRUCTURE_CONTAINER);
+    }
+
+    private getOrCacheSourceInfo(room: Room): SourceScanInfo {
+        let sourceRoom = Memory.sources[room.name];
+        if (sourceRoom === undefined) {
+            Memory.sources[room.name] = sourceRoom = { sourceInfo: MiningScanner.scan(room) };
+        }
+        return sourceRoom.sourceInfo;
+    }
+
+    private getSourceInfo(roomOrRoomName: Room | string): SourceScanInfo | undefined {
+        let roomName: string;
+        if (roomOrRoomName instanceof Room) {
+            roomName = roomOrRoomName.name;
+        } else {
+            roomName = roomOrRoomName;
+        }
+        let sourceRoom = Memory.sources[roomName];
+        if (sourceRoom === undefined) {
+            return undefined;
+        }
+        return sourceRoom.sourceInfo;
+    }
+
+    private getSourceId(creep: Creep, cmem: DrillMemory) {
+        if (cmem.sourceId === undefined) {
+            const sourceInfo = this.getOrCacheSourceInfo(creep.room);
+            const indexedSource = sourceInfo.sources[cmem.sourceIndex % sourceInfo.sources.length];
+            return indexedSource.id;
+        } else {
+            return cmem.sourceId;
+        }
     }
 
     public static createInitialMemory(spawn: Spawn | string, homeRoom: string | Room, sourceIndex: number): DrillMemory {
@@ -76,44 +148,88 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
     }
 
     public handleInitialize(creep: Creep, cmem: DrillMemory): DrillState | undefined {
-        //If no position, we are newly spawned; find 
-        if (cmem.targetPosition === undefined) {
-            let homeRoom = Game.rooms[cmem.homeRoomName];
-            if (homeRoom === undefined) {
-                //We have to travel to find it, or check source details cache when one exists
+        if (cmem.homeRoomName === undefined) {
+            cmem.homeRoomName = Game.spawns[cmem.spawnName].room.name;
+        }
+        if (cmem.sourceIndex === undefined) {
+            cmem.sourceIndex = 0;
+        }
+        // if we aren't in the homeroom
+        if (creep.room.name !== cmem.homeRoomName) {
+            console.log(`I'm in ${creep.room.name} and my home room is ${cmem.homeRoomName}`);
+            if (Memory.sources[cmem.homeRoomName] !== undefined) {
+                return DrillState.MoveToSource;//Already scanned
             } else {
-                //Room is available
+                return DrillState.MoveToHomeRoomForScan;//Get there so we can collect scan info
             }
+        } else {
+            //if we are in the right room, ensure it has scan data
+            if (Memory.sources[cmem.homeRoomName] === undefined) {
+                this.getOrCacheSourceInfo(creep.room);//Caches it before usage below
+            }
+        }
+
+        return DrillState.MoveToSource;
+    }
+
+    public handleMoveToSource(creep: Creep, cmem: DrillMemory): DrillState | undefined {
+        let path: RoomPosition[];
+        if (cmem.pathCache === undefined) {
+            const sourceInfo = this.getSourceInfo(cmem.homeRoomName);
+            if (sourceInfo === undefined) {
+                throw new Error("No source info available where expected in RoleDrill.handleMoveToSource");
+            }
+            const indexedSource = sourceInfo.sources[cmem.sourceIndex % sourceInfo.sources.length];
+            const miningPosition = new RoomPosition(indexedSource.miningPosition.x, indexedSource.miningPosition.y, sourceInfo.roomName);
+            if (creep.pos.isEqualTo(miningPosition)) {
+                path = [creep.pos];
+            } else {
+                path = PathFinder.search(creep.pos, miningPosition).path;
+            }
+            cmem.pathCache = RoleDrill.shittySerializePath(path);
+        } else {
+            path = RoleDrill.shittyDeserializePath(cmem.pathCache);
+        }
+
+        if (creep.pos.isEqualTo(path[path.length - 1])) {
+            return DrillState.Harvest;
+        }
+        if (creep.moveByPath(path) !== OK) {
+            delete cmem.pathCache;
         }
         return;
     }
 
-    private performHarvest(creep: Creep, cmem: DrillMemory): void {
-        const spawn = Game.spawns[cmem.spawnName];
-        let container: StructureContainer | undefined;
-        const flags = spawn.room.find<Flag>(FIND_FLAGS);
-        for (let flag of flags) {
-            if (
-                flag.color !== COLOR_GREY || flag.secondaryColor !== COLOR_YELLOW
-            ) {
-                continue;
-            }
-            const testContainer = flag.lookForStructureAtPosition<StructureContainer>(STRUCTURE_CONTAINER);
-            if (testContainer !== undefined && testContainer.store["energy"] > creep.carryCapacity) {
-                container = testContainer;
-            }
+    public handleWaitForSourceRegen(creep: Creep, cmem: DrillMemory): DrillState | undefined {
+        const source = <Source>Game.getObjectById(this.getSourceId(creep, cmem));
+        if (source.energy > 0) {
+            return DrillState.WaitForSourceRegen;
         }
+        //Container repair
+        const container = RoleDrill.getContainerOnPosition(creep.pos);
+        if (container === undefined) { return; }
+        if (creep.carry.energy === 0) {
+            creep.withdraw(container, "energy");
+        }
+        if (container !== undefined && container.hits < container.hitsMax) {
+            creep.repair(container);
+        }
+    }
 
-        if (container !== undefined) {
-            if (container.transfer(creep, "energy") === ERR_NOT_IN_RANGE) {
-                creep.moveTo(container);
-            }
-        } else {
-            let sources = creep.room.find<Source>(FIND_SOURCES).filter(s => s.pos.lookFor<Flag>(LOOK_FLAGS).find(f => f.color === COLOR_GREEN && f.secondaryColor === COLOR_YELLOW) === undefined);
-            if (creep.harvest(sources[0]) === ERR_NOT_IN_RANGE) {
-                creep.moveTo(sources[0]);
+    public handleHarvest(creep: Creep, cmem: DrillMemory): DrillState | undefined {
+        const source = <Source>Game.getObjectById(this.getSourceId(creep, cmem));
+        if (source.energy === 0) {
+            return DrillState.WaitForSourceRegen;
+        }
+        if (creep.carry.energy > 0) {
+            //Emergency repair
+            const container = RoleDrill.getContainerOnPosition(creep.pos);
+            if (container !== undefined && container.hits < container.hitsMax * 0.75) {
+                creep.repair(container);
+                return;
             }
         }
+        creep.harvest(source);
     }
 }
 

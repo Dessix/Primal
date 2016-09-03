@@ -39,7 +39,7 @@ export abstract class FsmRole<TMemory extends CreepMemory, TStateValue extends s
     private runState(state: TStateValue, creep: Creep, cmem: TMemory): TStateValue | undefined {
         const handler = this._stateHandlers[<string | number>state];
         if (handler === undefined) {
-            throw new Error(`FsmRole state ${state} is not defined`);
+            throw new Error(`FsmRole state ${state} is not defined for creep ${creep.name}`);
         }
         return handler.call(this, creep, cmem);
     }

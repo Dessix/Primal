@@ -38,9 +38,6 @@ export class PBootstrap extends Process {
         }
 
         if (pmem.upgradePid === undefined) {
-            if (harvester.minimumHarvestDurationRemaining() < 500) {
-                return pmem;
-            }
 
             console.log("Bootstrap spawning Upgrade...");
             pmem.upgradePid = this.spawnChildProcess(PUpgrade);

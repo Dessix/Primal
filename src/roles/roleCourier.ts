@@ -67,34 +67,6 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
         return <CreepBodyPart[]>chosenBody;
     }
 
-    private findPickupTarget(creep: Creep, cmem: CourierMemory): void {
-        const spawn = Game.spawns[cmem.spawnName];
-        let container: StructureContainer | undefined;
-        const flags = spawn.room.find<Flag>(FIND_FLAGS);
-        for (let flag of flags) {
-            if (
-                flag.color !== COLOR_GREY || flag.secondaryColor !== COLOR_YELLOW
-            ) {
-                continue;
-            }
-            const testContainer = flag.lookForStructureAtPosition<StructureContainer>(STRUCTURE_CONTAINER);
-            if (testContainer !== undefined && testContainer.store["energy"] > creep.carryCapacity) {
-                container = testContainer;
-            }
-        }
-
-        if (container !== undefined) {
-            if (container.transfer(creep, "energy") === ERR_NOT_IN_RANGE) {
-                creep.moveTo(container);
-            }
-        } else {
-            let sources = creep.room.find<Source>(FIND_SOURCES).filter(s => s.pos.lookFor<Flag>(LOOK_FLAGS).find(f => f.color === COLOR_GREEN && f.secondaryColor === COLOR_YELLOW) === undefined);
-            if (creep.harvest(sources[0]) === ERR_NOT_IN_RANGE) {
-                creep.moveTo(sources[0]);
-            }
-        }
-    }
-
     private readonly waitTickCount: number = 5;
 
     private handleWait(creep: Creep, cmem: CourierMemory): CourierState | undefined {
@@ -144,7 +116,7 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
         {
             const flags = spawn.room.find<Flag>(FIND_FLAGS);
             for (let flag of flags) {
-                if (flag.color === COLOR_CYAN || flag.secondaryColor === COLOR_YELLOW) {
+                if (flag.color !== COLOR_CYAN || flag.secondaryColor !== COLOR_YELLOW) {
                     continue;
                 }
                 const container = flag.pos.lookForStructure<StructureContainer>(STRUCTURE_CONTAINER);

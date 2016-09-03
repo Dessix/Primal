@@ -86,19 +86,31 @@ interface RoomWithSlowFindExitTo extends Room {
 
 class RoomX extends Room {
     public findFirstStructureOfType<T extends Structure>(this: Room, structureType: string, onlyMine: boolean = true): T | undefined {
+        if (onlyMine && (structureType === STRUCTURE_WALL || structureType === STRUCTURE_ROAD || structureType === STRUCTURE_CONTAINER)) {
+            onlyMine = false;
+        }
         return <T | undefined>this.find<Structure>(onlyMine ? FIND_MY_STRUCTURES : FIND_STRUCTURES).find(x => x.structureType === structureType);
     }
 
     public findStructuresOfType<T extends Structure>(this: Room, structureType: string, onlyMine: boolean = true): T[] {
+        if (onlyMine && (structureType === STRUCTURE_WALL || structureType === STRUCTURE_ROAD || structureType === STRUCTURE_CONTAINER)) {
+            onlyMine = false;
+        }
         return <T[]>this.find<Structure>(onlyMine ? FIND_MY_STRUCTURES : FIND_STRUCTURES).filter(x => x.structureType === structureType);
     }
 
 
     public findFirstStructureOfTypeMatching<T extends Structure>(this: Room, structureType: string, condition: (structure: T) => boolean, onlyMine: boolean = true): T | undefined {
+        if (onlyMine && (structureType === STRUCTURE_WALL || structureType === STRUCTURE_ROAD || structureType === STRUCTURE_CONTAINER)) {
+            onlyMine = false;
+        }
         return <T | undefined>this.find<Structure>(onlyMine ? FIND_MY_STRUCTURES : FIND_STRUCTURES).find(x => x.structureType === structureType && condition(<T>x));
     }
 
     public findStructuresOfTypeMatching<T extends Structure>(this: Room, structureType: string, condition: (structure: T) => boolean, onlyMine: boolean = true): T[] {
+        if (onlyMine && (structureType === STRUCTURE_WALL || structureType === STRUCTURE_ROAD || structureType === STRUCTURE_CONTAINER)) {
+            onlyMine = false;
+        }
         return <T[]>this.find<Structure>(onlyMine ? FIND_MY_STRUCTURES : FIND_STRUCTURES).filter(x => x.structureType === structureType && condition(<T>x));
     }
 }

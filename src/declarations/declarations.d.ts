@@ -49,6 +49,7 @@ interface Memory {
      * Does not reset, but is not guaranteed to survive
      */
     involatile: Volatile;
+    sources: { [roomName: string]: { sourceInfo: SourceScanInfo } | undefined }
 }
 
 declare const enum Direction {
@@ -60,4 +61,22 @@ declare const enum Direction {
     BOTTOM_LEFT = 6,
     LEFT = 7,
     TOP_LEFT = 8,
+}
+
+interface SourceInfo {
+    id: string;
+    position: {
+        x: number;
+        y: number;
+    };
+    miningPosition: {
+        x: number;
+        y: number;
+    };
+}
+
+interface SourceScanInfo {
+    roomName: string;
+    sources: Array<SourceInfo>;
+    lastSourceIndex: number;
 }

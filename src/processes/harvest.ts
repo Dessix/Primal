@@ -1,8 +1,9 @@
+import { RoleDrill } from "./../roles/roleDrill";
 import { RoleCourier } from "./../roles/roleCourier";
 import { RoleUpgrader } from "./../roles/roleUpgrader";
 import { BaseRole } from "./../roles/baseRole";
-import { RoleBootstrapMiner } from "./../roles/roleBootstrapMiner";
 import { Process, ProcessStatus } from "../kernel/process";
+import { MiningScanner } from "../util/miningScanner";
 
 export class PHarvest extends Process {
     public static className: string = "Harvest";
@@ -13,94 +14,66 @@ export class PHarvest extends Process {
     }
 
     public run(): ProcessMemory | undefined {
-        let numHarvesters = 0;
-        let numUpgraders = 0;
+        let numDrills = 0;
         let numCouriers = 0;
-        const roleMiner = RoleBootstrapMiner.Instance;
+        const roleMiner = RoleDrill.Instance;
         const roleCourier = RoleCourier.Instance;
 
         for (let creepName in Game.creeps) {
             const creep = Game.creeps[creepName];
-            if (creep.role === RoleUpgrader.RoleTag) { ++numUpgraders; continue; }
             if (creep.role === RoleCourier.RoleTag) {
                 ++numCouriers;
                 roleCourier.run(creep);
                 continue;
             }
-            if (creep.role !== RoleBootstrapMiner.RoleTag) { continue; }
-            ++numHarvesters;
+            if (creep.role !== RoleDrill.RoleTag) { continue; }
+            ++numDrills;
             roleMiner.run(creep);
         }
 
-        if (numHarvesters < 2) {
-            for (let spawnName in Game.spawns) {
-                const spawn = Game.spawns[spawnName];
-                const energyAvailable = spawn.room.energyAvailable;
-                if (!spawn.spawning) {
-                    const chosenBody = RoleBootstrapMiner.chooseBody(energyAvailable);
-                    if (chosenBody !== undefined) {
-                        const creepMemory: CreepMemory = {
-                            spawnName: spawn.name,
-                            role: RoleBootstrapMiner.RoleTag,
-                        };
-                        const success = spawn.createCreep(
-                            chosenBody,
-                            RoleBootstrapMiner.generateName(RoleBootstrapMiner),
-                            creepMemory
-                        );
-                        if (typeof success === "number") {
-                            console.log(`Spawn failure: ${success}`);
-                        } else {
-                            //only work with the first to succeed
-                            break;
-                        }
+        for (let spawnName in Game.spawns) {
+            const spawn = Game.spawns[spawnName];
+            if (spawn.spawning) { continue; }
+            const room = spawn.room;
+            const energyAvailable = spawn.room.energyAvailable;
+            if (numDrills >= 1 && numCouriers < 2) {
+                const chosenBody = RoleCourier.chooseBody(energyAvailable);
+                if (chosenBody !== undefined) {
+                    const creepMemory: CreepMemory = {
+                        spawnName: spawn.name,
+                        role: RoleCourier.RoleTag,
+                    };
+                    const success = spawn.createCreep(
+                        chosenBody,
+                        RoleCourier.generateName(RoleCourier),
+                        creepMemory
+                    );
+                    if (typeof success === "number") {
+                        console.log(`Spawn failure: ${success}`);
+                    } else {
+                        //only work with the first to succeed
+                        break;
                     }
                 }
-            }
-        } else if (numHarvesters >= 2 && numUpgraders >= 1 && numCouriers < 1) {
-            for (let spawnName in Game.spawns) {
-                const spawn = Game.spawns[spawnName];
-                const energyAvailable = spawn.room.energyAvailable;
-                if (!spawn.spawning) {
-                    const chosenBody = RoleCourier.chooseBody(energyAvailable);
-                    if (chosenBody !== undefined) {
-                        const creepMemory: CreepMemory = {
-                            spawnName: spawn.name,
-                            role: RoleCourier.RoleTag,
-                        };
-                        const success = spawn.createCreep(
-                            chosenBody,
-                            RoleCourier.generateName(RoleCourier),
-                            creepMemory
-                        );
-                        if (typeof success === "number") {
-                            console.log(`Spawn failure: ${success}`);
-                        } else {
-                            //only work with the first to succeed
-                            break;
-                        }
+            } else if (numDrills < 2) {
+                const chosenBody = RoleDrill.chooseBody(energyAvailable);
+                if (chosenBody !== undefined) {
+                    const roomSourceInfo = Memory.sources[spawn.room.name] || (Memory.sources[spawn.room.name] = { sourceInfo: MiningScanner.scan(spawn.room) });
+                    const creepMemory: CreepMemory = RoleDrill.createInitialMemory(spawn, spawn.room, ++(roomSourceInfo.sourceInfo.lastSourceIndex));
+                    const success = spawn.createCreep(
+                        chosenBody,
+                        RoleDrill.generateName(RoleDrill),
+                        creepMemory
+                    );
+                    if (typeof success === "number") {
+                        console.log(`Spawn failure: ${success}`);
+                    } else {
+                        //only work with the first to succeed
+                        break;
                     }
                 }
             }
         }
         return;
-    }
-
-    public minimumHarvestDurationRemaining(): number {
-        let ttl = 0;
-        for (let creepName in Game.creeps) {
-            const creep = Game.creeps[creepName];
-            if (creep.role !== "harv") {
-                continue;
-            }
-            const cttl = creep.ticksToLive;
-            if (cttl > ttl) {
-                ttl = cttl;
-            }
-        }
-        return ttl;
-    }
-
-    public reloadFromMemory(pmem: ProcessMemory | undefined): void {
     }
 }

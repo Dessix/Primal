@@ -1,7 +1,7 @@
 import { BaseRole } from "./baseRole";
 
 interface BuilderMemory extends CreepMemory {
-    bild_building?: boolean; 
+    bild_building?: boolean;
 }
 
 export class RoleBuilder extends BaseRole<BuilderMemory> {
@@ -38,9 +38,12 @@ export class RoleBuilder extends BaseRole<BuilderMemory> {
         return <CreepBodyPart[]>chosenBody;
     }
 
-    private performHarvest(creep: Creep, cmem: BuilderMemory): void {
+    private getResources(creep: Creep, cmem: BuilderMemory): void {
         const spawn = Game.spawns[cmem.spawnName];
+
         let container: StructureContainer | undefined;
+
+        //Try flagged storage containers
         const flags = spawn.room.find<Flag>(FIND_FLAGS);
         for (let flag of flags) {
             if (
@@ -49,19 +52,19 @@ export class RoleBuilder extends BaseRole<BuilderMemory> {
                 continue;
             }
             const testContainer = flag.lookForStructureAtPosition<StructureContainer>(STRUCTURE_CONTAINER);
-            if (testContainer !== undefined && testContainer.store["energy"] > creep.carryCapacity) {
+            if (testContainer !== undefined && testContainer.store["energy"] > 0) {
                 container = testContainer;
             }
+        }
+
+        if (container === undefined) {
+            //Try any container
+            container = spawn.room.findFirstStructureOfTypeMatching<StructureContainer>(STRUCTURE_CONTAINER, c => c.store.energy > 0, false);
         }
 
         if (container !== undefined) {
             if (container.transfer(creep, "energy") === ERR_NOT_IN_RANGE) {
                 creep.moveTo(container);
-            }
-        } else {
-            let sources = creep.room.find<Source>(FIND_SOURCES).filter(s => s.pos.lookFor<Flag>(LOOK_FLAGS).find(f => f.color === COLOR_GREEN && f.secondaryColor === COLOR_YELLOW) === undefined);
-            if (creep.harvest(sources[0]) === ERR_NOT_IN_RANGE) {
-                creep.moveTo(sources[0]);
             }
         }
     }
@@ -70,11 +73,11 @@ export class RoleBuilder extends BaseRole<BuilderMemory> {
         if (creep.spawning) { return; }
         if (cmem.bild_building && creep.carry.energy === 0) {
             cmem.bild_building = false;
-            creep.say("harvesting");
+            creep.say("energy");
         }
         if (!cmem.bild_building && creep.carry.energy === creep.carryCapacity) {
             cmem.bild_building = true;
-            creep.say("building");
+            creep.say("production");
         }
 
         if (cmem.bild_building) {
@@ -85,7 +88,7 @@ export class RoleBuilder extends BaseRole<BuilderMemory> {
                 }
             } else {
                 if (creep.carry.energy < creep.carryCapacity) {
-                    this.performHarvest(creep, cmem);
+                    this.getResources(creep, cmem);
                 } else {
                     // const idleFlag = Game.spawns[cmem.spawnName].room.find<Flag>(FIND_FLAGS).find(x => x.color === COLOR_BROWN && x.secondaryColor === COLOR_BROWN);
                     // if (idleFlag !== undefined) {
@@ -94,7 +97,7 @@ export class RoleBuilder extends BaseRole<BuilderMemory> {
                 }
             }
         } else {
-            this.performHarvest(creep, cmem);
+            this.getResources(creep, cmem);
         }
     }
 }

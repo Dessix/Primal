@@ -36,7 +36,10 @@ export class RoleUpgrader extends BaseRole<UpgraderMemory> {
 
     private performHarvest(creep: Creep, cmem: UpgraderMemory): void {
         const spawn = Game.spawns[cmem.spawnName];
+        
         let container: StructureContainer | undefined;
+        
+        //Marked storage containers
         const flags = spawn.room.find<Flag>(FIND_FLAGS);
         for (let flag of flags) {
             if (
@@ -48,6 +51,11 @@ export class RoleUpgrader extends BaseRole<UpgraderMemory> {
             if (testContainer !== undefined && testContainer.store["energy"] > creep.carryCapacity) {
                 container = testContainer;
             }
+        }
+        
+        if (container === undefined) {
+            //Try any container
+            container = spawn.room.findFirstStructureOfTypeMatching<StructureContainer>(STRUCTURE_CONTAINER, c => c.store.energy > 0, false);
         }
 
         if (container !== undefined) {
