@@ -4,13 +4,20 @@ interface BuilderMemory extends CreepMemory {
     bild_building?: boolean; 
 }
 
-export class RoleBuilder extends BaseRole {
+export class RoleBuilder extends BaseRole<BuilderMemory> {
     public static RoleTag: string = "bild";
-    public get cmem() { return <BuilderMemory>this.creep.memory; }
-    public set cmem(value: BuilderMemory) { this.creep.memory = value; }
 
-    public constructor(creep: Creep) {
-        super(creep);
+    public constructor() {
+        super();
+    }
+
+    private static _instance: RoleBuilder | undefined;
+    public static get Instance(): RoleBuilder {
+        const instance = RoleBuilder._instance;
+        if (instance === undefined) {
+            return (RoleBuilder._instance = new RoleBuilder());
+        }
+        return instance;
     }
 
     public static chooseBody(energyAvailable: number): CreepBodyPart[] {
@@ -59,10 +66,8 @@ export class RoleBuilder extends BaseRole {
         }
     }
 
-    public run(): void {
-        const creep = this.creep;
+    public onRun(creep: Creep, cmem: BuilderMemory): void {
         if (creep.spawning) { return; }
-        const cmem = this.cmem;
         if (cmem.bild_building && creep.carry.energy === 0) {
             cmem.bild_building = false;
             creep.say("harvesting");

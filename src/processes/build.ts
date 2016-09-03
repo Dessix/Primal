@@ -18,6 +18,7 @@ export class PBuild extends Process {
         let numUpgraders = 0;
         let numMiners = 0;
         let numBuilders = 0;
+        const builder = RoleBuilder.Instance;
         for (let creepName in Game.creeps) {
             const creep = Game.creeps[creepName];
             const cmem = <CreepMemory>creep.memory;
@@ -26,8 +27,7 @@ export class PBuild extends Process {
             if (cmem.role === RoleUpgrader.RoleTag) { ++numUpgraders; continue; }
             if (cmem.role !== RoleBuilder.RoleTag) { continue; }
             ++numBuilders;
-            const builder = new RoleBuilder(creep);
-            builder.run();
+            builder.run(creep);
         }
         if (numMiners >= 2 && numUpgraders >= 1 && numBuilders < 1) {
             for (let spawnName in Game.spawns) {

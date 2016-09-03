@@ -18,6 +18,7 @@ export class PRepair extends Process {
         let numUpgraders = 0;
         let numMiners = 0;
         let numRepairers = 0;
+        const repairer = RoleRepairer.Instance;
         for (let creepName in Game.creeps) {
             const creep = Game.creeps[creepName];
             const cmem = <CreepMemory & { working: boolean }>creep.memory;
@@ -27,8 +28,7 @@ export class PRepair extends Process {
             ++numRepairers;
             if (creep.spawning) { continue; }
             // if creep is trying to repair something but has no energy left
-            const repairer = new RoleRepairer(creep);
-            repairer.run();
+            repairer.run(creep);
         }
         //console.log(`${numMiners} : ${numUpgraders} : ${numRepairers}`);
         if (numMiners >= 2 && numUpgraders >= 1 && numRepairers < 2) {

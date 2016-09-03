@@ -4,14 +4,22 @@ interface RepairerMemory extends CreepMemory {
     repr_working?: boolean;
 }
 
-export class RoleRepairer extends BaseRole {
+export class RoleRepairer extends BaseRole<RepairerMemory> {
     public static RoleTag: string = "repr";
-    public get cmem() { return <RepairerMemory>this.creep.memory; }
-    public set cmem(value: RepairerMemory) { this.creep.memory = value; }
 
-    public constructor(creep: Creep) {
-        super(creep);
+    public constructor() {
+        super();
     }
+
+    private static _instance: RoleRepairer | undefined;
+    public static get Instance(): RoleRepairer {
+        const instance = RoleRepairer._instance;
+        if (instance === undefined) {
+            return (RoleRepairer._instance = new RoleRepairer());
+        }
+        return instance;
+    }
+
     public static chooseBody(energyAvailable: number): CreepBodyPart[] {
         let chosenBody: string[];
         if (energyAvailable >= 750) {
@@ -56,10 +64,8 @@ export class RoleRepairer extends BaseRole {
         }
     }
 
-    public run(): void {
-        const creep = this.creep;
+    public onRun(creep: Creep, cmem: RepairerMemory): void {
         if (creep.spawning) { return; }
-        const cmem = this.cmem;
         if (cmem.repr_working && creep.carry.energy === 0) {
             // switch state
             cmem.repr_working = false;

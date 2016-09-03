@@ -16,6 +16,7 @@ export class PUpgrade extends Process {
 
         let numUpgraders = 0;
         let numMiners = 0;
+        const upgrader = RoleUpgrader.Instance;
         for (let creepName in Game.creeps) {
             const creep = Game.creeps[creepName];
             const cmem = <CreepMemory & { upgrading: boolean }>creep.memory;
@@ -23,8 +24,7 @@ export class PUpgrade extends Process {
             if (cmem.role !== RoleUpgrader.RoleTag) { continue; }
             ++numUpgraders;
             if (creep.spawning) { continue; }
-            const upgrader = new RoleUpgrader(creep);
-            upgrader.run();
+            upgrader.run(creep);
         }
         if (numMiners >= 2 && numUpgraders < 2) {
             for (let spawnName in Game.spawns) {

@@ -16,20 +16,22 @@ export class PHarvest extends Process {
         let numHarvesters = 0;
         let numUpgraders = 0;
         let numCouriers = 0;
+        const roleMiner = RoleBootstrapMiner.Instance;
+        const roleCourier = RoleCourier.Instance;
+
         for (let creepName in Game.creeps) {
             const creep = Game.creeps[creepName];
             if (creep.role === RoleUpgrader.RoleTag) { ++numUpgraders; continue; }
             if (creep.role === RoleCourier.RoleTag) {
                 ++numCouriers;
-                const courier: BaseRole = new RoleCourier(creep);
-                courier.run();
+                roleCourier.run(creep);
                 continue;
             }
             if (creep.role !== RoleBootstrapMiner.RoleTag) { continue; }
             ++numHarvesters;
-            const miner: BaseRole = new RoleBootstrapMiner(creep);
-            miner.run();
+            roleMiner.run(creep);
         }
+
         if (numHarvesters < 2) {
             for (let spawnName in Game.spawns) {
                 const spawn = Game.spawns[spawnName];

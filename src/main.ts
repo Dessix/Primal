@@ -1,3 +1,8 @@
+import { RoleBootstrapMiner } from "./roles/roleBootstrapMiner";
+import { RoleRepairer } from "./roles/roleRepairer";
+import { RoleUpgrader } from "./roles/roleUpgrader";
+import { RoleBuilder } from "./roles/roleBuilder";
+import { RoleCourier } from "./roles/roleCourier";
 import { RecordStats } from "./util/stats";
 import "./extensions/";//Apply extension modules
 import { Processes } from "./kernel/processes";
@@ -6,12 +11,22 @@ import { Kernel } from "./kernel/kernel";
 import { inspect } from "./util/inspect";
 import * as Profiler from "../lib/screeps-profiler";
 import { DefaultConfig } from "./util/config";
+import { FsmRole } from "./roles/fsmRole";
 
 Memory.config = DefaultConfig.apply(Memory.config);
 if (Memory.involatile === undefined) { Memory.involatile = {}; }
 
 //Enable profiler if configured
-if (Memory.config.profile) { Profiler.enable(); }
+if (Memory.config.profile) {
+    Profiler.enable();
+    Profiler.registerClass(FsmRole, "FsmRole");
+    Profiler.registerClass(RoleCourier, "RoleCourier");
+    Profiler.registerClass(RoleBuilder, "RoleBuilder");
+    Profiler.registerClass(RoleUpgrader, "RoleUpgrader");
+    Profiler.registerClass(RoleRepairer, "RoleRepairer");
+    Profiler.registerClass(RoleBootstrapMiner, "RoleBootstrapMiner");
+    Profiler.registerFN(RecordStats, "RecordStats");
+}
 
 Processes.RegisterAll();
 function spawnNewProcessTable() {

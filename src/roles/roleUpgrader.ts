@@ -4,14 +4,18 @@ export interface UpgraderMemory extends CreepMemory {
     upgrading?: boolean;
 }
 
-export class RoleUpgrader extends BaseRole {
+export class RoleUpgrader extends BaseRole<UpgraderMemory> {
     public static RoleTag: string = "upgr";
-    public get cmem() { return <UpgraderMemory>this.creep.memory; }
-    public set cmem(value: UpgraderMemory) { this.creep.memory = value; }
 
-    public constructor(creep: Creep) {
-        super(creep);
+    private static _instance: RoleUpgrader | undefined;
+    public static get Instance(): RoleUpgrader {
+        const instance = RoleUpgrader._instance;
+        if (instance === undefined) {
+            return (RoleUpgrader._instance = new RoleUpgrader());
+        }
+        return instance;
     }
+
     public static chooseBody(energyAvailable: number): CreepBodyPart[] {
         let chosenBody: string[];
         if (energyAvailable >= 750) {
@@ -58,9 +62,7 @@ export class RoleUpgrader extends BaseRole {
         }
     }
 
-    public run(): void {
-        const creep = this.creep;
-        const cmem = this.cmem;
+    public onRun(creep: Creep, cmem: UpgraderMemory): void {
         if (creep.spawning) { return; } if (cmem.upgrading && creep.carry.energy === 0) {
             cmem.upgrading = false;
             creep.say("harvesting");

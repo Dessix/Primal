@@ -1,17 +1,13 @@
+export interface IRole {
+    run(creep: Creep): void;
+}
 
-export abstract class BaseRole {
-    public readonly creep: Creep;
-    constructor(creep: Creep) {
-        this.creep = creep;
+export abstract class BaseRole<TMemory extends CreepMemory> implements IRole {
+    public run(creep: Creep): void {
+        this.onRun(creep, <TMemory>creep.cmem);
     }
-    public get cmem(): CreepMemory {
-        return <CreepMemory>this.creep.memory;
-    }
-    public set cmem(value: CreepMemory) {
-        this.creep.memory = value;
-    }
-    public abstract run(): void;
+    protected abstract onRun(creep: Creep, cmem: TMemory): void;
     public static generateName(roleCtor: { RoleTag: string }) {
-        return roleCtor.RoleTag + Game.time.toString(16).slice(-2);
+        return roleCtor.RoleTag + Game.time.toString(36).slice(-2);
     }
 }

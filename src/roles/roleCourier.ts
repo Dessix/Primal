@@ -2,7 +2,7 @@ import { RoleUpgrader } from "./roleUpgrader";
 import { RoleRepairer } from "./roleRepairer";
 import { RoleBuilder } from "./roleBuilder";
 import { RoleBootstrapMiner } from "./roleBootstrapMiner";
-import { BaseRole } from "./baseRole";
+import { FsmRole, StateHandlerList } from "./fsmRole";
 
 enum CourierState {
     Decide,
@@ -16,13 +16,35 @@ interface CourierMemory extends CreepMemory {
     crr_targ?: string | number;//Object ID
 }
 
-export class RoleCourier extends BaseRole {
+export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
     public static RoleTag: string = "crr";
-    public get cmem() { return <CourierMemory>this.creep.memory; }
-    public set cmem(value: CourierMemory) { this.creep.memory = value; }
 
-    public constructor(creep: Creep) {
-        super(creep);
+    public constructor() {
+        super(CourierState.Pickup, (mem, val) => mem.crr_st = val, mem => mem.crr_st);
+    }
+
+    private static _instance: RoleCourier | undefined;
+    public static get Instance(): RoleCourier {
+        const instance = RoleCourier._instance;
+        if (instance === undefined) {
+            return (RoleCourier._instance = new RoleCourier());
+        }
+        return instance;
+    }
+
+    protected provideStates(): StateHandlerList<CourierMemory, CourierState> {
+        return {
+            [CourierState.Decide]: this.handleDecide,
+            [CourierState.Deliver]: this.handleDeliver,
+            [CourierState.Pickup]: this.handlePickup,
+            [CourierState.Wait]: this.handleWait,
+        };
+    }
+
+    protected onTransition(creep: Creep, cmem: CourierMemory, prev: CourierState, next: CourierState) {
+        if (prev !== next) {
+            delete cmem.crr_targ;
+        }
     }
 
     public static chooseBody(energyAvailable: number): CreepBodyPart[] | undefined {
@@ -75,7 +97,7 @@ export class RoleCourier extends BaseRole {
 
     private readonly waitTickCount: number = 5;
 
-    private performWait(creep: Creep, cmem: CourierMemory): CourierState | undefined {
+    private handleWait(creep: Creep, cmem: CourierMemory): CourierState | undefined {
         if (cmem.crr_targ === undefined) {
             cmem.crr_targ = Game.time + this.waitTickCount;
         }
@@ -144,7 +166,7 @@ export class RoleCourier extends BaseRole {
         return;
     }
 
-    private performPickup(creep: Creep, cmem: CourierMemory): CourierState | undefined {
+    private handlePickup(creep: Creep, cmem: CourierMemory): CourierState | undefined {
         const spawn = Game.spawns[cmem.spawnName];
         const target = this.getPickupTarget(creep, cmem);
         if (creep.carry.energy === creep.carryCapacity) {
@@ -271,7 +293,7 @@ export class RoleCourier extends BaseRole {
 
     }
 
-    private performDeliver(creep: Creep, cmem: CourierMemory): CourierState | undefined {
+    private handleDeliver(creep: Creep, cmem: CourierMemory): CourierState | undefined {
         if (creep.carry.energy === 0) {
             return CourierState.Pickup;
         }
@@ -322,46 +344,11 @@ export class RoleCourier extends BaseRole {
         }
     }
 
-    private performDecidePickupDeliver(creep: Creep, cmem: CourierMemory): CourierState | undefined {
+    private handleDecide(creep: Creep, cmem: CourierMemory): CourierState | undefined {
         if (creep.carry.energy >= 10 * creep.body.length) {
             return CourierState.Deliver;
         } else {
             return CourierState.Pickup;
-        }
-    }
-
-    private runState(creep: Creep, cmem: CourierMemory): CourierState | undefined {
-        switch (cmem.crr_st) {
-            case CourierState.Decide:
-                return this.performDecidePickupDeliver(creep, cmem);
-            case CourierState.Wait:
-                return this.performWait(creep, cmem);
-            case CourierState.Pickup:
-                return this.performPickup(creep, cmem);
-            case CourierState.Deliver:
-                return this.performDeliver(creep, cmem);
-            default:
-                return CourierState.Pickup;
-        }
-    }
-
-    public run(): void {
-        const creep = this.creep;
-        if (creep.spawning) { return; }
-        let cmem = this.cmem;
-        const capStateTransitions = 10;
-
-        let transitions = 0;
-        let newState: CourierState | undefined;
-        while ((newState = this.runState(creep, cmem)) !== undefined) {
-            if (cmem.crr_st !== newState) {
-                delete cmem.crr_targ;//States can use the arg as they see fit, but not to communicate
-            }
-            if (++transitions === capStateTransitions) {
-                console.log("Courier - Maxed out state transitions per execution! Coming out of: " + cmem.crr_st);
-                break;
-            }
-            cmem.crr_st = newState;
         }
     }
 }

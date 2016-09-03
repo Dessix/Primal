@@ -1,5 +1,5 @@
 import { RoleBuilder } from "./roleBuilder";
-import { BaseRole } from "./baseRole";
+import { FsmRole, StateHandlerList } from "./fsmRole";
 
 enum BootstrapMinerState {
     Renew = -1,
@@ -8,18 +8,40 @@ enum BootstrapMinerState {
 }
 
 interface BootstrapMinerMemory extends CreepMemory {
-    state?: BootstrapMinerState;
+    harv_state?: BootstrapMinerState;
     stateArg?: string;
     stateArgPath?: string;
 }
 
-export class RoleBootstrapMiner extends BaseRole {
+export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapMinerState> {
     public static RoleTag: string = "harv";
-    public get cmem() { return <BootstrapMinerMemory>this.creep.memory; }
-    public set cmem(value: BootstrapMinerMemory) { this.creep.memory = value; }
 
-    public constructor(creep: Creep) {
-        super(creep);
+    public constructor() {
+        super(BootstrapMinerState.Harvest, (mem, val) => mem.harv_state = val, (mem) => mem.harv_state);
+    }
+
+    private static _instance: RoleBootstrapMiner | undefined;
+    public static get Instance(): RoleBootstrapMiner {
+        const instance = RoleBootstrapMiner._instance;
+        if (instance === undefined) {
+            return (RoleBootstrapMiner._instance = new RoleBootstrapMiner());
+        }
+        return instance;
+    }
+
+    protected provideStates(): StateHandlerList<BootstrapMinerMemory, BootstrapMinerState> {
+        return {
+            [BootstrapMinerState.Harvest]: this.handleHarvest,
+            [BootstrapMinerState.Carry]: this.handleCarry,
+            [BootstrapMinerState.Renew]: this.handleRenew,
+        };
+    }
+
+    protected onTransition(creep: Creep, cmem: BootstrapMinerMemory, prev: BootstrapMinerState, next: BootstrapMinerState) {
+        if (prev !== next) {
+            delete cmem.stateArg;
+            delete cmem.stateArgPath;
+        }
     }
 
     private shouldRenew(creep: Creep, cmem: BootstrapMinerMemory) {
@@ -173,7 +195,7 @@ export class RoleBootstrapMiner extends BaseRole {
         return spawn;
     }
 
-    private renew(creep: Creep, cmem: BootstrapMinerMemory): BootstrapMinerState | undefined {
+    private handleRenew(creep: Creep, cmem: BootstrapMinerMemory): BootstrapMinerState | undefined {
         const spawn = Game.spawns[cmem.spawnName];
         if (creep.ticksToLive >= 1400 || spawn.room.energyAvailable < spawn.room.energyCapacityAvailable / 2) {
             return BootstrapMinerState.Carry;
@@ -209,7 +231,7 @@ export class RoleBootstrapMiner extends BaseRole {
         return false;
     }
 
-    private carry(creep: Creep, cmem: BootstrapMinerMemory): BootstrapMinerState | undefined {
+    private handleCarry(creep: Creep, cmem: BootstrapMinerMemory): BootstrapMinerState | undefined {
         const spawn = Game.spawns[cmem.spawnName];
         if (creep.carry.energy === 0) {
             return BootstrapMinerState.Harvest;
@@ -238,8 +260,7 @@ export class RoleBootstrapMiner extends BaseRole {
             isFull = (tstrct.store["energy"] === tstrct.storeCapacity);
         }
         if (isFull) {
-            const asBuilder = new RoleBuilder(this.creep);
-            asBuilder.run();
+            RoleBuilder.Instance.run(creep);
             return;
         }
         if (creep.transfer(target, "energy") === ERR_NOT_IN_RANGE) {
@@ -338,7 +359,7 @@ export class RoleBootstrapMiner extends BaseRole {
         return chosen;
     }
 
-    private harvest(creep: Creep, cmem: BootstrapMinerMemory): BootstrapMinerState | undefined {
+    private handleHarvest(creep: Creep, cmem: BootstrapMinerMemory): BootstrapMinerState | undefined {
         const spawn = Game.spawns[cmem.spawnName];
         if (creep.carry.energy === creep.carryCapacity) {
             return BootstrapMinerState.Carry;
@@ -382,39 +403,6 @@ export class RoleBootstrapMiner extends BaseRole {
         }
 
         return;
-    }
-
-    private runState(creep: Creep, cmem: BootstrapMinerMemory): BootstrapMinerState | undefined {
-        switch (cmem.state) {
-            case BootstrapMinerState.Carry:
-                return this.carry(creep, cmem);
-            case BootstrapMinerState.Harvest:
-                return this.harvest(creep, cmem);
-            case BootstrapMinerState.Renew:
-                return this.renew(creep, cmem);
-            default:
-                return BootstrapMinerState.Carry;
-        }
-    }
-
-    public run(): void {
-        const creep = this.creep;
-        if (creep.spawning) { return; }
-        let cmem = this.cmem;
-        const capStateTransitions = 15;
-
-        let transitions = 0;
-        let newState: BootstrapMinerState | undefined;
-        while ((newState = this.runState(creep, cmem)) !== undefined) {
-            if (cmem.state !== newState) {
-                delete cmem.stateArg;//States can use the arg as they see fit, but not to communicate
-            }
-            if (++transitions === capStateTransitions) {
-                console.log("BootstrapMiner - Maxed out state transitions per execution! Coming out of: " + cmem.state);
-                break;
-            }
-            cmem.state = newState;
-        }
     }
 }
 
