@@ -58,6 +58,7 @@ export class PHarvest extends Process {
             } else if (numDrills < 2) {
                 const chosenBody = RoleDrill.chooseBody(energyAvailable);
                 if (chosenBody !== undefined) {
+                    //TODO: Get source info from MiningScanner and have it manage the complexities of making sure variables are set
                     const roomSourceInfo = Memory.sources[spawn.room.name] || (Memory.sources[spawn.room.name] = { sourceInfo: MiningScanner.scan(spawn.room) });
                     const creepMemory: CreepMemory = RoleDrill.createInitialMemory(spawn, spawn.room, ++(roomSourceInfo.sourceInfo.lastSourceIndex));
                     const success = spawn.createCreep(

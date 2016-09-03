@@ -29,7 +29,7 @@ export class PUpgrade extends Process {
             if (creep.spawning) { continue; }
             upgrader.run(creep);
         }
-        if (numDrills >= 1 && numCouriers >= 1 && numUpgraders < 4) {
+        if (numDrills >= 1 && numCouriers >= 1 && numUpgraders < 2 * global.config.upgraderMultiplier) {
             for (let spawnName in Game.spawns) {
                 const spawn = Game.spawns[spawnName];
                 const energyAvailable = spawn.room.energyAvailable;

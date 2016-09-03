@@ -40,6 +40,9 @@ interface CoreConfiguration {
     noisy: boolean;
     profile: boolean;
     minersRepair: boolean,
+    builderMultiplier: number,
+    upgraderMultiplier: number,
+    repairerMultiplier: number,
 }
 
 interface Memory {

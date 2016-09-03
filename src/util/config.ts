@@ -4,6 +4,9 @@ export class DefaultConfig {
             noisy: false,
             profile: false,
             minersRepair: false,
+            repairerMultiplier: 1,
+            builderMultiplier: 1,
+            upgraderMultiplier: 1,
         };
         
         if (config === undefined) {

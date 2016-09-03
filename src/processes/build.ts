@@ -33,7 +33,7 @@ export class PBuild extends Process {
             ++numBuilders;
             builder.run(creep);
         }
-        if (numDrills >= 1 && numCouriers >= 1 && numUpgraders >= 1 && numBuilders < 1) {
+        if (numDrills >= 1 && numCouriers >= 1 && numUpgraders >= 1 && numBuilders < 1 * global.config.builderMultiplier) {
             for (let spawnName in Game.spawns) {
                 const spawn = Game.spawns[spawnName];
                 if (spawn.room.energyAvailable >= 300 && !spawn.spawning) {
