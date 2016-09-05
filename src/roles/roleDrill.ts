@@ -133,7 +133,9 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
 
     public static chooseBody(energyAvailable: number): CreepBodyPart[] | undefined {
         let chosenBody: string[] | undefined;
-        if (energyAvailable >= 700) {
+        if (energyAvailable >= 800) {
+            chosenBody = [MOVE, CARRY, WORK, WORK, WORK, WORK, WORK, WORK, WORK];
+        } else if (energyAvailable >= 700) {
             chosenBody = [MOVE, CARRY, WORK, WORK, WORK, WORK, WORK, WORK];
         } else if (energyAvailable >= 600) {
             chosenBody = [MOVE, CARRY, WORK, WORK, WORK, WORK, WORK];
@@ -207,7 +209,7 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
     public handleWaitForSourceRegen(creep: Creep, cmem: DrillMemory): DrillState | undefined {
         const source = <Source>Game.getObjectById(this.getSourceId(creep, cmem));
         if (source.energy > 0) {
-            return DrillState.WaitForSourceRegen;
+            return DrillState.Harvest;
         }
         //Container repair
         const container = RoleDrill.getContainerOnPosition(creep.pos);
