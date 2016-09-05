@@ -7,6 +7,7 @@ export class DefaultConfig {
             repairerMultiplier: 1,
             builderMultiplier: 1,
             upgraderMultiplier: 1,
+            courierMultiplier: 1,
         };
         
         if (config === undefined) {

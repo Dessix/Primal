@@ -39,10 +39,11 @@ type CreepBodyPart = "move" | "work" | "carry" | "attack" | "ranged_attack" | "t
 interface CoreConfiguration {
     noisy: boolean;
     profile: boolean;
-    minersRepair: boolean,
-    builderMultiplier: number,
-    upgraderMultiplier: number,
-    repairerMultiplier: number,
+    minersRepair: boolean;
+    builderMultiplier: number;
+    upgraderMultiplier: number;
+    repairerMultiplier: number;
+    courierMultiplier: number;
 }
 
 interface Memory {

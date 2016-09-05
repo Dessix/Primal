@@ -59,7 +59,7 @@ export abstract class FsmRole<TMemory extends CreepMemory, TStateValue extends s
         let newState: TStateValue | undefined;
         while ((newState = this.runState(currentState, creep, cmem)) !== undefined) {
             if (++transitions === FsmRole.StateTransitionsCap) {
-                console.log(`Exceeded state transitions per execution! Coming out of: ${currentState} toward ${newState}`);
+                console.log(`Role ${creep.role} Exceeded state transitions per execution! Coming out of: ${currentState} toward ${newState}`);
                 break;
             }
             this.onTransition(creep, cmem, currentState, newState);

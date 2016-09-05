@@ -1,5 +1,6 @@
 import { RoleDrill } from "./../roles/roleDrill";
 import { RoleCourier } from "./../roles/roleCourier";
+import { RoleBard } from "./../roles/roleBard";
 import { RoleUpgrader } from "./../roles/roleUpgrader";
 import { BaseRole } from "./../roles/baseRole";
 import { Process, ProcessStatus } from "../kernel/process";
@@ -18,9 +19,14 @@ export class PHarvest extends Process {
         let numCouriers = 0;
         const roleMiner = RoleDrill.Instance;
         const roleCourier = RoleCourier.Instance;
+        const roleBard = RoleBard.Instance;
 
         for (let creepName in Game.creeps) {
             const creep = Game.creeps[creepName];
+            if (creep.role === RoleBard.RoleTag) {
+                roleBard.run(creep);
+                continue;
+            }
             if (creep.role === RoleCourier.RoleTag) {
                 ++numCouriers;
                 roleCourier.run(creep);
@@ -37,7 +43,7 @@ export class PHarvest extends Process {
             const room = spawn.room;
             const energyAvailable = spawn.room.energyAvailable;
             const energyCapacityAvailable = spawn.room.energyCapacityAvailable;
-            if (numDrills >= 1 && numCouriers < 2) {
+            if (numDrills >= 1 && numCouriers < 2 * global.config.courierMultiplier) {
                 if (numCouriers >= 1 && numDrills >= 1) {
                     if (energyCapacityAvailable === 300 && energyAvailable < energyCapacityAvailable) {
                         break;
@@ -60,6 +66,7 @@ export class PHarvest extends Process {
                     if (typeof success === "number") {
                         console.log(`Spawn failure: ${success}`);
                     } else {
+                        console.log(global.sinspect(spawn.spawning));
                         //only work with the first to succeed
                         break;
                     }
@@ -86,6 +93,7 @@ export class PHarvest extends Process {
                     if (typeof success === "number") {
                         console.log(`Spawn failure: ${success}`);
                     } else {
+                        console.log(global.sinspect(spawn.spawning));
                         //only work with the first to succeed
                         break;
                     }

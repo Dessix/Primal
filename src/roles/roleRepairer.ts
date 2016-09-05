@@ -109,8 +109,8 @@ export class RoleRepairer extends BaseRole<RepairerMemory> {
         const structuresNeedingRepair = creep.room.find<Structure>(FIND_STRUCTURES)
             .filter(s => s.hits < s.hitsMax && (
                 (s.structureType !== STRUCTURE_WALL && s.structureType !== STRUCTURE_RAMPART) ||
-                (s.structureType === STRUCTURE_WALL && s.hits < 5000 * ctrlLvl) &&
-                (s.structureType === STRUCTURE_RAMPART && s.hits < 5000 * ctrlLvl)
+                (s.structureType === STRUCTURE_WALL && s.hits < 25000 * ctrlLvl) &&
+                (s.structureType === STRUCTURE_RAMPART && s.hits < 25000 * ctrlLvl)
             ))
             .sort(function (a, b) {
                 if (a.structureType === STRUCTURE_WALL) {

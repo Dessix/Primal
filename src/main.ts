@@ -1,3 +1,4 @@
+import { RoleBard } from "./roles/roleBard";
 import { RoleBootstrapMiner } from "./roles/roleBootstrapMiner";
 import { RoleRepairer } from "./roles/roleRepairer";
 import { RoleUpgrader } from "./roles/roleUpgrader";
@@ -75,6 +76,40 @@ if (!global.c) { Object.defineProperty(global, "c", { get: () => Game.creeps });
 if (!global.s) { Object.defineProperty(global, "s", { get: () => Game.spawns }); }
 if (!global.f) { Object.defineProperty(global, "f", { get: () => Game.flags }); }
 
+(<any>global).spawnBard = function () {
+    const spawn = Game.spawns["Hive"];
+    const room = spawn.room;
+    const energyAvailable = room.energyAvailable;
+    const energyCapacityAvailable = room.energyCapacityAvailable;
+    const chosenBody = RoleBard.chooseBody(energyAvailable);
+    if (chosenBody === undefined) {
+        //console.log("No body could be chosen");
+        return;
+    }
+    const creepMemory: CreepMemory = {
+        spawnName: spawn.name,
+        role: RoleBard.RoleTag,
+    };
+    const success = spawn.createCreep(
+        chosenBody,
+        RoleBard.generateName(RoleBard),
+        creepMemory
+    );
+    if (typeof success === "number") {
+        //console.log(`Spawn failure: ${success}`);
+        return;
+    }
+    console.log(global.sinspect(spawn.spawning));
+};
+
+(<any>global).showBuildQueue = function (room: Room) {
+    const buildQueue = room.find<ConstructionSite>(FIND_CONSTRUCTION_SITES);
+    for (let i = 0, n = buildQueue.length; i < n; ++i) {
+        const item = buildQueue[i];
+        console.log(`${i+1}: ${item.structureType}`);
+    }
+};
+
 function mainLoop() {
     global.tickVolatile = {};
     if (Memory.config.noisy) { console.log("Ω Load"); }
@@ -87,9 +122,7 @@ function mainLoop() {
     if (Memory.config.noisy) { console.log("Ω Save"); }
     Memory.proc = KernelSerializer.serializeProcessTable(kernel.getProcessTable());
     RecordStats();
-
-    //TODO: Temporary, remove after RCL3
-    Game.rooms["W14N53"].createConstructionSite(36, 17, STRUCTURE_TOWER);
+    //(<any>global).spawnBard();
 };
 
 export const loop = !Memory.config.profile ? mainLoop : Profiler.wrap(mainLoop);

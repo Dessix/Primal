@@ -5,7 +5,7 @@ import { RoleBootstrapMiner } from "./roleBootstrapMiner";
 import { FsmRole, StateHandlerList } from "./fsmRole";
 
 enum CourierState {
-    Decide,
+    Decide = 0,
     Wait,
     Pickup,
     Deliver,
@@ -151,10 +151,10 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
 
     private handlePickup(creep: Creep, cmem: CourierMemory): CourierState | undefined {
         const spawn = Game.spawns[cmem.spawnName];
-        const target = this.getPickupTarget(creep, cmem);
         if (creep.carry.energy === creep.carryCapacity) {
             return CourierState.Deliver;
         }
+        const target = this.getPickupTarget(creep, cmem);
         if (target === undefined) {
             return CourierState.Wait;
         }
@@ -163,9 +163,10 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
                 creep.moveTo(target, { reusePath: 20 });
             }
         } else {
-            if (creep.pickup(<Resource>target) === ERR_NOT_IN_RANGE) {
+            const pickedUp = creep.pickup(<Resource>target);
+            if (pickedUp === ERR_NOT_IN_RANGE) {
                 creep.moveTo(target, { reusePath: 20 });
-            } else {
+            } else if (pickedUp === OK) {
                 return CourierState.Decide;
             }
         }
@@ -327,8 +328,12 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
         }
     }
 
+    private shouldDeliver(creep: Creep): boolean {
+        return creep.carry.energy >= 10 * creep.body.length;
+    }
+
     private handleDecide(creep: Creep, cmem: CourierMemory): CourierState | undefined {
-        if (creep.carry.energy >= 10 * creep.body.length) {
+        if (this.shouldDeliver(creep)) {
             return CourierState.Deliver;
         } else {
             return CourierState.Pickup;
