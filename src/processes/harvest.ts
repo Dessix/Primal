@@ -93,7 +93,11 @@ export class PHarvest extends Process {
                 if (numCouriers >= 1 && numDrills >= 1) {
                     if (energyCapacityAvailable === 300 && energyAvailable < energyCapacityAvailable) {
                         break;
-                    } else if (energyCapacityAvailable > 450 && energyAvailable < energyCapacityAvailable) {
+                    } else if (energyCapacityAvailable > 450 && energyAvailable < 450) {
+                        break;
+                    } else if (energyCapacityAvailable > 550 && energyAvailable < 550) {
+                        break;
+                    } else if (energyCapacityAvailable > 650 && energyAvailable < 650) {
                         break;
                     }
                     //Prefer larger spawns!
@@ -108,6 +112,8 @@ export class PHarvest extends Process {
                     } else if (energyCapacityAvailable > 450 && energyAvailable < 450) {
                         break;
                     } else if (energyCapacityAvailable > 550 && energyAvailable < 550) {
+                        break;
+                    } else if (energyCapacityAvailable > 650 && energyAvailable < 650) {
                         break;
                     }
                     //Prefer larger spawns!
