@@ -246,6 +246,15 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
 
 
         {
+            const storage = spawn.room.storage;
+            if (storage !== undefined && storage.store.energy < storage.storeCapacity) {
+                cmem.crr_targ = storage.id;
+                return storage;
+            }
+        }
+
+
+        {
             const flags = spawn.room.find<Flag>(FIND_FLAGS);
             for (let flag of flags) {
                 if (
@@ -257,15 +266,6 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
                 if (container !== undefined && _.sum(container.store) < container.storeCapacity) {
                     return container;
                 }
-            }
-        }
-
-
-        {
-            const storage = spawn.room.storage;
-            if (storage !== undefined && storage.store.energy < storage.storeCapacity) {
-                cmem.crr_targ = storage.id;
-                return storage;
             }
         }
 

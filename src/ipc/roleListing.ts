@@ -70,7 +70,7 @@ export class RoleListing {
         return roleEntry;
     }
 
-    public static *getByRoles(...rolesOrRoleTags: (string | { RoleTag: string })[]): Iterable<Creep> {
+    public static *getByRoles(...rolesOrRoleTags: (string | { RoleTag: string })[]): IterableIterator<Creep> {
         let mapping = RoleListing._map;
         if (mapping === undefined) {
             RoleListing.initialize();

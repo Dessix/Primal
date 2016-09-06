@@ -129,20 +129,10 @@ export class RoleRepairer extends BaseRole<RepairerMemory> {
             })
             ;
 
-        const structure = creep.pos.findClosestByRange<Structure>(FIND_STRUCTURES, {
-            // the second argument for findClosestByPath is an object which takes
-            // a property called filter which can be a function
-            // we use the arrow operator to define it
-            filter: (s: Structure) => {
-                return s.hits < s.hitsMax &&
-                    (s.structureType !== STRUCTURE_WALL || s.hits < 3000 * ctrlLvl) &&
-                    (s.structureType !== STRUCTURE_RAMPART || s.hits < 3000 * ctrlLvl);
-            },
-        });
-
 
         // if we find one
-        if (structure !== undefined) {
+        if (structuresNeedingRepair.length !== 0) {
+            const structure = structuresNeedingRepair[0];
             if (creep.repair(structure) === ERR_NOT_IN_RANGE) {
                 creep.moveTo(structure);
             }

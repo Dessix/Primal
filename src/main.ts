@@ -125,7 +125,7 @@ function mainLoop() {
         }
     }
     if (Memory.config.noisy) { console.log("Ω Execute"); }
-    kernel.run(Game.cpu.limit * 0.75);
+    kernel.run(Game.cpu.limit * 0.7);
     if (Memory.config.noisy) { console.log("Ω Save"); }
     Memory.proc = KernelSerializer.serializeProcessTable(kernel.getProcessTable());
     RecordStats();
