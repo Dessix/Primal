@@ -21,6 +21,21 @@ class CreepX extends Creep {
         }
     }
 
+    public get spawn(): Spawn {
+        return Game.spawns[(<CreepMemory>this.memory).spawnName];
+    }
+
+    public set spawn(spawn: Spawn) {
+        if (!spawn || !Game.spawns[spawn.name]) {
+            return;
+        }
+        (<CreepMemory>this.memory).spawnName = spawn.name;
+    }
+
+    public recycle(): void {
+        (<CreepMemory>this.memory).role = "recy";
+    }
+
 }
 
 safeExtendPrototype(Creep, CreepX);

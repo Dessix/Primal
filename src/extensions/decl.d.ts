@@ -11,6 +11,9 @@ interface CreepMemory {
 interface Creep {
     cmem: CreepMemory;
     role?: string;
+
+    spawn: Spawn;
+    recycle(): void;
 }
 
 

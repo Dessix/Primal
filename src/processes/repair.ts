@@ -34,7 +34,7 @@ export class PRepair extends Process {
             repairer.run(creep);
         }
         //console.log(`${numMiners} : ${numUpgraders} : ${numRepairers}`);
-        if (numDrills >= 1 && numCouriers >= 1 && numUpgraders >= 1 && numRepairers < 2 * global.config.repairerMultiplier) {
+        if (numDrills >= 2 && numCouriers >= 1 && numUpgraders >= 1 && numRepairers < 2 * global.config.repairerMultiplier) {
             for (let spawnName in Game.spawns) {
                 const spawn = Game.spawns[spawnName];
                 const energyAvailable = spawn.room.energyAvailable;

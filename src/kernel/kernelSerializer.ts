@@ -16,6 +16,9 @@ export class KernelSerializer {
         const processTable: SerializableProcessTable = new Array<SerializableProcessTableEntry>(serializedProcessTable.length);
         for (let i = processTable.length; i-- > 0;) {
             const serialized = serializedProcessTable[i];
+            if (serialized === undefined || serialized === null) {
+                continue;
+            }
             const {className: className, heat: heat, service: service, pid: pid, parentPid: parentPid } = serialized;
 
             const processConstructor = ProcessRegistry.fetch(className);
@@ -40,6 +43,9 @@ export class KernelSerializer {
         const output = new Array<SerializedProcess>(processTable.length);
         for (let i = processTable.length; i-- > 0;) {
             const record = processTable[i];
+            if (record === null || record === undefined) {
+                continue;//Skip blanks
+            }
             const className = ProcessRegistry.fetchClassNameFor(record.processCtor);
             if (className === undefined) {
                 continue;

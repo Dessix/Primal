@@ -160,14 +160,12 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
         }
         if ((<StructureStorage | StructureContainer>target).store) {
             if ((<StructureStorage | StructureContainer>target).transfer(creep, "energy") === ERR_NOT_IN_RANGE) {
-                creep.moveTo(target, { reusePath: 20 });
+                creep.moveTo(target/*, { reusePath: 20 }*/);
             }
         } else {
             const pickedUp = creep.pickup(<Resource>target);
             if (pickedUp === ERR_NOT_IN_RANGE) {
-                creep.moveTo(target, { reusePath: 20 });
-            } else if (pickedUp === OK) {
-                return CourierState.Decide;
+                creep.moveTo(target/*, { reusePath: 20 }*/);
             }
         }
     }
@@ -324,7 +322,7 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
         }
 
         if (creep.transfer(target, "energy") === ERR_NOT_IN_RANGE) {
-            creep.moveTo(target, { reusePath: 20 });
+            creep.moveTo(target/*, { reusePath: 20 }*/);
         }
     }
 

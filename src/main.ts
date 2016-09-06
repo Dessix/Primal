@@ -49,10 +49,11 @@ const kernel = global.k = global.kernel = new Kernel();
 global.volatile = {};
 
 //Command-line calls
-global.reset = function (): void {
+global.reset = function (): SerializedProcessTable {
     console.log("Ω Rebooting...");
     Memory.proc = spawnNewProcessTable();
     delete Memory.pmem;
+    return Memory.proc;
 };
 
 const inspect = (val: any) => JSON.stringify(val, undefined, 2);
@@ -111,11 +112,17 @@ if (!global.f) { Object.defineProperty(global, "f", { get: () => Game.flags }); 
 };
 
 function mainLoop() {
+    //PathFinder.use(false);//Disable when pathing acts sanely again
     global.tickVolatile = {};
     if (Memory.config.noisy) { console.log("Ω Load"); }
     {
         let proc = Memory.proc || spawnNewProcessTable();
-        kernel.loadProcessTable(KernelSerializer.deserializeProcessTable(proc));
+        try {
+            kernel.loadProcessTable(KernelSerializer.deserializeProcessTable(proc));
+        } catch (e) {
+            console.log("ERROR loading process table: %s\n%s", e, e.stack);
+            kernel.loadProcessTable(KernelSerializer.deserializeProcessTable(global.reset()));
+        }
     }
     if (Memory.config.noisy) { console.log("Ω Execute"); }
     kernel.run(Game.cpu.limit * 0.75);

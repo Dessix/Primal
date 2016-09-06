@@ -1,3 +1,4 @@
+import { PathUtils } from "./../util/pathUtils";
 import { MiningScanner } from "./../util/miningScanner";
 import { FsmRole, StateHandlerList } from "./fsmRole";
 
@@ -23,38 +24,6 @@ interface DrillMemory extends CreepMemory {
 
 export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
     public static RoleTag: string = "drll";
-
-    private static shittySerializePath(path: RoomPosition[]): string {
-        const output = new Array<String>(path.length);
-        let currentRoomName: string | undefined;
-        for (let i = 0, n = path.length; i < n; ++i) {
-            const step = path[i];
-            if (currentRoomName === step.roomName) {
-                output[i] = `${step.x.toString(36)},${step.y.toString(36)}`;
-            } else {
-                currentRoomName = step.roomName;
-                output[i] = `${step.x.toString(36)},${step.y.toString(36)},${currentRoomName}`;
-            }
-        }
-        return output.join(";");
-    }
-
-    private static shittyDeserializePath(encoded: string): RoomPosition[] {
-        const split = encoded.split(";");
-        const output = new Array<RoomPosition>(split.length);
-        let lastReadRoomName: string | undefined;
-        for (let i = 0, n = split.length; i < n; ++i) {
-            const [x, y, roomName] = split[i].split(",");
-            if (roomName !== undefined) {
-                lastReadRoomName = roomName;
-            }
-            if (lastReadRoomName === undefined) {
-                throw new Error("Format incorrect on path- did not start with a leading room");
-            }
-            output[i] = new RoomPosition(Number.parseInt(x, 36), Number.parseInt(y, 36), lastReadRoomName);
-        }
-        return output;
-    }
 
     public constructor() {
         super(DrillState.Initialize, (mem, val) => mem.drill_state = val, (mem) => mem.drill_state);
@@ -179,30 +148,17 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
     }
 
     public handleMoveToSource(creep: Creep, cmem: DrillMemory): DrillState | undefined {
-        let path: RoomPosition[];
-        if (cmem.pathCache === undefined) {
-            const sourceInfo = this.getSourceInfo(cmem.homeRoomName);
-            if (sourceInfo === undefined) {
-                throw new Error("No source info available where expected in RoleDrill.handleMoveToSource");
-            }
-            const indexedSource = sourceInfo.sources[cmem.sourceIndex % sourceInfo.sources.length];
-            const miningPosition = new RoomPosition(indexedSource.miningPosition.x, indexedSource.miningPosition.y, sourceInfo.roomName);
-            if (creep.pos.isEqualTo(miningPosition)) {
-                path = [creep.pos];
-            } else {
-                path = PathFinder.search(creep.pos, miningPosition).path;
-            }
-            cmem.pathCache = RoleDrill.shittySerializePath(path);
-        } else {
-            path = RoleDrill.shittyDeserializePath(cmem.pathCache);
+        const sourceInfo = this.getSourceInfo(cmem.homeRoomName);
+        if (sourceInfo === undefined) {
+            throw new Error("No source info available where expected in RoleDrill.handleMoveToSource");
         }
+        const indexedSource = sourceInfo.sources[cmem.sourceIndex % sourceInfo.sources.length];
+        const miningPosition = new RoomPosition(indexedSource.miningPosition.x, indexedSource.miningPosition.y, sourceInfo.roomName);
 
-        if (creep.pos.isEqualTo(path[path.length - 1])) {
+        if (creep.pos.isEqualTo(miningPosition)) {
             return DrillState.Harvest;
         }
-        if (creep.moveByPath(path) !== OK) {
-            delete cmem.pathCache;
-        }
+        creep.moveTo(miningPosition);
         return;
     }
 
@@ -215,26 +171,45 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
         const container = RoleDrill.getContainerOnPosition(creep.pos);
         if (container === undefined) { return; }
         if (creep.carry.energy === 0) {
-            creep.withdraw(container, "energy");
+            creep.withdraw(container, RESOURCE_ENERGY);
         }
         if (container !== undefined && container.hits < container.hitsMax) {
             creep.repair(container);
+        }
+        if (creep.ticksToLive < 5) {
+            if (container !== undefined && container.store.energy < container.storeCapacity) {
+                creep.transfer(container, RESOURCE_ENERGY);
+                creep.drop(RESOURCE_ENERGY);
+            } else {
+                creep.drop(RESOURCE_ENERGY);
+            }
         }
     }
 
     public handleHarvest(creep: Creep, cmem: DrillMemory): DrillState | undefined {
         const source = <Source>Game.getObjectById(this.getSourceId(creep, cmem));
+        if (source === undefined) {
+            delete cmem.sourceId;
+        }
         if (source.energy === 0) {
             return DrillState.WaitForSourceRegen;
         }
+        const container = RoleDrill.getContainerOnPosition(creep.pos);
         if (creep.carry.energy > 0) {
             //Emergency repair
-            const container = RoleDrill.getContainerOnPosition(creep.pos);
             if (container !== undefined && container.hits < container.hitsMax * 0.75) {
                 creep.repair(container);
-                return;
+            }
+            if (creep.ticksToLive < 5) {
+                if (container !== undefined && container.store.energy < container.storeCapacity) {
+                    creep.transfer(container, RESOURCE_ENERGY);
+                    creep.drop(RESOURCE_ENERGY);
+                } else {
+                    creep.drop(RESOURCE_ENERGY);
+                }
             }
         }
+
         creep.harvest(source);
     }
 }

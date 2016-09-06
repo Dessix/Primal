@@ -1,3 +1,4 @@
+import { PLogisticsRoles } from "./logisticsRoles";
 import { PTower } from "./tower";
 import { PBuild } from "./build";
 import { PRepair } from "./repair";
@@ -62,6 +63,11 @@ export class PBootstrap extends Process {
         if (kernel.getProcessesByClass(PTower).length === 0) {
             console.log("Bootstrap spawning Tower...");
             this.spawnChildProcess(PTower);
+        }
+
+        if (kernel.getProcessesByClass(PLogisticsRoles).length === 0) {
+            console.log("Bootstrap spawning Logistics Roles...");
+            this.spawnChildProcess(PLogisticsRoles);
         }
         
         return pmem;

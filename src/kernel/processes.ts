@@ -1,3 +1,4 @@
+import { PLogisticsRoles } from "./../processes/logisticsRoles";
 import { PTower } from "./../processes/tower";
 import { PRepair } from "./../processes/repair";
 import { PBuild } from "./../processes/build";
@@ -23,6 +24,7 @@ export class Processes {
         PRoot,
         PTower,
         PUpgrade,
+        PLogisticsRoles,
     ];
 
     public static RegisterAll(): void {

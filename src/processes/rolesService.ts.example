@@ -1,0 +1,23 @@
+import { RoleListing } from "./../ipc/roleListing";
+import { BaseRole } from "./../roles/baseRole";
+import { Process, ProcessStatus } from "../kernel/process";
+
+export class PLogisticsRoles extends Process {
+    public static className: string = "LogisticsRoles";
+    public get className(): string { return PLogisticsRoles.className; }
+    public readonly service: boolean = true;
+
+    public constructor(pid: ProcessId, parentPid: ProcessId) {
+        super(pid, parentPid);
+    }
+    
+    public reloadFromMemory(pmem: ProcessMemory | undefined): void {
+        for (let creepName in Game.creeps) {
+        }
+    }
+
+    public run(): ProcessMemory | undefined {
+        RoleListing.initialize();
+        return;
+    }
+}

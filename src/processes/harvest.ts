@@ -1,3 +1,4 @@
+import { RoleListing } from "./../ipc/roleListing";
 import { RoleDrill } from "./../roles/roleDrill";
 import { RoleCourier } from "./../roles/roleCourier";
 import { RoleBard } from "./../roles/roleBard";
@@ -14,6 +15,51 @@ export class PHarvest extends Process {
         super(pid, parentPid);
     }
 
+    private trySpawnCourier(spawn: Spawn, energyAvailable: number, energyCapacityAvailable: number): boolean {
+        const chosenBody = RoleCourier.chooseBody(energyAvailable);
+        if (chosenBody !== undefined) {
+            const creepMemory: CreepMemory = {
+                spawnName: spawn.name,
+                role: RoleCourier.RoleTag,
+            };
+            const success = spawn.createCreep(
+                chosenBody,
+                RoleCourier.generateName(RoleCourier),
+                creepMemory
+            );
+            if (typeof success === "number") {
+                console.log(`Spawn failure: ${success}`);
+            } else {
+                console.log(`Spawning ${global.sinspect(chosenBody)}\n${global.sinspect(creepMemory)}`);
+                //only work with the first to succeed
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private trySpawnDrill(spawn: Spawn, energyAvailable: number, energyCapacityAvailable: number): boolean {
+        const chosenBody = RoleDrill.chooseBody(energyAvailable);
+        if (chosenBody !== undefined) {
+            //TODO: Get source info from MiningScanner and have it manage the complexities of making sure variables are set
+            const roomSourceInfo = Memory.sources[spawn.room.name] || (Memory.sources[spawn.room.name] = { sourceInfo: MiningScanner.scan(spawn.room) });
+            const creepMemory: CreepMemory = RoleDrill.createInitialMemory(spawn, spawn.room, ++(roomSourceInfo.sourceInfo.lastSourceIndex));
+            const success = spawn.createCreep(
+                chosenBody,
+                RoleDrill.generateName(RoleDrill),
+                creepMemory
+            );
+            if (typeof success === "number") {
+                console.log(`Spawn failure: ${success}`);
+            } else {
+                console.log(`Spawning ${global.sinspect(chosenBody)}\n${global.sinspect(creepMemory)}`);
+                //only work with the first to succeed
+                return true;
+            }
+        }
+        return false;
+    }
+
     public run(): ProcessMemory | undefined {
         let numDrills = 0;
         let numCouriers = 0;
@@ -21,8 +67,7 @@ export class PHarvest extends Process {
         const roleCourier = RoleCourier.Instance;
         const roleBard = RoleBard.Instance;
 
-        for (let creepName in Game.creeps) {
-            const creep = Game.creeps[creepName];
+        for (let creep of RoleListing.getByRoles(RoleBard, RoleCourier, RoleDrill)) {
             if (creep.role === RoleBard.RoleTag) {
                 roleBard.run(creep);
                 continue;
@@ -43,7 +88,8 @@ export class PHarvest extends Process {
             const room = spawn.room;
             const energyAvailable = spawn.room.energyAvailable;
             const energyCapacityAvailable = spawn.room.energyCapacityAvailable;
-            if (numDrills >= 1 && numCouriers < 2 * global.config.courierMultiplier) {
+
+            if ((numDrills >= 1 && numCouriers < 1) || (numDrills >= 2 && numCouriers < 2 * global.config.courierMultiplier)) {
                 if (numCouriers >= 1 && numDrills >= 1) {
                     if (energyCapacityAvailable === 300 && energyAvailable < energyCapacityAvailable) {
                         break;
@@ -52,51 +98,22 @@ export class PHarvest extends Process {
                     }
                     //Prefer larger spawns!
                 }
-                const chosenBody = RoleCourier.chooseBody(energyAvailable);
-                if (chosenBody !== undefined) {
-                    const creepMemory: CreepMemory = {
-                        spawnName: spawn.name,
-                        role: RoleCourier.RoleTag,
-                    };
-                    const success = spawn.createCreep(
-                        chosenBody,
-                        RoleCourier.generateName(RoleCourier),
-                        creepMemory
-                    );
-                    if (typeof success === "number") {
-                        console.log(`Spawn failure: ${success}`);
-                    } else {
-                        console.log(global.sinspect(spawn.spawning));
-                        //only work with the first to succeed
-                        break;
-                    }
+                if (this.trySpawnCourier(spawn, energyAvailable, energyCapacityAvailable)) {
+                    break;
                 }
             } else if (numDrills < 2) {
                 if (numCouriers >= 1 && numDrills >= 1) {
                     if (energyCapacityAvailable === 300 && energyAvailable < energyCapacityAvailable) {
                         break;
-                    } else if (energyCapacityAvailable > 450 && energyAvailable < energyCapacityAvailable) {
+                    } else if (energyCapacityAvailable > 450 && energyAvailable < 450) {
+                        break;
+                    } else if (energyCapacityAvailable > 550 && energyAvailable < 550) {
                         break;
                     }
                     //Prefer larger spawns!
                 }
-                const chosenBody = RoleDrill.chooseBody(energyAvailable);
-                if (chosenBody !== undefined) {
-                    //TODO: Get source info from MiningScanner and have it manage the complexities of making sure variables are set
-                    const roomSourceInfo = Memory.sources[spawn.room.name] || (Memory.sources[spawn.room.name] = { sourceInfo: MiningScanner.scan(spawn.room) });
-                    const creepMemory: CreepMemory = RoleDrill.createInitialMemory(spawn, spawn.room, ++(roomSourceInfo.sourceInfo.lastSourceIndex));
-                    const success = spawn.createCreep(
-                        chosenBody,
-                        RoleDrill.generateName(RoleDrill),
-                        creepMemory
-                    );
-                    if (typeof success === "number") {
-                        console.log(`Spawn failure: ${success}`);
-                    } else {
-                        console.log(global.sinspect(spawn.spawning));
-                        //only work with the first to succeed
-                        break;
-                    }
+                if (this.trySpawnDrill(spawn, energyAvailable, energyCapacityAvailable)) {
+                    break;
                 }
             }
         }

@@ -12,7 +12,7 @@ interface Global {
         spawnProcessByClassName(processName: string, parentPid?: number): ProcessId | undefined;
     };
     launchNew(className: string): number | undefined;
-    reset(): void;
+    reset(): SerializedProcessTable;
     config: CoreConfiguration;
     c: { [creepName: string]: Creep | undefined };
     s: { [spawnName: string]: Spawn | undefined };
