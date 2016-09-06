@@ -216,7 +216,7 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
     }
 
     private doRoadMaintenance(creep: Creep, cmem: BootstrapMinerMemory): boolean {
-        if (!Memory.config.minersRepair) { return false; }
+        if (!Memory.config.boostrapsRepair) { return false; }
         const constructions = creep.pos.lookFor<ConstructionSite>(LOOK_CONSTRUCTION_SITES);
         if (constructions.length > 0) {
             creep.build(constructions[0]);
@@ -292,7 +292,7 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
 
         //TODO: Add flag-avoidance for drills
 
-        const occupiedSources: Source[] = [];
+        /*const occupiedSources: Source[] = [];
         {
             const roomSources = spawn.room.find<Source>(FIND_SOURCES_ACTIVE);
             let unoccupiedSources: Source[] = [];
@@ -308,7 +308,7 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
                 cmem.stateArg = unoccupiedSources[0].id;
                 return unoccupiedSources[0];
             }
-        }
+        }*/
 
 
 
@@ -322,8 +322,9 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
                         continue;
                     }
                     const hintFlag = flag;//Room name hint flag
-                    if (remoteMiningRoomNames.indexOf(hintFlag.name) < 0) {
-                        remoteMiningRoomNames.push(hintFlag.name);
+                    const targetRoomName = hintFlag.name.split(":")[1];
+                    if (remoteMiningRoomNames.indexOf(targetRoomName) < 0) {
+                        remoteMiningRoomNames.push(targetRoomName);
                     }
                 }
             }
@@ -353,10 +354,7 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
             }
         }
 
-        //No remote mining flags, no unoccupied sources; just pick a random occupied one
-        const chosen = occupiedSources[~~(Math.random() * occupiedSources.length)];
-        cmem.stateArg = chosen.id;
-        return chosen;
+        return;
     }
 
     private handleHarvest(creep: Creep, cmem: BootstrapMinerMemory): BootstrapMinerState | undefined {

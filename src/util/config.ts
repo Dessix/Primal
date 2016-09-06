@@ -3,7 +3,7 @@ export class DefaultConfig {
         const defaultConfig: CoreConfiguration = {
             noisy: false,
             profile: false,
-            minersRepair: false,
+            boostrapsRepair: true,
             repairerMultiplier: 1,
             builderMultiplier: 1,
             upgraderMultiplier: 1,
