@@ -158,7 +158,15 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
         if (creep.pos.isEqualTo(miningPosition)) {
             return DrillState.Harvest;
         }
-        creep.moveTo(miningPosition);
+        if (creep.moveTo(miningPosition) === ERR_NO_PATH) {
+            if (creep.pos.getRangeTo(miningPosition) === 1) {
+                const creepsInTheWay = miningPosition.lookFor<Creep>(LOOK_CREEPS);
+                if (creepsInTheWay.length !== 0 && creepsInTheWay[0].my) {
+                    creepsInTheWay[0].moveTo(creep.pos);
+                    creep.moveTo(miningPosition);
+                }
+            }
+        }
         return;
     }
 
