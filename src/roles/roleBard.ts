@@ -53,7 +53,7 @@ export class RoleBard extends BaseRole<BardMemory> {
 
     public onRun(creep: Creep, cmem: BardMemory): void {
         if (creep.spawning) { return; }
-        const spawn = Game.spawns[cmem.spawnName];
+        const spawn = creep.spawn;
         let flag = _.find(Game.flags, f => f.color === COLOR_RED && f.secondaryColor === COLOR_RED);
         if (flag === undefined) {
             creep.say("No Orders");

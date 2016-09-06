@@ -35,7 +35,7 @@ export class RoleUpgrader extends BaseRole<UpgraderMemory> {
     }
 
     private performHarvest(creep: Creep, cmem: UpgraderMemory): void {
-        const spawn = Game.spawns[cmem.spawnName];
+        const spawn = creep.spawn;
 
         let container: StructureContainer | undefined;
 
@@ -105,7 +105,7 @@ export class RoleUpgrader extends BaseRole<UpgraderMemory> {
 
             //order of preference: flagged container, storage, sources
 
-            const spawn = Game.spawns[cmem.spawnName];
+            const spawn = creep.spawn;
             let container: StructureContainer | undefined;
 
             {

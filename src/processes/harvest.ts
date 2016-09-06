@@ -154,7 +154,7 @@ export class PHarvest extends Process {
                 if (this.trySpawnDrill(spawn, energyAvailable, energyCapacityAvailable)) {
                     break;
                 }
-            } else if (numDrills >= 2 && numCouriers >= 2 && numBootstrapMiners < 2) {
+            } else if (numDrills >= 2 && numCouriers >= 2 && numBootstrapMiners < 4) {
                 if (numCouriers >= 1 && numDrills >= 1) {
                     if (energyCapacityAvailable === 300 && energyAvailable < energyCapacityAvailable) {
                         break;

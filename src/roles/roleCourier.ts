@@ -106,7 +106,7 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
             delete cmem.crr_targ;
         }
 
-        const spawn = Game.spawns[cmem.spawnName];
+        const spawn = creep.spawn;
 
         const dropped = spawn.room.find<Resource>(FIND_DROPPED_ENERGY);
         if (dropped.length > 0) {
@@ -150,7 +150,7 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
     }
 
     private handlePickup(creep: Creep, cmem: CourierMemory): CourierState | undefined {
-        const spawn = Game.spawns[cmem.spawnName];
+        const spawn = creep.spawn;
         if (creep.carry.energy === creep.carryCapacity) {
             return CourierState.Deliver;
         }
@@ -209,7 +209,7 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
         }
 
         // This creep's spawn
-        const spawn = Game.spawns[cmem.spawnName];
+        const spawn = creep.spawn;
         if (spawn !== undefined && spawn.energy < spawn.energyCapacity) {
             cmem.crr_targ = spawn.id;
             return spawn;
@@ -279,7 +279,7 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
         if (creep.carry.energy === 0) {
             return CourierState.Pickup;
         }
-        const spawn = Game.spawns[cmem.spawnName];
+        const spawn = creep.spawn;
         const target = this.getDeliveryTarget(creep, cmem);
         if (target === undefined) {
             return CourierState.Wait;

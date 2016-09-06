@@ -41,7 +41,7 @@ export class RoleBuilder extends BaseRole<BuilderMemory> {
     }
 
     private getResources(creep: Creep, cmem: BuilderMemory): void {
-        const spawn = Game.spawns[cmem.spawnName];
+        const spawn = creep.spawn;
 
         let container: StructureContainer | undefined;
 

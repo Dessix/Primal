@@ -42,7 +42,7 @@ export class RoleRepairer extends BaseRole<RepairerMemory> {
     }
 
     private getEnergy(creep: Creep, cmem: RepairerMemory): void {
-        const spawn = Game.spawns[cmem.spawnName];
+        const spawn = creep.spawn;
 
         let container: StructureContainer | undefined;
 

@@ -45,7 +45,7 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
     }
 
     private shouldRenew(creep: Creep, cmem: BootstrapMinerMemory) {
-        const spawn = Game.spawns[cmem.spawnName];
+        const spawn = creep.spawn;
         return (creep.ticksToLive < 75 && spawn.room.energyAvailable >= spawn.room.energyCapacityAvailable / 2 && creep.body.length > 13);
     }
 
@@ -130,7 +130,7 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
         }
 
         // This creep's spawn
-        const spawn = Game.spawns[cmem.spawnName];
+        const spawn = creep.spawn;
         if (spawn !== undefined && spawn.energy < spawn.energyCapacity) {
             cmem.stateArg = spawn.id;
             return spawn;
@@ -196,7 +196,7 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
     }
 
     private handleRenew(creep: Creep, cmem: BootstrapMinerMemory): BootstrapMinerState | undefined {
-        const spawn = Game.spawns[cmem.spawnName];
+        const spawn = creep.spawn;
         if (creep.ticksToLive >= 1400 || spawn.room.energyAvailable < spawn.room.energyCapacityAvailable / 2) {
             return BootstrapMinerState.Carry;
         }
@@ -232,7 +232,7 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
     }
 
     private handleCarry(creep: Creep, cmem: BootstrapMinerMemory): BootstrapMinerState | undefined {
-        const spawn = Game.spawns[cmem.spawnName];
+        const spawn = creep.spawn;
         if (creep.carry.energy === 0) {
             return BootstrapMinerState.Harvest;
         }
@@ -288,7 +288,7 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
         }
 
         // This creep's spawn
-        const spawn = Game.spawns[cmem.spawnName];
+        const spawn = creep.spawn;
 
         //TODO: Add flag-avoidance for drills
 
@@ -358,7 +358,7 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
     }
 
     private handleHarvest(creep: Creep, cmem: BootstrapMinerMemory): BootstrapMinerState | undefined {
-        const spawn = Game.spawns[cmem.spawnName];
+        const spawn = creep.spawn;
         if (creep.carry.energy === creep.carryCapacity) {
             return BootstrapMinerState.Carry;
         }
