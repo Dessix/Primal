@@ -20,7 +20,7 @@ export class RoleBuilder extends BaseRole<BuilderMemory> {
         return instance;
     }
 
-    public static chooseBody(energyAvailable: number): CreepBodyPart[] {
+    public static chooseBody(energyAvailable: number): CreepBodyPart[] | undefined {
         let chosenBody: string[];
         if (energyAvailable >= 750) {
             chosenBody = [
@@ -32,8 +32,10 @@ export class RoleBuilder extends BaseRole<BuilderMemory> {
             chosenBody = [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, WORK, WORK];
         } else if (energyAvailable >= 400) {
             chosenBody = [MOVE, MOVE, CARRY, CARRY, WORK, WORK];
-        } else {
+        } else if (energyAvailable >= 300) {
             chosenBody = [MOVE, MOVE, CARRY, CARRY, WORK];
+        } else {
+            return undefined;
         }
         return <CreepBodyPart[]>chosenBody;
     }

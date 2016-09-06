@@ -1,3 +1,4 @@
+import { RoleListing } from "./../ipc/roleListing";
 import { RoleCourier } from "./../roles/roleCourier";
 import { RoleDrill } from "./../roles/roleDrill";
 import { RoleUpgrader } from "./../roles/roleUpgrader";
@@ -17,41 +18,37 @@ export class PBuild extends Process {
     public run(): ProcessMemory | undefined {
         let pmem = this.pmem;
 
-        let numDrills = 0;
-        let numCouriers = 0;
-        let numUpgraders = 0;
-        let numBuilders = 0;
         const builder = RoleBuilder.Instance;
-        for (let creepName in Game.creeps) {
-            const creep = Game.creeps[creepName];
-            const cmem = <CreepMemory>creep.memory;
-
-            if (cmem.role === RoleDrill.RoleTag) { ++numDrills; continue; }
-            if (cmem.role === RoleCourier.RoleTag) { ++numCouriers; continue; }
-            if (cmem.role === RoleUpgrader.RoleTag) { ++numUpgraders; continue; }
-            if (cmem.role !== RoleBuilder.RoleTag) { continue; }
-            ++numBuilders;
+        for (let creep of RoleListing.getByRole(RoleBuilder)) {
             builder.run(creep);
         }
+
+        const numDrills = RoleListing.getByRole(RoleDrill).length;
+        const numCouriers = RoleListing.getByRole(RoleCourier).length;
+        const numUpgraders = RoleListing.getByRole(RoleUpgrader).length;
+        const numBuilders = RoleListing.getByRole(RoleBuilder).length;
         if (numDrills >= 2 && numCouriers >= 1 && numUpgraders >= 1 && numBuilders < 1 * global.config.builderMultiplier) {
             for (let spawnName in Game.spawns) {
                 const spawn = Game.spawns[spawnName];
-                if (spawn.room.energyAvailable >= 300 && !spawn.spawning) {
-                    const creepMemory: CreepMemory = {
-                        spawnName: spawn.name,
-                        role: RoleBuilder.RoleTag,
-                    };
-                    const success = spawn.createCreep(
-                        RoleBuilder.chooseBody(spawn.room.energyAvailable),
-                        RoleBuilder.generateName(RoleBuilder),
-                        creepMemory
-                    );
-                    if (typeof success !== "string") {
-                        console.log(`Spawn failure: ${success}`);
-                    } else {
-                        //only work with the first to succeed
-                        break;
-                    }
+                if (spawn.spawning) { continue; }
+                const chosenBody = RoleBuilder.chooseBody(spawn.room.energyAvailable);
+                if (chosenBody === undefined) {
+                    continue;
+                }
+                const creepMemory: CreepMemory = {
+                    spawnName: spawn.name,
+                    role: RoleBuilder.RoleTag,
+                };
+                const success = spawn.createCreep(
+                    chosenBody,
+                    RoleBuilder.generateName(RoleBuilder),
+                    creepMemory
+                );
+                if (typeof success !== "string") {
+                    console.log(`Spawn failure: ${success}`);
+                } else {
+                    //only work with the first to succeed
+                    break;
                 }
             }
         }

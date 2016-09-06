@@ -12,12 +12,10 @@ export class PLogisticsRoles extends Process {
     }
     
     public reloadFromMemory(pmem: ProcessMemory | undefined): void {
-        for (let creepName in Game.creeps) {
-        }
+        RoleListing.initialize();
     }
 
     public run(): ProcessMemory | undefined {
-        RoleListing.initialize();
         return;
     }
 }

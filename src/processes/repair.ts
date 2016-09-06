@@ -29,23 +29,26 @@ export class PRepair extends Process {
         if (RoleListing.getByRole(RoleDrill).length >= 2 && numCouriers >= 1 && numUpgraders >= 1 && numRepairers < 2 * global.config.repairerMultiplier) {
             for (let spawnName in Game.spawns) {
                 const spawn = Game.spawns[spawnName];
+                if (spawn.spawning) { continue; }
                 const energyAvailable = spawn.room.energyAvailable;
-                if (energyAvailable >= 300 && !spawn.spawning) {
-                    const creepMemory: CreepMemory = {
-                        spawnName: spawn.name,
-                        role: RoleRepairer.RoleTag,
-                    };
-                    const success = spawn.createCreep(
-                        RoleRepairer.chooseBody(energyAvailable),
-                        RoleRepairer.generateName(RoleRepairer),
-                        creepMemory
-                    );
-                    if (typeof success === "number") {
-                        console.log(`Spawn failure: ${success}`);
-                    } else {
-                        //only work with the first to succeed
-                        break;
-                    }
+                const chosenBody = RoleRepairer.chooseBody(energyAvailable);
+                if (chosenBody === undefined) {
+                    continue;
+                }
+                const creepMemory: CreepMemory = {
+                    spawnName: spawn.name,
+                    role: RoleRepairer.RoleTag,
+                };
+                const success = spawn.createCreep(
+                    chosenBody,
+                    RoleRepairer.generateName(RoleRepairer),
+                    creepMemory
+                );
+                if (typeof success === "number") {
+                    console.log(`Spawn failure: ${success}`);
+                } else {
+                    //only work with the first to succeed
+                    break;
                 }
             }
         }

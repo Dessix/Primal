@@ -1,3 +1,4 @@
+import { RoleListing } from "./../ipc/roleListing";
 import { RoleDrill } from "./../roles/roleDrill";
 import { RoleCourier } from "./../roles/roleCourier";
 import { RoleUpgrader } from "./../roles/roleUpgrader";
@@ -14,22 +15,15 @@ export class PUpgrade extends Process {
 
     public run(): ProcessMemory | undefined {
         let pmem = this.pmem;
-
-        let numDrills = 0;
-        let numCouriers = 0;
-        let numUpgraders = 0;
-        const upgrader = RoleUpgrader.Instance;
-        for (let creepName in Game.creeps) {
-            const creep = Game.creeps[creepName];
-            const cmem = <CreepMemory & { upgrading: boolean }>creep.memory;
-            if (cmem.role === RoleDrill.RoleTag) { ++numDrills; continue; }
-            if (cmem.role === RoleCourier.RoleTag) { ++numCouriers; continue; }
-            if (cmem.role !== RoleUpgrader.RoleTag) { continue; }
-            ++numUpgraders;
-            if (creep.spawning) { continue; }
-            upgrader.run(creep);
+        const roleUpgrader = RoleUpgrader.Instance;
+        for (let upgrader of RoleListing.getByRole(RoleUpgrader)) {
+            roleUpgrader.run(upgrader);
         }
-        if (numDrills >= 1 && numCouriers >= 1 && numUpgraders < 2 * global.config.upgraderMultiplier) {
+
+        const numDrills = RoleListing.getByRole(RoleDrill).length;
+        const numCouriers = RoleListing.getByRole(RoleCourier).length;
+        const numUpgraders = RoleListing.getByRole(RoleUpgrader).length;
+        if (numDrills >= 2 && numCouriers >= 1 && numUpgraders < 2 * global.config.upgraderMultiplier) {
             for (let spawnName in Game.spawns) {
                 const spawn = Game.spawns[spawnName];
                 const energyAvailable = spawn.room.energyAvailable;
