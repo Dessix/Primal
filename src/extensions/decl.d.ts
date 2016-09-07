@@ -42,7 +42,10 @@ interface Room {
     findStructuresOfType<T extends Structure>(this: Room, structureType: string, onlyMine?: Boolean): T[];
     
     findFirstStructureOfTypeMatching<T extends Structure>(this: Room, structureType: string, condition: (structure: T)=>boolean, onlyMine?: Boolean): T | undefined;
+    findFirstStructureOfTypeMatching<TReturn extends TCallback, TCallback extends Structure>(this: Room, structureType: string, condition: (structure: TCallback)=>boolean, onlyMine?: Boolean): TReturn | undefined;
+
     findStructuresOfTypeMatching<T extends Structure>(this: Room, structureType: string, condition: (structure: T)=>boolean, onlyMine?: Boolean): T[];
+    findStructuresOfTypeMatching<TReturn extends TCallback, TCallback extends Structure>(this: Room, structureType: string, condition: (structure: TCallback)=>boolean, onlyMine?: Boolean): TReturn[];
 }
 
 interface Global {
