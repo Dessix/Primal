@@ -90,6 +90,7 @@ if (!global.f) { Object.defineProperty(global, "f", { get: () => Game.flags }); 
     const creepMemory: CreepMemory = {
         spawnName: spawn.name,
         role: RoleBard.RoleTag,
+        homeRoomName: spawn.room.name,
     };
     const success = spawn.createCreep(
         chosenBody,

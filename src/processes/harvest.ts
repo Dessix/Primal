@@ -22,6 +22,7 @@ export class PHarvest extends Process {
             const creepMemory: CreepMemory = {
                 spawnName: spawn.name,
                 role: RoleCourier.RoleTag,
+                homeRoomName: spawn.room.name,
             };
             const success = spawn.createCreep(
                 chosenBody,
@@ -71,6 +72,7 @@ export class PHarvest extends Process {
         const creepMemory: CreepMemory = {
             spawnName: spawn.name,
             role: RoleBootstrapMiner.RoleTag,
+            homeRoomName: spawn.room.name,
         };
         const success = spawn.createCreep(
             chosenBody,

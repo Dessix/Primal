@@ -94,7 +94,7 @@ export class RoleUpgrader extends BaseRole<UpgraderMemory> {
         }
 
         if (cmem.upgrading) {
-            if (creep.upgradeController(creep.room.controller) === ERR_NOT_IN_RANGE) {
+            if (creep.room.controller !== undefined && creep.upgradeController(creep.room.controller) === ERR_NOT_IN_RANGE) {
                 creep.moveTo(creep.room.controller);
             } else {
                 if (creep.ticksToLive % 23 === 0) {

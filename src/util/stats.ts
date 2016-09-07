@@ -19,8 +19,10 @@ export function RecordStats() {
             stats[`room.${room.name}.myRoom`] = 1;
             stats[`room.${room.name}.energyAvailable`] = room.energyAvailable;
             stats[`room.${room.name}.energyCapacityAvailable`] = room.energyCapacityAvailable;
-            stats[`room.${room.name}.controllerProgress`] = room.controller.progress;
-            stats[`room.${room.name}.controllerProgressTotal`] = room.controller.progressTotal;
+            if (room.controller !== undefined) {
+                stats[`room.${room.name}.controllerProgress`] = room.controller.progress;
+                stats[`room.${room.name}.controllerProgressTotal`] = room.controller.progressTotal;
+            }
             let stored = 0;
             let storedCapacity = 0;
 

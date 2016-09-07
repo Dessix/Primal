@@ -38,6 +38,7 @@ export class PBuild extends Process {
                 const creepMemory: CreepMemory = {
                     spawnName: spawn.name,
                     role: RoleBuilder.RoleTag,
+                    homeRoomName: spawn.room.name,
                 };
                 const success = spawn.createCreep(
                     chosenBody,

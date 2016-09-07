@@ -31,6 +31,7 @@ export class PUpgrade extends Process {
                     const creepMemory: CreepMemory = {
                         spawnName: spawn.name,
                         role: RoleUpgrader.RoleTag,
+                        homeRoomName: spawn.room.name,
                     };
                     const success = spawn.createCreep(
                         RoleUpgrader.chooseBody(energyAvailable),

@@ -45,7 +45,7 @@
     "tsconfig-glob": "^0.4.3",
     "tslint": "^3.13.0",
     "tslint-loader": "^2.1.5",
-    "typescript": "^2.0.0",
+    "typescript": "^2.1.0-dev.20160906",
     "typings": "*",
     "vinyl-named": "^1.1.0",
     "webpack": "^1.13.1",

@@ -9,11 +9,11 @@ class CreepX extends Creep {
         this.memory = value;
     }
 
-    public get role(): string | undefined {
+    public get role(): string | null | undefined {
         return this.cmem.role;
     }
 
-    public set role(value: string | undefined) {
+    public set role(value: string | null | undefined) {
         if (value !== undefined) {
             this.cmem.role = value;
         } else {
@@ -27,9 +27,20 @@ class CreepX extends Creep {
 
     public set spawn(spawn: Spawn) {
         if (!spawn || !Game.spawns[spawn.name]) {
-            return;
+            throw new Error("Null/undefined spawn assigned to creep!");
         }
         (<CreepMemory>this.memory).spawnName = spawn.name;
+    }
+
+    public get homeRoom(): Room {
+        return Game.rooms[(<CreepMemory>this.memory).homeRoomName];
+    }
+
+    public set homeRoom(homeRoom: Room) {
+        if (!homeRoom || !Game.rooms[homeRoom.name]) {
+            throw new Error("Null/undefined homeRoom assigned to creep!");
+        }
+        (<CreepMemory>this.memory).homeRoomName = homeRoom.name;
     }
 
     public recycle(): void {

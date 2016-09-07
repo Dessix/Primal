@@ -4,15 +4,23 @@ interface Memory {
 
 interface CreepMemory {
     spawnName: string;
-    role?: string;
+    homeRoomName: string;
+    role: string | null | undefined;
     [key: string]: any;
 }
 
 interface Creep {
     cmem: CreepMemory;
-    role?: string;
+    role: string | null | undefined;
 
     spawn: Spawn;
+
+    /**
+     * Home room of the creep.
+     * Unavailable if fog of war is occluding access.
+     */
+    homeRoom?: Room;
+    homeRoomName: string;
     recycle(): void;
 }
 
@@ -38,5 +46,5 @@ interface Room {
 }
 
 interface Global {
-    getObjectOrFlagById<T>(id: string): T | null;
+    byId<T>(id: string | null | undefined): T | null;
 }

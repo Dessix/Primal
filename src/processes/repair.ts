@@ -38,6 +38,7 @@ export class PRepair extends Process {
                 const creepMemory: CreepMemory = {
                     spawnName: spawn.name,
                     role: RoleRepairer.RoleTag,
+                    homeRoomName: spawn.room.name,
                 };
                 const success = spawn.createCreep(
                     chosenBody,

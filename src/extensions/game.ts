@@ -1,10 +1,13 @@
 
-function flaggedGetObjectById<T>(id: string): T | null {
-    if (id.startsWith("flag-")) {
-        return <T><Object>Game.flags[id.substr(5)];
+function flaggedGetObjectById<T>(id: string | null | undefined): T | null {
+    if (id === null || id === undefined) {
+        return null;
+    } if (id.startsWith("flag-")) {
+        const flag = <T | undefined><Object>Game.flags[id.substr(5)];
+        return flag !== undefined ? flag : null;
     } else {
         return Game.getObjectById<T>(id);
     }
 }
 
-global.getObjectOrFlagById = flaggedGetObjectById;
+global.byId = flaggedGetObjectById;
