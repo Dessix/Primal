@@ -2,7 +2,6 @@ import { RoleListing } from "./../ipc/roleListing";
 import { RoleRecycle } from "./../roles/roleRecycle";
 import { IRole } from "./../roles/baseRole";
 import { Process, ProcessStatus } from "../kernel/process";
-import { MiningScanner } from "../util/miningScanner";
 
 export class PLogisticsRoles extends Process {
     public static className: string = "LogisticsRoles";

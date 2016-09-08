@@ -10,4 +10,4 @@ function flaggedGetObjectById<T>(id: string | null | undefined): T | null {
     }
 }
 
-global.byId = flaggedGetObjectById;
+global.fromId = flaggedGetObjectById;

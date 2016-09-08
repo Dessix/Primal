@@ -14,8 +14,8 @@ enum DrillState {
 
 interface DrillMemory extends CreepMemory {
     drill_state?: DrillState;
-    homeRoomName: string;
     sourceIndex: number;
+    linkId?: string;
 
     pathCache?: string;
     sourceId?: string;
@@ -44,7 +44,8 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
             [DrillState.MoveToSource]: this.handleMoveToSource,
             [DrillState.Harvest]: this.handleHarvest,
             [DrillState.WaitForSourceRegen]: this.handleWaitForSourceRegen,
-            //TODO: Implement others
+            [DrillState.MoveToHomeRoomForScan]: this.handleMoveToHomeRoomForScan,
+            [DrillState.ScanHomeRoom]: this.handleScanHomeRoom,
         };
     }
 
@@ -59,31 +60,9 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
         return pos.lookForStructure<StructureContainer>(STRUCTURE_CONTAINER);
     }
 
-    private getOrCacheSourceInfo(room: Room): SourceScanInfo {
-        let sourceRoom = Memory.sources[room.name];
-        if (sourceRoom === undefined) {
-            Memory.sources[room.name] = sourceRoom = { sourceInfo: MiningScanner.scan(room) };
-        }
-        return sourceRoom.sourceInfo;
-    }
-
-    private getSourceInfo(roomOrRoomName: Room | string): SourceScanInfo | undefined {
-        let roomName: string;
-        if (roomOrRoomName instanceof Room) {
-            roomName = roomOrRoomName.name;
-        } else {
-            roomName = roomOrRoomName;
-        }
-        let sourceRoom = Memory.sources[roomName];
-        if (sourceRoom === undefined) {
-            return undefined;
-        }
-        return sourceRoom.sourceInfo;
-    }
-
     private getSourceId(creep: Creep, cmem: DrillMemory) {
         if (cmem.sourceId === undefined) {
-            const sourceInfo = this.getOrCacheSourceInfo(creep.room);
+            const sourceInfo = MiningScanner.getScanInfoForRoom(creep.room);
             const indexedSource = sourceInfo.sources[cmem.sourceIndex % sourceInfo.sources.length];
             return indexedSource.id;
         } else {
@@ -129,33 +108,48 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
         if (cmem.sourceIndex === undefined) {
             cmem.sourceIndex = 0;
         }
-        // if we aren't in the homeroom
+        //If we aren't in the homeroom
         if (creep.room.name !== cmem.homeRoomName) {
             console.log(`I'm in ${creep.room.name} and my home room is ${cmem.homeRoomName}`);
-            if (Memory.sources[cmem.homeRoomName] !== undefined) {
+            if (MiningScanner.getScanInfoByRoomName(cmem.homeRoomName) !== undefined) {
                 return DrillState.MoveToSource;//Already scanned
             } else {
                 return DrillState.MoveToHomeRoomForScan;//Get there so we can collect scan info
             }
         } else {
-            //if we are in the right room, ensure it has scan data
-            if (Memory.sources[cmem.homeRoomName] === undefined) {
-                this.getOrCacheSourceInfo(creep.room);//Caches it before usage below
-            }
+            //If we are in the right room, ensure it has scan data cached
+            MiningScanner.getScanInfoForRoom(creep.room);
         }
 
         return DrillState.MoveToSource;
     }
 
+    public handleMoveToHomeRoomForScan(creep: Creep, cmem: DrillMemory): DrillState | undefined {
+        if (creep.room.name === cmem.homeRoomName && !this.moveOffBorder(creep)) { return DrillState.ScanHomeRoom; }
+
+        creep.moveTo(25, 25, cmem.homeRoomName);
+        return;
+    }
+
+    public handleScanHomeRoom(creep: Creep, cmem: DrillMemory): DrillState | undefined {
+        const homeRoom = creep.homeRoom;
+        if (homeRoom === undefined) { throw new Error("HomeRoom not visible in scan."); }
+        MiningScanner.getScanInfoForRoom(homeRoom);
+        return DrillState.MoveToSource;
+    }
+
     public handleMoveToSource(creep: Creep, cmem: DrillMemory): DrillState | undefined {
-        const sourceInfo = this.getSourceInfo(cmem.homeRoomName);
+        const sourceInfo = MiningScanner.getIndexedSourceByRoomName(cmem.homeRoomName, cmem.sourceIndex);
         if (sourceInfo === undefined) {
             throw new Error("No source info available where expected in RoleDrill.handleMoveToSource");
         }
-        const indexedSource = sourceInfo.sources[cmem.sourceIndex % sourceInfo.sources.length];
-        const miningPosition = new RoomPosition(indexedSource.miningPosition.x, indexedSource.miningPosition.y, sourceInfo.roomName);
+        const miningPosition = sourceInfo.miningPosition;
 
         if (creep.pos.isEqualTo(miningPosition)) {
+            const links = miningPosition.findInRange<StructureLink, Structure>(FIND_STRUCTURES, 1, { filter: (s: Structure) => s.structureType === STRUCTURE_LINK });
+            if (links.length > 0) {
+                cmem.linkId = links[0].id;
+            }
             return DrillState.Harvest;
         }
         if (creep.moveTo(miningPosition) === ERR_NO_PATH) {
@@ -171,7 +165,8 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
     }
 
     public handleWaitForSourceRegen(creep: Creep, cmem: DrillMemory): DrillState | undefined {
-        const source = <Source>Game.getObjectById(this.getSourceId(creep, cmem));
+        const source = fromId<Source>(this.getSourceId(creep, cmem));
+        if (source === null) { throw new Error("Source id empty"); }
         if (source.energy > 0) {
             return DrillState.Harvest;
         }
@@ -195,9 +190,10 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
     }
 
     public handleHarvest(creep: Creep, cmem: DrillMemory): DrillState | undefined {
-        const source = <Source>Game.getObjectById(this.getSourceId(creep, cmem));
-        if (source === undefined) {
+        const source = fromId<Source>(this.getSourceId(creep, cmem));
+        if (source === null) {
             delete cmem.sourceId;
+            return DrillState.ScanHomeRoom;
         }
         if (source.energy === 0) {
             return DrillState.WaitForSourceRegen;

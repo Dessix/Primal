@@ -44,8 +44,8 @@ export class PHarvest extends Process {
         const chosenBody = RoleDrill.chooseBody(energyAvailable);
         if (chosenBody !== undefined) {
             //TODO: Get source info from MiningScanner and have it manage the complexities of making sure variables are set
-            const roomSourceInfo = Memory.sources[spawn.room.name] || (Memory.sources[spawn.room.name] = { sourceInfo: MiningScanner.scan(spawn.room) });
-            const creepMemory: CreepMemory = RoleDrill.createInitialMemory(spawn, spawn.room, ++(roomSourceInfo.sourceInfo.lastSourceIndex));
+            const roomSourceInfo = MiningScanner.getScanInfoForRoom(spawn.room);
+            const creepMemory: CreepMemory = RoleDrill.createInitialMemory(spawn, spawn.room, ++(roomSourceInfo.lastSourceIndex));
             const success = spawn.createCreep(
                 chosenBody,
                 RoleDrill.generateName(RoleDrill),
@@ -68,7 +68,7 @@ export class PHarvest extends Process {
             return false;
         }
         //TODO: Get source info from MiningScanner and have it manage the complexities of making sure variables are set
-        const roomSourceInfo = Memory.sources[spawn.room.name] || (Memory.sources[spawn.room.name] = { sourceInfo: MiningScanner.scan(spawn.room) });
+        const roomSourceInfo = MiningScanner.getScanInfoForRoom(spawn.room);
         const creepMemory: CreepMemory = {
             spawnName: spawn.name,
             role: RoleBootstrapMiner.RoleTag,

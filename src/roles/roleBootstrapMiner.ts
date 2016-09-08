@@ -271,7 +271,7 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
 
     private getHarvestTarget(creep: Creep, cmem: BootstrapMinerMemory): Source | Flag | undefined {
         if (cmem.stateArg !== undefined) {
-            let rawTarget = global.byId(<string>cmem.stateArg);
+            let rawTarget = global.fromId(<string>cmem.stateArg);
             if (rawTarget !== null) {
                 if (cmem.stateArg.startsWith("flag-")) {
                     const flag = <Flag>rawTarget;

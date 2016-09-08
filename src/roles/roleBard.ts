@@ -19,21 +19,6 @@ export class RoleBard extends BaseRole<BardMemory> {
         return instance;
     }
 
-    public moveOffBorder(creep: Creep): boolean {
-        if (creep.pos.x === 0) {
-            creep.move(RIGHT);
-        } else if (creep.pos.y === 0) {
-            creep.move(BOTTOM);
-        } else if (creep.pos.x === 49) {
-            creep.move(LEFT);
-        } else if (creep.pos.y === 49) {
-            creep.move(TOP);
-        } else {
-            return false;
-        }
-        return true;
-    }
-
     public static chooseBody(energyAvailable: number): CreepBodyPart[] | undefined {
         let chosenBody: string[];
         if (energyAvailable >= 650) {

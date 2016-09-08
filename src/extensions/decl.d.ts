@@ -20,7 +20,6 @@ interface Creep {
      * Unavailable if fog of war is occluding access.
      */
     homeRoom?: Room;
-    homeRoomName: string;
     recycle(): void;
 }
 
@@ -48,6 +47,9 @@ interface Room {
     findStructuresOfTypeMatching<TReturn extends TCallback, TCallback extends Structure>(this: Room, structureType: string, condition: (structure: TCallback)=>boolean, onlyMine?: Boolean): TReturn[];
 }
 
+
 interface Global {
-    byId<T>(id: string | null | undefined): T | null;
+    fromId<T>(id: string | null | undefined): T | null;
 }
+
+declare function fromId<T>(id: string | null | undefined): T | null;

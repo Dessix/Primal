@@ -59,7 +59,7 @@ export class MiningScanner {
         return new RoomPosition(terrain[0].x, terrain[0].y, source.room.name);
     }
 
-    public static scan(room: Room): SourceScanInfo {
+    private static scan(room: Room): SourceScanInfo {
         const roomInfo: SourceScanInfo = {
             roomName: room.name,
             sources: [],
@@ -75,5 +75,48 @@ export class MiningScanner {
             });
         }
         return roomInfo;
+    }
+
+    public static getScanInfoForRoom(room: Room): SourceScanInfo {
+        let roomName: string = room.name;
+        const sources = Memory.sources || (Memory.sources = {});
+        let sourceRoom = sources[roomName];
+        if (sourceRoom === undefined) {
+            return sources[roomName] = MiningScanner.scan(room);
+        }
+        return sourceRoom;
+    }
+
+    public static getScanInfoByRoomName(roomName: string): SourceScanInfo | undefined {
+        const sources = Memory.sources || (Memory.sources = {});
+        let sourceRoom = sources[roomName];
+        if (sourceRoom === undefined) {
+            const room = Game.rooms[roomName];
+            if (room === undefined) {
+                return undefined;
+            } else {
+                return MiningScanner.getScanInfoForRoom(room);
+            }
+        }
+        return sourceRoom;
+    }
+
+    public static getIndexedSourceForRoom(room: Room, sourceIndex: number): { sourceInfo: SourceInfo; miningPosition: RoomPosition; } {
+        const scanInfo = MiningScanner.getScanInfoForRoom(room);
+        const sourceInfo = scanInfo.sources[sourceIndex % scanInfo.sources.length];
+        return {
+            sourceInfo,
+            miningPosition: new RoomPosition(sourceInfo.miningPosition.x, sourceInfo.miningPosition.y, room.name),
+        };
+    }
+
+    public static getIndexedSourceByRoomName(roomName: string, sourceIndex: number): { sourceInfo: SourceInfo; miningPosition: RoomPosition; } | undefined {
+        const scanInfo = MiningScanner.getScanInfoByRoomName(roomName);
+        if (scanInfo === undefined) { return undefined; }
+        const sourceInfo = scanInfo.sources[sourceIndex % scanInfo.sources.length];
+        return {
+            sourceInfo,
+            miningPosition: new RoomPosition(sourceInfo.miningPosition.x, sourceInfo.miningPosition.y, roomName),
+        };
     }
 }

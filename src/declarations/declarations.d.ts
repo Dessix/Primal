@@ -53,7 +53,7 @@ interface Memory {
      * Does not reset, but is not guaranteed to survive
      */
     involatile: Volatile;
-    sources: { [roomName: string]: { sourceInfo: SourceScanInfo } | undefined }
+    sources?: { [roomName: string]: SourceScanInfo | undefined }
 }
 
 declare const enum Direction {

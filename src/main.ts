@@ -16,7 +16,6 @@ import { FsmRole } from "./roles/fsmRole";
 
 Memory.config = DefaultConfig.apply(Memory.config);
 if (Memory.involatile === undefined) { Memory.involatile = {}; }
-if (Memory.sources === undefined) { Memory.sources = {}; }
 
 //Enable profiler if configured
 if (Memory.config.profile) {
@@ -108,7 +107,7 @@ if (!global.f) { Object.defineProperty(global, "f", { get: () => Game.flags }); 
     const buildQueue = room.find<ConstructionSite>(FIND_CONSTRUCTION_SITES);
     for (let i = 0, n = buildQueue.length; i < n; ++i) {
         const item = buildQueue[i];
-        console.log(`${i+1}: ${item.structureType}`);
+        console.log(`${i + 1}: ${item.structureType}`);
     }
 };
 
@@ -126,7 +125,10 @@ function mainLoop() {
         }
     }
     if (Memory.config.noisy) { console.log("Ω Execute"); }
-    kernel.run(Game.cpu.limit * 0.7);
+    const minCpuAlloc = 0.35;
+    const bucket = Game.cpu.bucket;
+    const cpuLimitRatio = ((bucket * bucket) * (1 - minCpuAlloc) * 10e-8) + minCpuAlloc;
+    kernel.run(Game.cpu.limit * cpuLimitRatio);
     if (Memory.config.noisy) { console.log("Ω Save"); }
     Memory.proc = KernelSerializer.serializeProcessTable(kernel.getProcessTable());
     RecordStats();
