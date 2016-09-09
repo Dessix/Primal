@@ -119,13 +119,13 @@ function loadProcessTable(k: Kernel): void {
     }
 }
 
-loadProcessTable(kernel);
 const minCpuAlloc = 0.35;
 const minCpuAllocInverse = 1 - minCpuAlloc;
 function mainLoop() {
     global.tickVolatile = {};
     const bucket = Game.cpu.bucket;
     const cpuLimitRatio = ((bucket * bucket) * minCpuAllocInverse * 10e-8) + minCpuAlloc;
+    loadProcessTable(kernel);
     kernel.run(Game.cpu.limit * cpuLimitRatio);
     try {
         Memory.proc = KernelSerializer.serializeProcessTable(kernel.getProcessTable());
