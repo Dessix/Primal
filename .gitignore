@@ -5,3 +5,4 @@ secrets.*
 !secrets.default.js
 typings
 .idea
+.vscode/symbols.json

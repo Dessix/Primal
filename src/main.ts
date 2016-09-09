@@ -107,6 +107,10 @@ if (!global.f) { Object.defineProperty(global, "f", { get: () => Game.flags }); 
 
 function loadProcessTable(k: Kernel): void {
     let proc = Memory.proc || spawnNewProcessTable();
+    if (proc.length === 0) {
+        proc = spawnNewProcessTable();
+    }
+    Memory.proc = proc;
     try {
         k.loadProcessTable(KernelSerializer.deserializeProcessTable(proc));
     } catch (e) {
@@ -115,6 +119,7 @@ function loadProcessTable(k: Kernel): void {
     }
 }
 
+loadProcessTable(kernel);
 const minCpuAlloc = 0.35;
 const minCpuAllocInverse = 1 - minCpuAlloc;
 function mainLoop() {
@@ -122,9 +127,13 @@ function mainLoop() {
     const bucket = Game.cpu.bucket;
     const cpuLimitRatio = ((bucket * bucket) * minCpuAllocInverse * 10e-8) + minCpuAlloc;
     kernel.run(Game.cpu.limit * cpuLimitRatio);
-    Memory.proc = KernelSerializer.serializeProcessTable(kernel.getProcessTable());
-    RecordStats();
+    try {
+        Memory.proc = KernelSerializer.serializeProcessTable(kernel.getProcessTable());
+    } catch (e) {
+        delete Memory.proc;
+    }
     //(<any>global).spawnBard();
+    RecordStats();
 };
 
 export const loop = !Memory.config.profile ? mainLoop : Profiler.wrap(mainLoop);
