@@ -1,10 +1,5 @@
-import { RoleBootstrapMiner } from "./../roles/roleBootstrapMiner";
 import { RoleListing } from "./../ipc/roleListing";
-import { RoleDrill } from "./../roles/roleDrill";
-import { RoleCourier } from "./../roles/roleCourier";
-import { RoleBard } from "./../roles/roleBard";
-import { RoleUpgrader } from "./../roles/roleUpgrader";
-import { BaseRole } from "./../roles/baseRole";
+import * as Roles from "../roles";
 import { Process, ProcessStatus } from "../kernel/process";
 import { MiningScanner } from "../util/miningScanner";
 
@@ -17,16 +12,16 @@ export class PHarvest extends Process {
     }
 
     private trySpawnCourier(spawn: Spawn, energyAvailable: number, energyCapacityAvailable: number): boolean {
-        const chosenBody = RoleCourier.chooseBody(energyAvailable);
+        const chosenBody = Roles.RoleCourier.chooseBody(energyAvailable);
         if (chosenBody !== undefined) {
             const creepMemory: CreepMemory = {
                 spawnName: spawn.name,
-                role: RoleCourier.RoleTag,
+                role: Roles.RoleCourier.RoleTag,
                 homeRoomName: spawn.room.name,
             };
             const success = spawn.createCreep(
                 chosenBody,
-                RoleCourier.generateName(RoleCourier),
+                Roles.RoleCourier.generateName(Roles.RoleCourier),
                 creepMemory
             );
             if (typeof success === "number") {
@@ -41,14 +36,14 @@ export class PHarvest extends Process {
     }
 
     private trySpawnDrill(spawn: Spawn, energyAvailable: number, energyCapacityAvailable: number): boolean {
-        const chosenBody = RoleDrill.chooseBody(energyAvailable);
+        const chosenBody = Roles.RoleDrill.chooseBody(energyAvailable);
         if (chosenBody !== undefined) {
             //TODO: Get source info from MiningScanner and have it manage the complexities of making sure variables are set
             const roomSourceInfo = MiningScanner.getScanInfoForRoom(spawn.room);
-            const creepMemory: CreepMemory = RoleDrill.createInitialMemory(spawn, spawn.room, ++(roomSourceInfo.lastSourceIndex));
+            const creepMemory: CreepMemory = Roles.RoleDrill.createInitialMemory(spawn, spawn.room, ++(roomSourceInfo.lastSourceIndex));
             const success = spawn.createCreep(
                 chosenBody,
-                RoleDrill.generateName(RoleDrill),
+                Roles.RoleDrill.generateName(Roles.RoleDrill),
                 creepMemory
             );
             if (typeof success === "number") {
@@ -63,7 +58,7 @@ export class PHarvest extends Process {
     }
 
     private trySpawnBootstrap(spawn: Spawn, energyAvailable: number, energyCapacityAvailable: number): boolean {
-        const chosenBody = RoleBootstrapMiner.chooseBody(energyAvailable);
+        const chosenBody = Roles.RoleBootstrapMiner.chooseBody(energyAvailable);
         if (chosenBody === undefined) {
             return false;
         }
@@ -71,12 +66,12 @@ export class PHarvest extends Process {
         const roomSourceInfo = MiningScanner.getScanInfoForRoom(spawn.room);
         const creepMemory: CreepMemory = {
             spawnName: spawn.name,
-            role: RoleBootstrapMiner.RoleTag,
+            role: Roles.RoleBootstrapMiner.RoleTag,
             homeRoomName: spawn.room.name,
         };
         const success = spawn.createCreep(
             chosenBody,
-            RoleBootstrapMiner.generateName(RoleBootstrapMiner),
+            Roles.RoleBootstrapMiner.generateName(Roles.RoleBootstrapMiner),
             creepMemory
         );
         if (typeof success === "number") {
@@ -90,15 +85,15 @@ export class PHarvest extends Process {
     }
 
     public run(): ProcessMemory | undefined {
-        const roleDrill = RoleDrill.Instance;
-        const roleCourier = RoleCourier.Instance;
-        const roleBard = RoleBard.Instance;
-        const roleBootstrapMiner = RoleBootstrapMiner.Instance;
+        const roleDrill = Roles.RoleDrill.Instance;
+        const roleCourier = Roles.RoleCourier.Instance;
+        const roleBard = Roles.RoleBard.Instance;
+        const roleBootstrapMiner = Roles.RoleBootstrapMiner.Instance;
 
-        const drills = Array.from(RoleListing.getByRole(RoleDrill));
-        const bards = RoleListing.getByRole(RoleBard);
-        const couriers = RoleListing.getByRole(RoleCourier);
-        const bootstraps = RoleListing.getByRole(RoleBootstrapMiner);
+        const drills = Array.from(RoleListing.getByRole(Roles.RoleDrill));
+        const bards = RoleListing.getByRole(Roles.RoleBard);
+        const couriers = RoleListing.getByRole(Roles.RoleCourier);
+        const bootstraps = RoleListing.getByRole(Roles.RoleBootstrapMiner);
 
         for (let drill of drills) {
             roleDrill.run(drill);

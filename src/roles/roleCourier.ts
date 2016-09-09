@@ -85,8 +85,10 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
 
     private getPickupTarget(creep: Creep, cmem: CourierMemory): StructureContainer | StructureStorage | Resource | undefined {
         if (cmem.crr_targ !== undefined) {
-            const rawTarget = Game.getObjectById(<string>cmem.crr_targ);
-            if (rawTarget !== null) {
+            const rawTarget = fromId<Structure | Resource>(<string>cmem.crr_targ);
+            if (rawTarget === null) {
+                delete cmem.crr_targ;
+            } else {
                 const struct = <StructureContainer | StructureStorage>rawTarget;
                 switch (struct.structureType) {
                     case STRUCTURE_STORAGE:
@@ -103,7 +105,6 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
                     }
                 }
             }
-            delete cmem.crr_targ;
         }
 
         const spawn = creep.spawn;
@@ -127,12 +128,12 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
             }
         }
 
-        
+
         if (containers.length !== 0) {
             if (containers.length === 1) {
                 return containers[0];
             } else {
-                const fullest = containers.sort(function(a, b) { return b.store["energy"] - a.store["energy"]; })[0];
+                const fullest = containers.sort(function (a, b) { return b.store["energy"] - a.store["energy"]; })[0];
                 return fullest;
             }
         }
@@ -172,9 +173,11 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
 
     private getDeliveryTarget(creep: Creep, cmem: CourierMemory): Spawn | Structure | undefined {
         if (cmem.crr_targ !== undefined) {
-            const rawTarget = Game.getObjectById(<string>cmem.crr_targ);
-            if (rawTarget !== null) {
-                const struct = <Spawn | Structure>rawTarget;
+            const struct = fromId<Structure>(<string>cmem.crr_targ);
+            if (struct === undefined) {
+                //console.log("Find new carry target");
+                delete cmem.crr_targ;
+            } else {
                 switch (struct.structureType) {
                     case STRUCTURE_EXTENSION:
                     case STRUCTURE_SPAWN: {
@@ -204,8 +207,6 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
                         break;
                 }
             }
-            //console.log("Find new carry target");
-            delete cmem.crr_targ;
         }
 
         // This creep's spawn

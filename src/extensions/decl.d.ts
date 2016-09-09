@@ -57,7 +57,7 @@ interface Room {
 
 
 interface Global {
-    fromId<T>(id: string | null | undefined): T | null;
+    fromId<T>(id: string | null | undefined): T | undefined;
 }
 
-declare function fromId<T>(id: string | null | undefined): T | null;
+declare function fromId<T>(id: string | null | undefined): T | undefined;

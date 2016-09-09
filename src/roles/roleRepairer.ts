@@ -163,7 +163,7 @@ export class RoleRepairer extends FsmRole<RepairerMemory, RepairerState> {
 
 
         const target = fromId<Structure>(cmem.repr_targetId);
-        if (target !== null && (target.hits < target.hitsMax && (cmem.repr_thc === undefined || target.hits < cmem.repr_thc))) {
+        if (target !== undefined && (target.hits < target.hitsMax && (cmem.repr_thc === undefined || target.hits < cmem.repr_thc))) {
             //console.log("GoRepair");
             return RepairerState.RepairTarget;
         }
@@ -199,7 +199,7 @@ export class RoleRepairer extends FsmRole<RepairerMemory, RepairerState> {
         //}
 
         const target = fromId<Structure>(cmem.repr_targetId);
-        if (target === null || target.hits === target.hitsMax || (cmem.repr_thc !== undefined && target.hits >= cmem.repr_thc)) {
+        if (target === undefined || target.hits === target.hitsMax || (cmem.repr_thc !== undefined && target.hits >= cmem.repr_thc)) {
             delete cmem.repr_targetId;
             //console.log("Donerepairing findmoar");
             return RepairerState.FindTarget;
@@ -213,9 +213,9 @@ export class RoleRepairer extends FsmRole<RepairerMemory, RepairerState> {
         if (creep.carry.energy === creep.carryCapacity) { return RepairerState.FindTarget; }
 
         let source = fromId<StructureContainer | StructureStorage>(cmem.repr_nrgId);
-        if (source === null) {
-            source = this.findEnergySource(creep, cmem) || null;
-            if (source === null) {
+        if (source === undefined) {
+            source = this.findEnergySource(creep, cmem);
+            if (source === undefined) {
                 delete cmem.repr_nrgId;
                 return;//Wait for an energy source
             } else {
@@ -279,8 +279,10 @@ export class RoleRepairer extends FsmRole<RepairerMemory, RepairerState> {
             const structureNeedingRepair = structuresNeedingRepair[i];
             switch (structureNeedingRepair.structureType) {
                 case STRUCTURE_WALL:
-                case STRUCTURE_RAMPART:
                     futureTargetIds[i] = [structureNeedingRepair.id, maxWallRepairThreshold];
+                    break;
+                case STRUCTURE_RAMPART:
+                    futureTargetIds[i] = [structureNeedingRepair.id, maxWallRepairThreshold + 25000];//Decay buffer so creeps aren't always scrambling
                     break;
                 default:
                     futureTargetIds[i] = structureNeedingRepair.id;
@@ -295,7 +297,7 @@ export class RoleRepairer extends FsmRole<RepairerMemory, RepairerState> {
         if (homeRoom === undefined) { throw new Error("HomeRoom not visible"); }
 
         const storage = fromId<StructureStorage>(cmem.storageId);
-        if (storage !== null && storage.store.energy > 0) {
+        if (storage !== undefined && storage.store.energy > 0) {
             return storage;
         }
 
@@ -307,7 +309,7 @@ export class RoleRepairer extends FsmRole<RepairerMemory, RepairerState> {
             const designatedStorageFlags = cmem.designatedStorageFlagIds;
             for (let i = designatedStorageFlags.length; i-- > 0;) {
                 const flag = fromId<Flag>(designatedStorageFlags[i]);
-                if (flag === null) {
+                if (flag === undefined) {
                     designatedStorageFlags.splice(i);
                     continue;
                 }

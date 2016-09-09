@@ -93,9 +93,8 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
 
     private getCarryTarget(creep: Creep, cmem: BootstrapMinerMemory): Spawn | Structure | undefined {
         if (cmem.stateArg !== undefined) {
-            const rawTarget = Game.getObjectById(<string>cmem.stateArg);
-            if (rawTarget !== null) {
-                const struct = <Spawn | Structure>rawTarget;
+            const struct = fromId<Structure>(<string>cmem.stateArg);
+            if (struct !== undefined) {
                 switch (struct.structureType) {
                     case STRUCTURE_EXTENSION:
                     case STRUCTURE_SPAWN: {
@@ -271,20 +270,19 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
 
     private getHarvestTarget(creep: Creep, cmem: BootstrapMinerMemory): Source | Flag | undefined {
         if (cmem.stateArg !== undefined) {
-            let rawTarget = global.fromId(<string>cmem.stateArg);
-            if (rawTarget !== null) {
-                if (cmem.stateArg.startsWith("flag-")) {
-                    const flag = <Flag>rawTarget;
-                    return flag;
+            const target = fromId<Flag | Source>(<string>cmem.stateArg);
+            if (target === undefined) {
+                //console.log(`Must find a new harvest target instead of ${cmem.stateArg}`);
+                delete cmem.stateArg;
+            } else if (target instanceof Source) {
+                if (target.energy === 0) {
+                    delete cmem.stateArg;
                 } else {
-                    const source = <Source>rawTarget;
-                    if (source.energy !== 0) {
-                        return source;
-                    }
+                    return target;
                 }
+            } else {
+                return target;
             }
-            //console.log(`Must find a new harvest target instead of ${cmem.stateArg}`);
-            delete cmem.stateArg;
         }
 
         // This creep's spawn
@@ -368,36 +366,36 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
         const target = this.getHarvestTarget(creep, cmem);
         if (target === undefined) { return; }
 
-        if ((<Flag>target).color !== undefined) {
-            //target is a flag
-            const flag = <Flag>target;
-            const flagRoom = flag.room;
-            if (flagRoom !== undefined) {
-                //room is visible
-                const sourcesAtPos = flag.pos.lookFor<Source>(LOOK_SOURCES);
-                if (sourcesAtPos.length !== 0) {
-                    const source = sourcesAtPos[0];
-                    if (creep.harvest(source) === ERR_NOT_IN_RANGE) {
-                        if (creep.moveTo(source, <FindPathOpts>{ ignoreCreeps: true }) !== OK) {
-                            delete cmem.stateArg;
-                        }
-                    }
-                } else {
-                    console.log("Remote mining flag where there is no source to mine?");
+        if (target instanceof Source) {
+            if (creep.harvest(target) === ERR_NOT_IN_RANGE) {
+                if (creep.moveTo(target, <FindPathOpts>{ ignoreCreeps: true }) === ERR_NO_PATH) {
                     delete cmem.stateArg;
                 }
-            } else {
-                if (creep.moveTo(flag, <FindPathOpts>{ ignoreCreeps: true }) === ERR_NO_PATH) {
+            }
+            return;
+        }
+
+        //target is a flag
+        const flagRoom = target.room;
+        if (flagRoom === undefined) {
+            //room is not visible
+            if (creep.moveTo(target, <FindPathOpts>{ ignoreCreeps: true }) === ERR_NO_PATH) {
+                delete cmem.stateArg;
+            }
+            return;
+        }
+
+        const sourcesAtPos = target.pos.lookFor<Source>(LOOK_SOURCES);
+        if (sourcesAtPos.length !== 0) {
+            const source = sourcesAtPos[0];
+            if (creep.harvest(source) === ERR_NOT_IN_RANGE) {
+                if (creep.moveTo(source, <FindPathOpts>{ ignoreCreeps: true }) !== OK) {
                     delete cmem.stateArg;
                 }
             }
         } else {
-            const source = <Source>target;
-            if (creep.harvest(source) === ERR_NOT_IN_RANGE) {
-                if (creep.moveTo(source, <FindPathOpts>{ ignoreCreeps: true }) === ERR_NO_PATH) {
-                    delete cmem.stateArg;
-                }
-            }
+            console.log("Remote mining flag where there is no source to mine?");
+            delete cmem.stateArg;
         }
 
         return;

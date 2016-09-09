@@ -1,7 +1,5 @@
 import { RoleListing } from "./../ipc/roleListing";
-import { RoleDrill } from "./../roles/roleDrill";
-import { RoleCourier } from "./../roles/roleCourier";
-import { RoleUpgrader } from "./../roles/roleUpgrader";
+import { RoleDrill, RoleCourier, RoleUpgrader } from "../roles";
 import { Process, ProcessStatus } from "../kernel/process";
 
 export class PUpgrade extends Process {

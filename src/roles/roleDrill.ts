@@ -173,7 +173,7 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
 
     public handleWaitForSourceRegen(creep: Creep, cmem: DrillMemory): DrillState | undefined {
         const source = fromId<Source>(this.getSourceId(creep, cmem));
-        if (source === null) { throw new Error("Source id empty"); }
+        if (source === undefined) { throw new Error("Source id empty"); }
         if (source.energy > 0) {
             return DrillState.Harvest;
         }
@@ -201,7 +201,7 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
 
     public handleHarvest(creep: Creep, cmem: DrillMemory): DrillState | undefined {
         const source = fromId<Source>(this.getSourceId(creep, cmem));
-        if (source === null) {
+        if (source === undefined) {
             delete cmem.sourceId;
             return DrillState.ScanHomeRoom;
         }
@@ -214,7 +214,7 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
             //Emergency repair
             if (container !== undefined && container.hits < container.hitsMax * 0.75) {
                 creep.repair(container);
-            } else if (link !== null && link.energy < link.energyCapacity) {
+            } else if (link !== undefined && link.energy < link.energyCapacity) {
                 if (container !== undefined && container.store[RESOURCE_ENERGY] > 0) {
                     creep.withdraw(container, RESOURCE_ENERGY);
                 }

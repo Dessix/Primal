@@ -1,5 +1,5 @@
 import { RoleListing } from "./../ipc/roleListing";
-import { BaseRole } from "./../roles/baseRole";
+import { BaseRole } from "../roles";
 import { Process, ProcessStatus } from "../kernel/process";
 
 export class PLogisticsRoles extends Process {

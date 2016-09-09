@@ -1,9 +1,4 @@
-import { RoleBard } from "./roles/roleBard";
-import { RoleBootstrapMiner } from "./roles/roleBootstrapMiner";
-import { RoleRepairer } from "./roles/roleRepairer";
-import { RoleUpgrader } from "./roles/roleUpgrader";
-import { RoleBuilder } from "./roles/roleBuilder";
-import { RoleCourier } from "./roles/roleCourier";
+import * as Roles from "./roles";
 import { RecordStats } from "./util/stats";
 import "./extensions/";//Apply extension modules
 import { Processes } from "./kernel/processes";
@@ -12,7 +7,6 @@ import { Kernel } from "./kernel/kernel";
 //import { inspect } from "../lib/inspect";
 import * as Profiler from "../lib/screeps-profiler";
 import { DefaultConfig } from "./util/config";
-import { FsmRole } from "./roles/fsmRole";
 
 Memory.config = DefaultConfig.apply(Memory.config);
 if (Memory.involatile === undefined) { Memory.involatile = {}; }
@@ -20,12 +14,12 @@ if (Memory.involatile === undefined) { Memory.involatile = {}; }
 //Enable profiler if configured
 if (Memory.config.profile) {
     Profiler.enable();
-    Profiler.registerClass(FsmRole, "FsmRole");
-    Profiler.registerClass(RoleCourier, "RoleCourier");
-    Profiler.registerClass(RoleBuilder, "RoleBuilder");
-    Profiler.registerClass(RoleUpgrader, "RoleUpgrader");
-    Profiler.registerClass(RoleRepairer, "RoleRepairer");
-    Profiler.registerClass(RoleBootstrapMiner, "RoleBootstrapMiner");
+    Profiler.registerClass(Roles.FsmRole, "FsmRole");
+    Profiler.registerClass(Roles.RoleCourier, "RoleCourier");
+    Profiler.registerClass(Roles.RoleBuilder, "RoleBuilder");
+    Profiler.registerClass(Roles.RoleUpgrader, "RoleUpgrader");
+    Profiler.registerClass(Roles.RoleRepairer, "RoleRepairer");
+    Profiler.registerClass(Roles.RoleBootstrapMiner, "RoleBootstrapMiner");
     Profiler.registerFN(RecordStats, "RecordStats");
 }
 
@@ -81,19 +75,19 @@ if (!global.f) { Object.defineProperty(global, "f", { get: () => Game.flags }); 
     const room = spawn.room;
     const energyAvailable = room.energyAvailable;
     const energyCapacityAvailable = room.energyCapacityAvailable;
-    const chosenBody = RoleBard.chooseBody(energyAvailable);
+    const chosenBody = Roles.RoleBard.chooseBody(energyAvailable);
     if (chosenBody === undefined) {
         //console.log("No body could be chosen");
         return;
     }
     const creepMemory: CreepMemory = {
         spawnName: spawn.name,
-        role: RoleBard.RoleTag,
+        role: Roles.RoleBard.RoleTag,
         homeRoomName: spawn.room.name,
     };
     const success = spawn.createCreep(
         chosenBody,
-        RoleBard.generateName(RoleBard),
+        Roles.RoleBard.generateName(Roles.RoleBard),
         creepMemory
     );
     if (typeof success === "number") {

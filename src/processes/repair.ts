@@ -1,8 +1,5 @@
 import { RoleListing } from "./../ipc/roleListing";
-import { RoleCourier } from "./../roles/roleCourier";
-import { RoleDrill } from "./../roles/roleDrill";
-import { RoleUpgrader } from "./../roles/roleUpgrader";
-import { RoleRepairer } from "./../roles/roleRepairer";
+import { RoleCourier, RoleDrill, RoleUpgrader, RoleRepairer } from "../roles";
 import { Process, ProcessStatus } from "../kernel/process";
 
 export class PRepair extends Process {
