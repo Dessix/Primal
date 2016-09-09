@@ -57,8 +57,8 @@ enum RepairerState {
 
 export class RoleRepairer extends FsmRole<RepairerMemory, RepairerState> {
     public static RoleTag: string = "repr";
-    private static ScanDelay: number = 15;
-    private static MaxStintDuration: number = 20;
+    private static ScanDelay: number = 25;
+    //private static MaxStintDuration: number = 50;
 
     public constructor() {
         super(RepairerState.Reorient, (mem, val) => mem.repr_state = val, mem => mem.repr_state);
@@ -193,10 +193,10 @@ export class RoleRepairer extends FsmRole<RepairerMemory, RepairerState> {
         if (creep.carry.energy === 0) { return RepairerState.GetEnergy; }
 
         //Prevent large jobs from occluding new objects in drastic need of repair.
-        if (cmem.repr_lScanTime === undefined || cmem.repr_lScanTime < Game.time - RoleRepairer.MaxStintDuration) {
-            delete cmem.repr_targetId;
-            return RepairerState.FindTarget;
-        }
+        //if (cmem.repr_lScanTime === undefined || cmem.repr_lScanTime < Game.time - RoleRepairer.MaxStintDuration) {
+        //    delete cmem.repr_targetId;
+        //    return RepairerState.FindTarget;
+        //}
 
         const target = fromId<Structure>(cmem.repr_targetId);
         if (target === null || target.hits === target.hitsMax || (cmem.repr_thc !== undefined && target.hits >= cmem.repr_thc)) {
@@ -229,7 +229,7 @@ export class RoleRepairer extends FsmRole<RepairerMemory, RepairerState> {
     private scanForTargetIds(room: Room): Array<string | [string, number]> | undefined {
         const ctrller = room.controller;
         const ctrlLvl = ctrller ? ctrller.level : 0;
-        const maxWallRepairThreshold = 25000 * ctrlLvl;
+        const maxWallRepairThreshold = 55000 * ctrlLvl;
         const structuresNeedingRepair = room.find<Structure>(FIND_STRUCTURES)
             .filter(s => {
                 if (s.hits === s.hitsMax) { return false; }
@@ -240,7 +240,7 @@ export class RoleRepairer extends FsmRole<RepairerMemory, RepairerState> {
                             return false;
                         }
                     case STRUCTURE_ROAD:
-                        if (s.hits >= s.hitsMax * 0.6) {
+                        if (s.hits >= s.hitsMax * 0.7) {
                             return false;
                         }
                     default:
@@ -253,12 +253,16 @@ export class RoleRepairer extends FsmRole<RepairerMemory, RepairerState> {
                 } else if (b.hits === 1) {
                     return 1;
                 }
-                if (a.structureType === STRUCTURE_WALL) {
+                if (a.structureType === STRUCTURE_WALL && b.structureType === STRUCTURE_WALL) {
+                    return a.hits - b.hits;
+                } else if (a.structureType === STRUCTURE_WALL) {
                     return 1;
                 } else if (b.structureType === STRUCTURE_WALL) {
                     return -1;
                 }
-                if (a.structureType === STRUCTURE_RAMPART) {
+                if (a.structureType === STRUCTURE_RAMPART && b.structureType === STRUCTURE_RAMPART) {
+                    return a.hits - b.hits;
+                } else if (a.structureType === STRUCTURE_RAMPART) {
                     return 1;
                 } else if (b.structureType === STRUCTURE_RAMPART) {
                     return 1;

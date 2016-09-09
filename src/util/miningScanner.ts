@@ -30,26 +30,17 @@ export class MiningScanner {
     public static findMiningPosition(source: Source): RoomPosition {
         //look for mining position flags (those starting with Cyan)
         const sourcePos = source.pos;
-        const topLeft = clampPoint(0, 49, addPoints(sourcePos, { x: -1, y: -1 }));
-        const bottomRight = clampPoint(0, 49, addPoints(sourcePos, { x: 1, y: 1 }));
+        const miningSiteFlag = sourcePos.lookForInBox<Flag>(LOOK_FLAGS, 1)
+            .find(flag => flag.color === COLOR_CYAN && flag.secondaryColor === COLOR_YELLOW);
+        if (miningSiteFlag !== undefined) { return miningSiteFlag.pos; }
 
-        const miningSiteFlag = (<LookAtResultWithPos[]>source.room.lookForAtArea(LOOK_FLAGS, topLeft.y, topLeft.x, bottomRight.y, bottomRight.x, true))
-            .find(res => res.flag !== undefined && res.flag.color === COLOR_CYAN && res.flag.secondaryColor === COLOR_YELLOW);
-        if (miningSiteFlag !== undefined) {
-            return new RoomPosition(miningSiteFlag.x, miningSiteFlag.y, source.room.name);
-        }
+        const miningContainer = sourcePos.lookForInBox<Structure>(LOOK_STRUCTURES, 1)
+            .find(function (s) { return s instanceof StructureContainer; });
+        if (miningContainer !== undefined) { return miningContainer.pos; }
 
-        const miningContainer = (<LookAtResultWithPos[]>source.room.lookForAtArea(LOOK_STRUCTURES, topLeft.y, topLeft.x, bottomRight.y, bottomRight.x, true))
-            .find(res => res.structure !== undefined && res.structure instanceof StructureContainer);
-        if (miningContainer !== undefined) {
-            return new RoomPosition(miningContainer.x, miningContainer.y, source.room.name);
-        }
-
-        const terrain = (<LookAtResultWithPos[]>source.room.lookForAtArea(LOOK_TERRAIN, topLeft.y, topLeft.x, bottomRight.y, bottomRight.x, true))
-            .filter(res => res.terrain !== undefined && (res.terrain === "plain" || res.terrain === "swamp"))
-            .sort(function (a, b) {
-                return (a.terrain === "swamp") ? 1 : -1;
-            });
+        const terrain = sourcePos.lookTerrainInBox(1)
+            .filter(function (res) { return (res.terrain === "plain" || res.terrain === "swamp"); })
+            .sort(function (a, b) { return (a.terrain === "swamp") ? 1 : -1; });
 
         if (terrain.length === 0) {
             throw new Error(`Hidden source? Cannot reach through terrain at ${source.room}:${source.pos}.`);

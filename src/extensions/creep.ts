@@ -46,7 +46,8 @@ class CreepX extends Creep {
     public recycle(): void {
         (<CreepMemory>this.memory).role = "recy";
     }
+    
 
 }
 
-safeExtendPrototype(Creep, CreepX);
+safeExtendPrototype(Creep, CreepX, true);

@@ -95,7 +95,7 @@ export class PHarvest extends Process {
         const roleBard = RoleBard.Instance;
         const roleBootstrapMiner = RoleBootstrapMiner.Instance;
 
-        const drills = RoleListing.getByRole(RoleDrill);
+        const drills = Array.from(RoleListing.getByRole(RoleDrill));
         const bards = RoleListing.getByRole(RoleBard);
         const couriers = RoleListing.getByRole(RoleCourier);
         const bootstraps = RoleListing.getByRole(RoleBootstrapMiner);
@@ -113,7 +113,7 @@ export class PHarvest extends Process {
             roleBootstrapMiner.run(bootstrap);
         }
 
-        const numDrills = drills.length;
+        const numDrills = drills.filter(d => d.ticksToLive > 25).length;
         const numCouriers = couriers.length;
         const numBootstrapMiners = bootstraps.length;
 

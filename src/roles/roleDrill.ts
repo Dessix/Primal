@@ -16,6 +16,7 @@ interface DrillMemory extends CreepMemory {
     drill_state?: DrillState;
     sourceIndex: number;
     linkId?: string;
+    storageLinkId?: string;
 
     pathCache?: string;
     sourceId?: string;
@@ -137,21 +138,27 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
         MiningScanner.getScanInfoForRoom(homeRoom);
         return DrillState.MoveToSource;
     }
+    
+    private findLinks(miningPosition: RoomPosition): string | undefined {
+        const room = Game.rooms[miningPosition.roomName];
+        if (room === undefined) { throw new Error("Room inaccessible"); }
+        const miningLink = miningPosition.lookForInBox<Structure>(LOOK_STRUCTURES, 1).find(s => s.structureType === STRUCTURE_LINK);
+        return miningLink && miningLink.id || undefined;
+    }
 
     public handleMoveToSource(creep: Creep, cmem: DrillMemory): DrillState | undefined {
         const sourceInfo = MiningScanner.getIndexedSourceByRoomName(cmem.homeRoomName, cmem.sourceIndex);
         if (sourceInfo === undefined) {
             throw new Error("No source info available where expected in RoleDrill.handleMoveToSource");
         }
+
         const miningPosition = sourceInfo.miningPosition;
 
         if (creep.pos.isEqualTo(miningPosition)) {
-            const links = miningPosition.findInRange<StructureLink, Structure>(FIND_STRUCTURES, 1, { filter: (s: Structure) => s.structureType === STRUCTURE_LINK });
-            if (links.length > 0) {
-                cmem.linkId = links[0].id;
-            }
+            cmem.linkId = this.findLinks(miningPosition);
             return DrillState.Harvest;
         }
+
         if (creep.moveTo(miningPosition) === ERR_NO_PATH) {
             if (creep.pos.getRangeTo(miningPosition) === 1) {
                 const creepsInTheWay = miningPosition.lookFor<Creep>(LOOK_CREEPS);
@@ -169,6 +176,9 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
         if (source === null) { throw new Error("Source id empty"); }
         if (source.energy > 0) {
             return DrillState.Harvest;
+        }
+        if (cmem.linkId === undefined) {
+            cmem.linkId = this.findLinks(creep.pos);
         }
         //Container repair
         const container = RoleDrill.getContainerOnPosition(creep.pos);
@@ -200,10 +210,17 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
         }
         const container = RoleDrill.getContainerOnPosition(creep.pos);
         if (creep.carry.energy > 0) {
+            const link = fromId<StructureLink>(cmem.linkId);
             //Emergency repair
             if (container !== undefined && container.hits < container.hitsMax * 0.75) {
                 creep.repair(container);
+            } else if (link !== null && link.energy < link.energyCapacity) {
+                if (container !== undefined && container.store[RESOURCE_ENERGY] > 0) {
+                    creep.withdraw(container, RESOURCE_ENERGY);
+                }
+                creep.transfer(link, RESOURCE_ENERGY);
             }
+
             if (creep.ticksToLive < 5) {
                 if (container !== undefined && container.store.energy < container.storeCapacity) {
                     creep.transfer(container, RESOURCE_ENERGY);

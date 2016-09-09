@@ -92,7 +92,7 @@ class RoomPositionX extends RoomPosition {
             return null;
         }
     }
-    
+
     public lookForStructure<T extends Structure>(this: RoomPosition, structureType: string): T | undefined {
         const looked = this.lookFor<Structure>(LOOK_STRUCTURES);
         for (let i = looked.length; i-- > 0;) {
@@ -101,6 +101,34 @@ class RoomPositionX extends RoomPosition {
             }
         }
         return;
+    }
+
+    public offset(this: RoomPosition, x: number, y: number): RoomPosition {
+        return new RoomPosition(this.x + x, this.y + y, this.roomName);
+    }
+
+    public offsetByPoint(this: RoomPosition, offset: { x: number; y: number; }): RoomPosition {
+        return new RoomPosition(this.x + offset.x, this.y + offset.y, this.roomName);
+    }
+
+    public lookTerrainInBox(this: RoomPosition, radius: number): LookForInBoxTerrainResult[] {
+        return this.lookForInBox<LookForInBoxTerrainResult>(LOOK_TERRAIN, radius);
+    }
+
+    public lookForInBox<T extends Creep | Flag | Structure | Resource | Source | ConstructionSite | LookForInBoxTerrainResult>(this: RoomPosition, lookType: string, radius: number): T[] {
+        if (radius < 0) { throw new Error("Radius was less than 0"); }
+        if (radius === 0) { return this.lookFor<T>(lookType); }
+        const res = <LookAtResultWithPos[]>Game.rooms[this.roomName]
+            .lookForAtArea(lookType,
+            Math.max(this.y - radius, 0), Math.max(this.x - radius, 0),
+            Math.min(this.y + radius, 49), Math.min(this.x + radius, 49),
+            true);
+        if (lookType === LOOK_TERRAIN) {
+            for (radius = res.length; radius-- > 0;) { (<T[]><{}[]>res)[radius] = <T><{}><LookForInBoxTerrainResult><LookAtResultWithPos & { terrain: string }>res[radius]; }
+        } else {
+            for (radius = res.length; radius-- > 0;) { (<T[]><{}[]>res)[radius] = (<{ [lookType: string]: T }><{}>res[radius])[lookType]; }
+        }
+        return <T[]><{}[]>res;
     }
 }
 

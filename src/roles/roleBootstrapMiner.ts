@@ -203,7 +203,7 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
 
         const renewRes = spawn.renewCreep(creep);
         if (renewRes === ERR_NOT_IN_RANGE) {
-            creep.moveTo(spawn);
+            creep.moveTo(spawn, <FindPathOpts>{ ignoreCreeps: true });
             return;
         }
 
@@ -264,7 +264,7 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
             return;
         }
         if (creep.transfer(target, "energy") === ERR_NOT_IN_RANGE) {
-            creep.moveTo(target);
+            creep.moveTo(target, <FindPathOpts>{ ignoreCreeps: true });
         }
         return;
     }
@@ -333,7 +333,7 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
                 const flags = Game.flags;
                 for (let flagName in flags) {
                     const flag = flags[flagName];
-                    if (flag.color !== COLOR_GREEN && flag.secondaryColor !== COLOR_YELLOW) {
+                    if (flag.color !== COLOR_GREEN || flag.secondaryColor !== COLOR_YELLOW) {
                         continue;
                     }
 
@@ -378,7 +378,7 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
                 if (sourcesAtPos.length !== 0) {
                     const source = sourcesAtPos[0];
                     if (creep.harvest(source) === ERR_NOT_IN_RANGE) {
-                        if (creep.moveTo(source) !== OK) {
+                        if (creep.moveTo(source, <FindPathOpts>{ ignoreCreeps: true }) !== OK) {
                             delete cmem.stateArg;
                         }
                     }
@@ -387,14 +387,14 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
                     delete cmem.stateArg;
                 }
             } else {
-                if (creep.moveTo(flag) === ERR_NO_PATH) {
+                if (creep.moveTo(flag, <FindPathOpts>{ ignoreCreeps: true }) === ERR_NO_PATH) {
                     delete cmem.stateArg;
                 }
             }
         } else {
             const source = <Source>target;
             if (creep.harvest(source) === ERR_NOT_IN_RANGE) {
-                if (creep.moveTo(source) === ERR_NO_PATH) {
+                if (creep.moveTo(source, <FindPathOpts>{ ignoreCreeps: true }) === ERR_NO_PATH) {
                     delete cmem.stateArg;
                 }
             }

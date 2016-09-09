@@ -29,11 +29,19 @@ interface Flag {
     lookForStructureAtPosition<T extends Structure>(this: Flag, structureType: string): T | undefined;
 }
 
+interface LookForInBoxTerrainResult {
+    x: number;
+    y: number;
+    terrain: string;
+}
+
 interface RoomPosition {
     getRangeToLinearSqr(this: RoomPosition, other: RoomPosition): number;
-    getClosest<T extends { pos: RoomPosition }>(this: RoomPosition, targets: T[]): T | undefined;
-    getClosestLinear<T extends { pos: RoomPosition }>(this: RoomPosition, targets: T[]): T | undefined;
+    getClosest<T extends RoomObject | { pos: RoomPosition }>(this: RoomPosition, targets: T[]): T | undefined;
+    getClosestLinear<T extends RoomObject | { pos: RoomPosition }>(this: RoomPosition, targets: T[]): T | undefined;
     lookForStructure<T extends Structure>(this: RoomPosition, structureType: string): T | undefined;
+    lookForInBox<T extends Creep | Flag | Structure | Resource | Source | ConstructionSite | LookForInBoxTerrainResult>(this: RoomPosition, structureType: string, radius: number): T[];
+    lookTerrainInBox(this: RoomPosition, radius: number): LookForInBoxTerrainResult[];
 }
 
 interface Room {
