@@ -1,5 +1,4 @@
-import { RoleBuilder } from "./roleBuilder";
-import { FsmRole, StateHandlerList } from "./fsmRole";
+import { FsmRole, RoleBuilder } from "./";
 
 interface RepairerMemory extends CreepMemory {
 
@@ -93,13 +92,14 @@ export class RoleRepairer extends FsmRole<RepairerMemory, RepairerState> {
         return <CreepBodyPart[]>chosenBody;
     }
 
-    protected provideStates(): StateHandlerList<RepairerMemory, RepairerState> {
-        return {
-            [RepairerState.Reorient]: this.handleReorient,
-            [RepairerState.WalkToHomeRoom]: this.handleWalkToHomeRoom,
-            [RepairerState.FindTarget]: this.handleFindTarget,
-            [RepairerState.RepairTarget]: this.handleRepairTarget,
-            [RepairerState.GetEnergy]: this.handleGetEnergy,
+    protected runState(state: RepairerState, creep: Creep, cmem: RepairerMemory): RepairerState | undefined {
+        switch (state) {
+            case RepairerState.Reorient: return this.handleReorient(creep, cmem);
+            case RepairerState.WalkToHomeRoom: return this.handleWalkToHomeRoom(creep, cmem);
+            case RepairerState.FindTarget: return this.handleFindTarget(creep, cmem);
+            case RepairerState.RepairTarget: return this.handleRepairTarget(creep, cmem);
+            case RepairerState.GetEnergy: return this.handleGetEnergy(creep, cmem);
+            default: throw new Error(`No state handler defined for ${state}`);
         };
     }
 

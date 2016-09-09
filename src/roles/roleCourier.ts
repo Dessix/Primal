@@ -32,19 +32,18 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
         return instance;
     }
 
-    protected provideStates(): StateHandlerList<CourierMemory, CourierState> {
-        return {
-            [CourierState.Decide]: this.handleDecide,
-            [CourierState.Deliver]: this.handleDeliver,
-            [CourierState.Pickup]: this.handlePickup,
-            [CourierState.Wait]: this.handleWait,
+    protected runState(state: CourierState, creep: Creep, cmem: CourierMemory): CourierState | undefined {
+        switch (state) {
+            case CourierState.Decide: return this.handleDecide(creep, cmem);
+            case CourierState.Deliver: return this.handleDeliver(creep, cmem);
+            case CourierState.Pickup: return this.handlePickup(creep, cmem);
+            case CourierState.Wait: return this.handleWait(creep, cmem);
+            default: throw new Error(`No state handler defined for ${state}`);
         };
     }
 
     protected onTransition(creep: Creep, cmem: CourierMemory, prev: CourierState, next: CourierState) {
-        if (prev !== next) {
-            delete cmem.crr_targ;
-        }
+        delete cmem.crr_targ;
     }
 
     public static chooseBody(energyAvailable: number): CreepBodyPart[] | undefined {

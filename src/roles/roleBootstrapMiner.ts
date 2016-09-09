@@ -37,11 +37,18 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
         };
     }
 
+    protected runState(state: BootstrapMinerState, creep: Creep, cmem: BootstrapMinerMemory): BootstrapMinerState | undefined {
+        switch (state) {
+            case BootstrapMinerState.Harvest: return this.handleHarvest(creep, cmem);
+            case BootstrapMinerState.Carry: return this.handleCarry(creep, cmem);
+            case BootstrapMinerState.Renew: return this.handleRenew(creep, cmem);
+            default: throw new Error(`No state handler defined for ${state}`);
+        };
+    }
+
     protected onTransition(creep: Creep, cmem: BootstrapMinerMemory, prev: BootstrapMinerState, next: BootstrapMinerState) {
-        if (prev !== next) {
-            delete cmem.stateArg;
-            delete cmem.stateArgPath;
-        }
+        delete cmem.stateArg;
+        delete cmem.stateArgPath;
     }
 
     private shouldRenew(creep: Creep, cmem: BootstrapMinerMemory) {

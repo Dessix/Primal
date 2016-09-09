@@ -1,6 +1,6 @@
-import { PathUtils } from "./../util/pathUtils";
+import { FsmRole } from "./";
 import { MiningScanner } from "./../util/miningScanner";
-import { FsmRole, StateHandlerList } from "./fsmRole";
+import { PathUtils } from "./../util/pathUtils";
 
 enum DrillState {
     Initialize = 0,
@@ -39,22 +39,21 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
         return instance;
     }
 
-    protected provideStates(): StateHandlerList<DrillMemory, DrillState> {
-        return {
-            [DrillState.Initialize]: this.handleInitialize,
-            [DrillState.MoveToSource]: this.handleMoveToSource,
-            [DrillState.Harvest]: this.handleHarvest,
-            [DrillState.WaitForSourceRegen]: this.handleWaitForSourceRegen,
-            [DrillState.MoveToHomeRoomForScan]: this.handleMoveToHomeRoomForScan,
-            [DrillState.ScanHomeRoom]: this.handleScanHomeRoom,
+    protected runState(state: DrillState, creep: Creep, cmem: DrillMemory): DrillState | undefined {
+        switch (state) {
+            case DrillState.Initialize: return this.handleInitialize(creep, cmem);
+            case DrillState.MoveToSource: return this.handleMoveToSource(creep, cmem);
+            case DrillState.Harvest: return this.handleHarvest(creep, cmem);
+            case DrillState.WaitForSourceRegen: return this.handleWaitForSourceRegen(creep, cmem);
+            case DrillState.MoveToHomeRoomForScan: return this.handleMoveToHomeRoomForScan(creep, cmem);
+            case DrillState.ScanHomeRoom: return this.handleScanHomeRoom(creep, cmem);
+            default: throw new Error(`No state handler defined for ${state}`);
         };
     }
 
     protected onTransition(creep: Creep, cmem: DrillMemory, prev: DrillState, next: DrillState) {
-        if (prev !== next) {
-            delete cmem.pathCache;
-            delete cmem.sourceId;
-        }
+        delete cmem.pathCache;
+        delete cmem.sourceId;
     }
 
     private static getContainerOnPosition(pos: RoomPosition) {
@@ -138,7 +137,7 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
         MiningScanner.getScanInfoForRoom(homeRoom);
         return DrillState.MoveToSource;
     }
-    
+
     private findLinks(miningPosition: RoomPosition): string | undefined {
         const room = Game.rooms[miningPosition.roomName];
         if (room === undefined) { throw new Error("Room inaccessible"); }

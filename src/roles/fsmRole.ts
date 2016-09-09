@@ -15,7 +15,6 @@ export abstract class FsmRole<TMemory extends CreepMemory, TStateValue extends s
     private readonly _setState: (memory: TMemory, value: TStateValue) => void;
     private readonly _getState: (memory: TMemory) => TStateValue | undefined;
     public readonly _defaultState: TStateValue;
-    private readonly _stateHandlers: StateHandlerList<TMemory, TStateValue>;
 
     constructor(
         defaultState: TStateValue,
@@ -26,24 +25,14 @@ export abstract class FsmRole<TMemory extends CreepMemory, TStateValue extends s
         this._setState = setState;
         this._getState = getState;
         this._defaultState = defaultState;
-        this._stateHandlers = this.provideStates();
     }
 
     /**
-     * Called just before a new state is assigned, if it has been provided
+     * Called just before a new state is assigned, if the state has changed
      */
     protected onTransition?(creep: Creep, cmem: TMemory, oldState: TStateValue | undefined, newState: TStateValue): void;
 
-    protected abstract provideStates(): StateHandlerList<TMemory, TStateValue>;
-
-    //TODO: Convert to switch in derived children; remove `provideStates`
-    private runState(state: TStateValue, creep: Creep, cmem: TMemory): TStateValue | undefined {
-        const handler = this._stateHandlers[<string | number>state];
-        if (handler === undefined) {
-            throw new Error(`FsmRole state ${state} is not defined for creep ${creep.name}`);
-        }
-        return handler.call(this, creep, cmem);
-    }
+    protected abstract runState(state: TStateValue, creep: Creep, cmem: TMemory): TStateValue | undefined;
 
     private static StateTransitionTracker = new Array<string | number>(FsmRole.StateTransitionsCap);
 
@@ -53,13 +42,9 @@ export abstract class FsmRole<TMemory extends CreepMemory, TStateValue extends s
         let currentState = this._getState(cmem);
         const onTransition = this.onTransition;
 
-        //Default state does not count as a transition, despite triggering onTransition
+        //Default state does not count as a transition
         if (currentState === undefined) {
-            currentState = this._defaultState;
-            if (onTransition !== undefined) {
-                onTransition(creep, cmem, undefined, currentState);
-            }
-            this._setState(cmem, currentState);
+            this._setState(cmem, currentState = this._defaultState);
         }
 
         const transitionCap = FsmRole.StateTransitionsCap;
@@ -75,10 +60,8 @@ export abstract class FsmRole<TMemory extends CreepMemory, TStateValue extends s
                 console.log(`Role ${creep.role} Exceeded state transitions per execution! Transition chain:\n${transitionTracker.slice(0, transitionCount).join(",")}`);
                 break;
             }
-            if (onTransition !== undefined) {
-                onTransition(creep, cmem, currentState, newState);
-            }
             if (currentState !== newState) {
+                if (onTransition !== undefined) { onTransition(creep, cmem, currentState, newState); }
                 this._setState(cmem, newState);
                 currentState = newState;
             }

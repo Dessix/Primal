@@ -105,25 +105,23 @@ if (!global.f) { Object.defineProperty(global, "f", { get: () => Game.flags }); 
     }
 };
 
-function mainLoop() {
-    //PathFinder.use(false);//Disable when pathing acts sanely again
-    global.tickVolatile = {};
-    if (Memory.config.noisy) { console.log("Ω Load"); }
-    {
-        let proc = Memory.proc || spawnNewProcessTable();
-        try {
-            kernel.loadProcessTable(KernelSerializer.deserializeProcessTable(proc));
-        } catch (e) {
-            console.log("ERROR loading process table: %s\n%s", e, e.stack);
-            kernel.loadProcessTable(KernelSerializer.deserializeProcessTable(global.reset()));
-        }
+function loadProcessTable(k: Kernel): void {
+    let proc = Memory.proc || spawnNewProcessTable();
+    try {
+        k.loadProcessTable(KernelSerializer.deserializeProcessTable(proc));
+    } catch (e) {
+        console.log("ERROR loading process table: %s\n%s", e, e.stack);
+        k.loadProcessTable(KernelSerializer.deserializeProcessTable(global.reset()));
     }
-    if (Memory.config.noisy) { console.log("Ω Execute"); }
-    const minCpuAlloc = 0.35;
+}
+
+const minCpuAlloc = 0.35;
+const minCpuAllocInverse = 1 - minCpuAlloc;
+function mainLoop() {
+    global.tickVolatile = {};
     const bucket = Game.cpu.bucket;
-    const cpuLimitRatio = ((bucket * bucket) * (1 - minCpuAlloc) * 10e-8) + minCpuAlloc;
+    const cpuLimitRatio = ((bucket * bucket) * minCpuAllocInverse * 10e-8) + minCpuAlloc;
     kernel.run(Game.cpu.limit * cpuLimitRatio);
-    if (Memory.config.noisy) { console.log("Ω Save"); }
     Memory.proc = KernelSerializer.serializeProcessTable(kernel.getProcessTable());
     RecordStats();
     //(<any>global).spawnBard();
