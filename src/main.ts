@@ -119,6 +119,14 @@ function loadProcessTable(k: Kernel): void {
     }
 }
 
+function saveProcessTable(k: Kernel):void {
+    try {
+        Memory.proc = KernelSerializer.serializeProcessTable(kernel.getProcessTable());
+    } catch (e) {
+        delete Memory.proc;
+    }
+}
+
 const minCpuAlloc = 0.35;
 const minCpuAllocInverse = 1 - minCpuAlloc;
 function mainLoop() {
@@ -127,11 +135,7 @@ function mainLoop() {
     const cpuLimitRatio = ((bucket * bucket) * minCpuAllocInverse * 10e-8) + minCpuAlloc;
     loadProcessTable(kernel);
     kernel.run(Game.cpu.limit * cpuLimitRatio);
-    try {
-        Memory.proc = KernelSerializer.serializeProcessTable(kernel.getProcessTable());
-    } catch (e) {
-        delete Memory.proc;
-    }
+    saveProcessTable(kernel);
     //(<any>global).spawnBard();
     RecordStats();
 };

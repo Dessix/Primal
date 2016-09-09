@@ -75,7 +75,7 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
         if (Game.time < cmem.crr_targ) {
             const idleFlag = Game.spawns[cmem.spawnName].room.find<Flag>(FIND_FLAGS).find(x => x.color === COLOR_BROWN && x.secondaryColor === COLOR_BROWN);
             if (idleFlag !== undefined) {
-                creep.moveTo(idleFlag);
+                creep.moveTo(idleFlag, { ignoreCreeps: true, reusePath: 20 });
             }
             return;
         }
@@ -160,12 +160,12 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
         }
         if ((<StructureStorage | StructureContainer>target).store) {
             if ((<StructureStorage | StructureContainer>target).transfer(creep, "energy") === ERR_NOT_IN_RANGE) {
-                creep.moveTo(target/*, { reusePath: 20 }*/);
+                creep.moveTo(target, { ignoreCreeps: true, reusePath: 20 });
             }
         } else {
             const pickedUp = creep.pickup(<Resource>target);
             if (pickedUp === ERR_NOT_IN_RANGE) {
-                creep.moveTo(target/*, { reusePath: 20 }*/);
+                creep.moveTo(target, { ignoreCreeps: true, reusePath: 20 });
             }
         }
     }
@@ -301,28 +301,20 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
             const builderOrRepairer = nearbyPossibleReceivers.find(c => c.role === RoleBuilder.RoleTag || c.role === RoleRepairer.RoleTag);
             if (builderOrRepairer !== undefined) {
                 if (creep.transfer(builderOrRepairer, "energy") === ERR_NOT_IN_RANGE) {
-                    creep.moveTo(builderOrRepairer);
-                }
-                return;
-            }
-
-            const upgrader = nearbyPossibleReceivers.find(c => c.role === RoleUpgrader.RoleTag);
-            if (upgrader !== undefined) {
-                if (creep.transfer(upgrader, "energy") === ERR_NOT_IN_RANGE) {
-                    creep.moveTo(upgrader);
+                    creep.moveTo(builderOrRepairer, { ignoreCreeps: true, reusePath: 20 });
                 }
                 return;
             }
 
             const idleFlag = Game.spawns[cmem.spawnName].room.find<Flag>(FIND_FLAGS).find(x => x.color === COLOR_BROWN && x.secondaryColor === COLOR_BROWN);
             if (idleFlag !== undefined) {
-                creep.moveTo(idleFlag);
+                creep.moveTo(idleFlag, { ignoreCreeps: true, reusePath: 20 });
             }
             return;
         }
 
         if (creep.transfer(target, "energy") === ERR_NOT_IN_RANGE) {
-            creep.moveTo(target/*, { reusePath: 20 }*/);
+            creep.moveTo(target, { ignoreCreeps: true, reusePath: 20 });
         }
     }
 
