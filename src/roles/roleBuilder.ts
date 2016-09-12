@@ -65,8 +65,13 @@ export class RoleBuilder extends BaseRole<BuilderMemory> {
                 if (containers.length === 1) {
                     container = containers[0];
                 } else {
-                    const fullest = containers.sort(function(a, b) { return b.store["energy"] - a.store["energy"]; })[0];
+                    const fullest = containers.sort(function (a, b) { return b.store["energy"] - a.store["energy"]; })[0];
                     container = fullest;
+                }
+            } else {
+                const storage = spawn.room.storage;
+                if (storage !== undefined && storage.store.energy > 0) {
+                    container = storage;
                 }
             }
         }

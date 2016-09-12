@@ -9,7 +9,6 @@ module.exports = {
     ],
     entry: {
         main: "./src/main.ts",
-        test: "./test/test.ts",
     },
     output: {
         filename: "./dist/[name].js",

@@ -84,4 +84,10 @@ interface String {
     padLeft(length: number, character: string): string;
 }
 
+interface ObjectX extends Object {
+    values<T>(object: { [key: string]: T; [key: number]: T; }): T[];
+}
+
+declare const ObjectX: ObjectX;
+
 declare function fromId<T>(id: string | null | undefined): T | undefined;

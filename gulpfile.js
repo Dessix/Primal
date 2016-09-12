@@ -101,4 +101,10 @@ gulp.task("adv-watch-upload", () => {
         .pipe(gulpUploadSingleVinylAsModule());
 });
 
+gulp.task("upload", () => {
+    return gulp.src("./dist/main.js")
+        .pipe(gulpRename(path => { path.dirname = ""; path.extname = ""; }))//strip module extension
+        .pipe(gulpUploadSingleVinylAsModule());
+});
+
 gulp.task("default", ["adv-watch", "adv-watch-upload"]);

@@ -2,6 +2,7 @@ import { ProcessRegistry } from "../src/kernel/processRegistry";
 import { Process } from "../src/kernel/process";
 import { KernelSerializer } from "../src/kernel/kernelSerializer";
 import { Kernel } from "../src/kernel/kernel";
+import { MockPRoot } from "./res/mockPRoot";
 
 import * as _ from "lodash";
 import * as chai from "chai";
@@ -10,25 +11,6 @@ const assert = chai.assert;
 
 declare const global: any;
 global.Memory = {};
-
-interface MockRootMemory extends ProcessMemory {
-}
-
-class MockPRoot extends Process {
-  public static className: string = "Root";
-  public get className(): string { return MockPRoot.className; }
-  private pmem: MockRootMemory;
-  public readonly baseHeat: number = 1000;
-  public readonly service: boolean = true;
-
-  public constructor(pid: ProcessId, parentPid: ProcessId) {
-    super(pid, parentPid);
-  }
-
-  public run(): MockRootMemory | undefined {
-    return;
-  }
-}
 
 ProcessRegistry.register(MockPRoot.className, MockPRoot);
 

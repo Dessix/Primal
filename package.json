@@ -5,9 +5,9 @@
   "main": "gulpfile.js",
   "scripts": {
     "postinstall": "./node_modules/.bin/typings install",
-    "start": "./node_modules/.bin/gulp build watch",
     "test": "./node_modules/.bin/mocha --compilers ts:ts-node/register,tsx:ts-node/register test/*.ts",
-    "build": "./node_modules/.bin/gulp compile && echo Done"
+    "start": "npm run build --silent && npm run test --silent && gulp upload || Echo Failure!",
+    "build": "./node_modules/.bin/webpack --colors"
   },
   "author": "Dessix <Dessix@Dessix.net>",
   "devDependencies": {
