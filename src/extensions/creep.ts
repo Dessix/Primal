@@ -43,11 +43,18 @@ class CreepX extends Creep {
         (<CreepMemory>this.memory).homeRoomName = homeRoom.name;
     }
 
-    public recycle(): void {
-        (<CreepMemory>this.memory).role = "recy";
+    public recycle(this: Creep): void {
+        this.cmem.role = "recy";
     }
-    
 
+    public travelTo(this: Creep, target: RoomPosition | RoomObject, opts?: MoveToOpts & FindPathOpts): number {
+        if (!this.my) { return ERR_NOT_OWNER; }
+        if (this.spawning) { return ERR_BUSY; }
+        if (this.fatigue > 0) { return ERR_TIRED; }
+        if (this.getActiveBodyparts(MOVE) === 0) { return ERR_NO_BODYPART; }
+
+        throw new Error("Not implemented!");
+    }
 }
 
 safeExtendPrototype(Creep, CreepX, true);

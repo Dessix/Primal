@@ -135,31 +135,13 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
             delete cmem.stateArg;
         }
 
-        // This creep's spawn
         const spawn = creep.spawn;
         if (spawn !== undefined && spawn.energy < spawn.energyCapacity) {
             cmem.stateArg = spawn.id;
             return spawn;
         }
 
-        let myStructures: Structure[] | undefined = undefined;
-        if (spawn.room.energyAvailable < spawn.room.energyCapacityAvailable) {
-            //Worth scanning for non-full extensions
-            if (myStructures === undefined) { myStructures = spawn.room.find<Structure>(FIND_MY_STRUCTURES); }
-
-            for (let ext of myStructures) {
-                if (
-                    ext.structureType !== STRUCTURE_EXTENSION ||
-                    (<StructureExtension>ext).energy === (<StructureExtension>ext).energyCapacity
-                ) {
-                    continue;
-                }
-                cmem.stateArg = ext.id;
-                return ext;
-            }
-        }
-
-        if (myStructures === undefined) { myStructures = spawn.room.find<Structure>(FIND_MY_STRUCTURES); }
+        let myStructures: Structure[] | undefined = spawn.room.find<Structure>(FIND_MY_STRUCTURES);
         for (let tower of myStructures) {
             if (
                 tower.structureType !== STRUCTURE_TOWER ||
@@ -170,23 +152,6 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
             cmem.stateArg = tower.id;
             return tower;
         }
-
-
-        {
-            const flags = spawn.room.find<Flag>(FIND_FLAGS);
-            for (let flag of flags) {
-                if (
-                    flag.color !== COLOR_GREY || flag.secondaryColor !== COLOR_YELLOW
-                ) {
-                    continue;
-                }
-                const container = flag.pos.lookForStructure<StructureContainer>(STRUCTURE_CONTAINER);
-                if (container !== undefined && _.sum(container.store) < container.storeCapacity) {
-                    return container;
-                }
-            }
-        }
-
 
         {
             const storage = spawn.room.storage;

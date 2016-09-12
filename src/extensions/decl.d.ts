@@ -7,13 +7,24 @@ interface CreepMemory {
     homeRoomName: string;
     role: string | null | undefined;
     [key: string]: any;
+
+    _move?: {
+    };
 }
+
+
 
 interface Creep {
     cmem: CreepMemory;
     role: string | null | undefined;
 
     spawn: Spawn;
+
+    //Custom MoveTo
+    travelTo(
+        target: RoomPosition | RoomObject
+        //, opts?: MoveToOpts & FindPathOpts
+    ): number;
 
     /**
      * Home room of the creep.
@@ -35,6 +46,10 @@ interface LookForInBoxTerrainResult {
     terrain: string;
 }
 
+interface RoomPositionConstructor {
+}
+
+
 interface RoomPosition {
     getRangeToLinearSqr(this: RoomPosition, other: RoomPosition): number;
     getClosest<T extends RoomObject | { pos: RoomPosition }>(this: RoomPosition, targets: T[]): T | undefined;
@@ -42,22 +57,31 @@ interface RoomPosition {
     lookForStructure<T extends Structure>(this: RoomPosition, structureType: string): T | undefined;
     lookForInBox<T extends Creep | Flag | Structure | Resource | Source | ConstructionSite | LookForInBoxTerrainResult>(this: RoomPosition, structureType: string, radius: number): T[];
     lookTerrainInBox(this: RoomPosition, radius: number): LookForInBoxTerrainResult[];
+
+    toUnicode(this: RoomPosition): string;
 }
 
 interface Room {
     findFirstStructureOfType<T extends Structure>(this: Room, structureType: string, onlyMine?: Boolean): T | undefined;
     findStructuresOfType<T extends Structure>(this: Room, structureType: string, onlyMine?: Boolean): T[];
-    
-    findFirstStructureOfTypeMatching<T extends Structure>(this: Room, structureType: string, condition: (structure: T)=>boolean, onlyMine?: Boolean): T | undefined;
-    findFirstStructureOfTypeMatching<TReturn extends TCallback, TCallback extends Structure>(this: Room, structureType: string, condition: (structure: TCallback)=>boolean, onlyMine?: Boolean): TReturn | undefined;
 
-    findStructuresOfTypeMatching<T extends Structure>(this: Room, structureType: string, condition: (structure: T)=>boolean, onlyMine?: Boolean): T[];
-    findStructuresOfTypeMatching<TReturn extends TCallback, TCallback extends Structure>(this: Room, structureType: string, condition: (structure: TCallback)=>boolean, onlyMine?: Boolean): TReturn[];
+    findFirstStructureOfTypeMatching<T extends Structure>(this: Room, structureType: string, condition: (structure: T) => boolean, onlyMine?: Boolean): T | undefined;
+    findFirstStructureOfTypeMatching<TReturn extends TCallback, TCallback extends Structure>(this: Room, structureType: string, condition: (structure: TCallback) => boolean, onlyMine?: Boolean): TReturn | undefined;
+
+    findStructuresOfTypeMatching<T extends Structure>(this: Room, structureType: string, condition: (structure: T) => boolean, onlyMine?: Boolean): T[];
+    findStructuresOfTypeMatching<TReturn extends TCallback, TCallback extends Structure>(this: Room, structureType: string, condition: (structure: TCallback) => boolean, onlyMine?: Boolean): TReturn[];
 }
 
 
 interface Global {
     fromId<T>(id: string | null | undefined): T | undefined;
+}
+
+interface String {
+    padRight(length: number): string;
+    padRight(length: number, character: string): string;
+    padLeft(length: number): string;
+    padLeft(length: number, character: string): string;
 }
 
 declare function fromId<T>(id: string | null | undefined): T | undefined;

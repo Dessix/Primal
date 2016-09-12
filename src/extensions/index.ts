@@ -1,6 +1,8 @@
+import "./array";
 import "./creep";
-import "./structure";
+import "./flag";
+import "./game";
 import "./room";
 import "./roomPosition";
-import "./game";
-import "./flag";
+import "./string";
+import "./structure";

@@ -75,7 +75,7 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
         if (Game.time < cmem.crr_targ) {
             const idleFlag = Game.spawns[cmem.spawnName].room.find<Flag>(FIND_FLAGS).find(x => x.color === COLOR_BROWN && x.secondaryColor === COLOR_BROWN);
             if (idleFlag !== undefined) {
-                creep.moveTo(idleFlag, { ignoreCreeps: true, reusePath: 20 });
+                creep.moveTo(idleFlag, { reusePath: 20 });
             }
             return;
         }
@@ -138,13 +138,13 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
         }
 
 
-        // {
-        //     const storage = spawn.room.storage;
-        //     if (storage !== undefined && storage.store.energy < storage.storeCapacity) {
-        //         cmem.crr_targ = storage.id;
-        //         return storage;
-        //     }
-        // }
+        {
+            const storage = spawn.room.storage;
+            if (storage !== undefined && storage.store.energy < storage.storeCapacity) {
+                cmem.crr_targ = storage.id;
+                return storage;
+            }
+        }
 
         //return;
     }
@@ -154,18 +154,22 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
         if (creep.carry.energy === creep.carryCapacity) {
             return CourierState.Deliver;
         }
+        if (creep.ticksToLive <= 75) {
+            creep.recycle();
+            return;
+        }
         const target = this.getPickupTarget(creep, cmem);
         if (target === undefined) {
             return CourierState.Wait;
         }
         if ((<StructureStorage | StructureContainer>target).store) {
             if ((<StructureStorage | StructureContainer>target).transfer(creep, "energy") === ERR_NOT_IN_RANGE) {
-                creep.moveTo(target, { ignoreCreeps: true, reusePath: 20 });
+                creep.moveTo(target, { reusePath: 20 });
             }
         } else {
             const pickedUp = creep.pickup(<Resource>target);
             if (pickedUp === ERR_NOT_IN_RANGE) {
-                creep.moveTo(target, { ignoreCreeps: true, reusePath: 20 });
+                creep.moveTo(target, { reusePath: 20 });
             }
         }
     }
@@ -279,6 +283,10 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
         if (creep.carry.energy === 0) {
             return CourierState.Pickup;
         }
+        if (creep.ticksToLive <= 75) {
+            creep.recycle();
+            return;
+        }
         const spawn = creep.spawn;
         const target = this.getDeliveryTarget(creep, cmem);
         if (target === undefined) {
@@ -291,7 +299,7 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
             isFull = (tstrct.energy === tstrct.energyCapacity);
         } else {
             const tstrct = <StructureContainer | StructureStorage>target;
-            isFull = (tstrct.store["energy"] === tstrct.storeCapacity);
+            isFull = (tstrct.store[RESOURCE_ENERGY] === tstrct.storeCapacity);
         }
 
         if (isFull) {
@@ -301,25 +309,25 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
             const builderOrRepairer = nearbyPossibleReceivers.find(c => c.role === RoleBuilder.RoleTag || c.role === RoleRepairer.RoleTag);
             if (builderOrRepairer !== undefined) {
                 if (creep.transfer(builderOrRepairer, "energy") === ERR_NOT_IN_RANGE) {
-                    creep.moveTo(builderOrRepairer, { ignoreCreeps: true, reusePath: 20 });
+                    creep.moveTo(builderOrRepairer, { reusePath: 20 });
                 }
                 return;
             }
 
             const idleFlag = Game.spawns[cmem.spawnName].room.find<Flag>(FIND_FLAGS).find(x => x.color === COLOR_BROWN && x.secondaryColor === COLOR_BROWN);
             if (idleFlag !== undefined) {
-                creep.moveTo(idleFlag, { ignoreCreeps: true, reusePath: 20 });
+                creep.moveTo(idleFlag, { reusePath: 20 });
             }
             return;
         }
 
         if (creep.transfer(target, "energy") === ERR_NOT_IN_RANGE) {
-            creep.moveTo(target, { ignoreCreeps: true, reusePath: 20 });
+            creep.moveTo(target, { reusePath: 20 });
         }
     }
 
     private shouldDeliver(creep: Creep): boolean {
-        return creep.carry.energy >= 10 * creep.body.length;
+        return creep.carry.energy === creep.carryCapacity;
     }
 
     private handleDecide(creep: Creep, cmem: CourierMemory): CourierState | undefined {

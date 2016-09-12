@@ -1,10 +1,4 @@
-export interface IBot {
-}
 
-export class Test {
-    constructor() {
-        console.log(4);
-    }
-}
+import "./testWayfarer";
 
-export default new Test();
+

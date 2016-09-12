@@ -46,19 +46,3 @@ export class BitComp {
         return String.fromCharCode.apply(null, new Uint16Array(buffer, offset, byteLength));
     }
 }
-
-
-
-//Bovius's Compression Code
-// RoomPosition.prototype.toUnicode = function() {
-//     return String.fromCharCode((this.x << 8) + this.y);
-// }
-
-// RoomPosition.prototype.fromUnicode = function(roomName, character) {
-//     let integer = character.charCodeAt(0);
-//     return new RoomPosition(
-//         (integer >> 8), 
-//         (integer & 255),
-//         roomName
-//     );  
-// }
