@@ -1,5 +1,3 @@
-import { WorldPosition } from "../../lib/worldPosition";
-
 const ROOM_TAG_LENGTH = 8;
 
 export class Wayfarer {

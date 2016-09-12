@@ -6,3 +6,4 @@ secrets.*
 typings
 .idea
 .vscode/symbols.json
+test/**.js

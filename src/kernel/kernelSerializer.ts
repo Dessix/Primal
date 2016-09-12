@@ -61,4 +61,17 @@ export class KernelSerializer {
         }
         return output;
     }
+
+    public static spawnNewProcessTable() {
+        const processTable = KernelSerializer.createBlankProcessTable();
+        const procInst: SerializedProcess = {
+            className: "Root",
+            pid: 0,
+            parentPid: 0,
+            heat: 1000,
+            service: true,
+        };
+        processTable.push(procInst);
+        return processTable;
+    }
 }

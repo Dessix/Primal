@@ -1,7 +1,9 @@
 {
   "name": "prime",
   "globalDependencies": {
+    "chai": "registry:dt/chai#3.4.0+20160601211834",
     "lodash": "registry:dt/lodash#3.10.0+20160720001309",
+    "mocha": "registry:dt/mocha#2.2.5+20160720003353",
     "screeps": "github:screepers/Screeps-Typescript-Declarations/dist/screeps.d.ts#TS2"
   }
 }

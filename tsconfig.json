@@ -15,7 +15,8 @@
   "include": [
     "typings/**/*.d.ts",
     "lib/**/*.ts",
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "test/**/*.ts"
   ],
   "compileOnSave": false,
   "exclude": [

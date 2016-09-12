@@ -100,7 +100,7 @@ export class Kernel {
         }
     }
 
-    public spawnProcessByClassName(processName: string, parentPid?: number): ProcessId | undefined {
+public spawnProcessByClassName(processName: string, parentPid?: number): ProcessId | undefined {
         if (parentPid === undefined) {
             parentPid = 0;
         }

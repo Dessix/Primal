@@ -15,6 +15,7 @@
         "lib",
         "**/.git",
         "**/.svn",
-        "**/.DS_Store"
+        "**/.DS_Store",
+        "test/**.js"
     ]
 }

@@ -24,19 +24,6 @@ if (Memory.config.profile) {
 }
 
 Processes.RegisterAll();
-function spawnNewProcessTable() {
-    const processTable = KernelSerializer.createBlankProcessTable();
-    console.log("Ω spawned new process table");
-    const procInst: SerializedProcess = {
-        className: "Root",
-        pid: 0,
-        parentPid: 0,
-        heat: 1000,
-        service: true,
-    };
-    processTable.push(procInst);
-    return processTable;
-}
 
 const kernel = global.k = global.kernel = new Kernel();
 global.volatile = {};
@@ -44,7 +31,7 @@ global.volatile = {};
 //Command-line calls
 global.reset = function (): SerializedProcessTable {
     console.log("Ω Rebooting...");
-    Memory.proc = spawnNewProcessTable();
+    Memory.proc = KernelSerializer.spawnNewProcessTable();
     delete Memory.pmem;
     return Memory.proc;
 };
@@ -106,9 +93,10 @@ if (!global.f) { Object.defineProperty(global, "f", { get: () => Game.flags }); 
 };
 
 function loadProcessTable(k: Kernel): void {
-    let proc = Memory.proc || spawnNewProcessTable();
-    if (proc.length === 0) {
-        proc = spawnNewProcessTable();
+    let proc = Memory.proc;
+    if (proc === undefined || proc.length === 0) {
+        proc = KernelSerializer.spawnNewProcessTable();
+        console.log("Ω spawned new process table");
     }
     Memory.proc = proc;
     try {
@@ -119,7 +107,7 @@ function loadProcessTable(k: Kernel): void {
     }
 }
 
-function saveProcessTable(k: Kernel):void {
+function saveProcessTable(k: Kernel): void {
     try {
         Memory.proc = KernelSerializer.serializeProcessTable(kernel.getProcessTable());
     } catch (e) {
