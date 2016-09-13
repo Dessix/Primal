@@ -47,8 +47,11 @@ interface LookForInBoxTerrainResult {
 }
 
 interface RoomPositionConstructor {
+    new (x: number, y: number, roomName: string): RoomPosition;
+    toUnicode(this: void, pos: PointLike): string;
+    fromUnicode(this: void, character: string, roomName: string): RoomPosition;
+    fromUnicodeFast(this: void, character: string): PointLike;
 }
-
 
 interface RoomPosition {
     getRangeToLinearSqr(this: RoomPosition, other: RoomPosition): number;
@@ -84,10 +87,17 @@ interface String {
     padLeft(length: number, character: string): string;
 }
 
-interface ObjectX extends Object {
-    values<T>(object: { [key: string]: T; [key: number]: T; }): T[];
+interface ObjectConstructor {
+    values<T>(object: { [key: string]: T;[key: number]: T; }): T[];
 }
 
-declare const ObjectX: ObjectX;
-
 declare function fromId<T>(id: string | null | undefined): T | undefined;
+
+interface PointLike {
+    x: number;
+    y: number;
+}
+
+interface RoomPositionLike extends PointLike {
+    roomName: string;
+}

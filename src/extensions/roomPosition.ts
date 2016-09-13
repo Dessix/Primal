@@ -1,4 +1,26 @@
-import { safeExtendPrototype } from "../util/reflection";
+import * as Reflect from "../util/reflection";
+
+class RoomPositionConstructorX {
+  public static toUnicode(this: void, pos: PointLike): string {
+    return String.fromCharCode((pos.x << 8) + pos.y);
+  }
+
+  public static fromUnicode(this: void, character: string, roomName: string): RoomPosition {
+    const integer = character.charCodeAt(0);
+    return new RoomPosition(
+      (integer >> 8),
+      (integer & 255),
+      roomName
+    );
+  }
+
+  public static roomPosFromUnicodeFast(this: void, character: string): PointLike {
+    const integer = character.charCodeAt(0);
+    return { x: (integer >> 8), y: (integer & 255) };
+  }
+}
+
+Reflect.safeExtendRaw(RoomPosition, RoomPositionConstructorX);
 
 class RoomPositionX extends RoomPosition {
   public getRangeToLinearSqr(this: RoomPosition, other: RoomPosition): number {
@@ -107,7 +129,7 @@ class RoomPositionX extends RoomPosition {
     return new RoomPosition(this.x + x, this.y + y, this.roomName);
   }
 
-  public offsetByPoint(this: RoomPosition, offset: { x: number; y: number; }): RoomPosition {
+  public offsetByPoint(this: RoomPosition, offset: PointLike): RoomPosition {
     return new RoomPosition(this.x + offset.x, this.y + offset.y, this.roomName);
   }
 
@@ -136,4 +158,4 @@ class RoomPositionX extends RoomPosition {
   }
 }
 
-safeExtendPrototype(RoomPosition, RoomPositionX, true);
+Reflect.safeExtendPrototype(RoomPosition, RoomPositionX, true);

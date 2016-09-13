@@ -1,28 +1,13 @@
 const ROOM_TAG_LENGTH = 8;
 
 export class Wayfarer {
-  //Bovius's Unicode Compression
-  public static roomPosToUnicode(this: void, pos: RoomPosition) {
-    return String.fromCharCode((pos.x << 8) + pos.y);
-  }
 
-  public static roomPosFromUnicode(this: void, character: string, roomName: string): RoomPosition {
-    const integer = character.charCodeAt(0);
-    return new RoomPosition(
-      (integer >> 8),
-      (integer & 255),
-      roomName
-    );
-  }
-
-  public static roomPosFromUnicodeFast(this: void, character: string): { x: number; y: number; } {
+  public static pointFromUnicodeFast(this: void, character: string): PointLike {
     const integer = character.charCodeAt(0);
     return { x: (integer >> 8), y: (integer & 255) };
   }
 
-  public static get RoomTagLength(): number {
-    return ROOM_TAG_LENGTH;
-  }
+  public static readonly RoomTagLength: number = ROOM_TAG_LENGTH;
 
   public static getPathLength(this: void, pathChunks: string[]): number {
     let totalStepLength = 0;
@@ -36,7 +21,7 @@ export class Wayfarer {
    * @return string[] of whitespace-right-padded ROOM_TAG_LENGTH characters roomName followed by
    * 1 character per position in each room per string. One string per room in path.
    */
-  public static serializePath(this: void, positions: RoomPosition[]): string[] {
+  public static serializePath(this: void, positions: RoomPositionLike[]): string[] {
     const outputPaths = new Array<string>();
     let currentRoomPath = "";
     let currentRoomName: string | undefined = undefined;
@@ -49,7 +34,7 @@ export class Wayfarer {
         }
         currentRoomName = pos.roomName;
       }
-      currentRoomPath += Wayfarer.roomPosToUnicode(pos);
+      currentRoomPath += RoomPosition.toUnicode(pos);
     }
     if (currentRoomName !== undefined && currentRoomPath.length !== 0) {
       outputPaths.push(currentRoomName.padRight(ROOM_TAG_LENGTH) + currentRoomPath);
@@ -68,7 +53,7 @@ export class Wayfarer {
       const chunk = pathChunks[i];
       const roomName = chunk.substr(0, ROOM_TAG_LENGTH).trim();
       for (let p = 0, np = chunk.length - ROOM_TAG_LENGTH; p < np; ++p) {
-        outputs[lastOffset + p] = Wayfarer.roomPosFromUnicode(chunk[ROOM_TAG_LENGTH + p], roomName);
+        outputs[lastOffset + p] = RoomPosition.fromUnicode(chunk[ROOM_TAG_LENGTH + p], roomName);
       }
       lastOffset += chunk.length - ROOM_TAG_LENGTH;
     }
@@ -76,10 +61,11 @@ export class Wayfarer {
   }
 
   public static deserializePathStep(this: void, pathChunks: string[], step: number): RoomPosition | undefined {
+    if (step < 0) { throw new RangeError("Step cannot be less than 0"); }
     let chosenPathChunk: string | undefined;
     for (let i = 0, n = pathChunks.length; i < n; ++i) {
       const chunk = pathChunks[i];
-      if (chunk.length - ROOM_TAG_LENGTH < step) {
+      if (chunk.length - ROOM_TAG_LENGTH <= step) {
         step -= (chunk.length - ROOM_TAG_LENGTH);
       } else {
         chosenPathChunk = chunk;
@@ -90,6 +76,6 @@ export class Wayfarer {
       return undefined;//Step was at a larger index than the path contained
     }
     const roomName = chosenPathChunk.substr(0, ROOM_TAG_LENGTH).trim();
-    return Wayfarer.roomPosFromUnicode(chosenPathChunk[step + ROOM_TAG_LENGTH], roomName);
+    return RoomPosition.fromUnicode(chosenPathChunk[step + ROOM_TAG_LENGTH], roomName);
   }
 }

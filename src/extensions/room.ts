@@ -1,4 +1,4 @@
-import { safeExtendPrototype } from "../util/reflection";
+import * as Reflect from "../util/reflection";
 interface RoomWithSlowFind extends Room {
     slowFind<T>(type: number, opts?: { filter: Object | Function | string }): T[];
     fastFindObject: { filter: Object | Function | string };
@@ -83,7 +83,6 @@ interface RoomWithSlowFindExitTo extends Room {
     }
 }
 
-
 class RoomX extends Room {
     public findFirstStructureOfType<T extends Structure>(this: Room, structureType: string, onlyMine: boolean = true): T | undefined {
         if (onlyMine && (structureType === STRUCTURE_WALL || structureType === STRUCTURE_ROAD || structureType === STRUCTURE_CONTAINER)) {
@@ -115,4 +114,4 @@ class RoomX extends Room {
     }
 }
 
-safeExtendPrototype(Room, RoomX, true);
+Reflect.safeExtendPrototype(Room, RoomX, true);

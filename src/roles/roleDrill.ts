@@ -213,7 +213,11 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
             //Emergency repair
             if (container !== undefined && container.hits < container.hitsMax * 0.75) {
                 creep.repair(container);
-            } else if (link !== undefined && link.energy < link.energyCapacity) {
+            } else if (
+                link !== undefined &&
+                link.energy < link.energyCapacity &&
+                creep.carry.energy >= creep.carryCapacity * 0.9
+            ) {
                 if (container !== undefined && container.store[RESOURCE_ENERGY] > 0) {
                     creep.withdraw(container, RESOURCE_ENERGY);
                 }

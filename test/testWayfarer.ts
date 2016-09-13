@@ -1,12 +1,5 @@
-import { Wayfarer } from "../src/util/Wayfarer";
-import "../src/extensions/string";
-import * as _ from "lodash";
-import * as chai from "chai";
-const expect = chai.expect;
-const assert = chai.assert;
-
 //Mock roomPosition
-class MockRoomPosition {
+class MockRoomPosition implements RoomPositionLike {
   public readonly x: number;
   public readonly y: number;
   public readonly roomName: string;
@@ -18,7 +11,15 @@ class MockRoomPosition {
 }
 
 declare const global: any;
-global.RoomPosition = MockRoomPosition;
+global.RoomPosition = <RoomPositionConstructor>MockRoomPosition;
+
+import { Wayfarer } from "../src/util/Wayfarer";
+import "../src/extensions/string";
+import "../src/extensions/roomPosition";
+import * as _ from "lodash";
+import * as chai from "chai";
+const expect = chai.expect;
+const assert = chai.assert;
 
 const testPath = new Array<RoomPosition>(
   new RoomPosition(46, 49, "E0N0"),//START at bottom right
@@ -47,11 +48,28 @@ describe("Wayfarer", () => {
     const serialized = Wayfarer.serializePath(testPath);
     Wayfarer.getPathLength(serialized);
   });
+  it("Should determine 0 length from an empty path", () => {
+    const serialized = Wayfarer.serializePath([]);
+    Wayfarer.getPathLength(serialized);
+  });
   it("Should be able to determine the length of a serialized path without edits", () => {
     const serialized = Wayfarer.serializePath(testPath);
     const toMeasure = _.cloneDeep(serialized);
     Wayfarer.getPathLength(toMeasure);
     assert.deepEqual(toMeasure, serialized);
   });
-
+  it("Should be able to deserialize single steps", () => {
+    const serialized = Wayfarer.serializePath(testPath);
+    for (let i = 0, n = testPath.length; i < n; ++i) {
+      assert.deepEqual(Wayfarer.deserializePathStep(serialized, i), testPath[i]);
+    }
+  });
+  it("Should return undefined if past the last step", () => {
+    const serialized = Wayfarer.serializePath(testPath);
+    assert.strictEqual(Wayfarer.deserializePathStep(serialized, testPath.length), undefined);
+  });
+  it("Should throw if before the first step", () => {
+    const serialized = Wayfarer.serializePath(testPath);
+    assert.throws(() => Wayfarer.deserializePathStep(serialized, -1), RangeError);
+  });
 });
