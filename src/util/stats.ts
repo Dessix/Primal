@@ -8,7 +8,7 @@ interface StatsMemory extends Memory {
 declare const global: { kernel: Kernel; };
 declare const RawMemory: RawMemory;
 
-export function RecordStats() {
+export function RecordStats(initialCpuOverhead: number, memoryInitializationTime: number) {
     const stats = <StatsRecord>{};
     const rooms = Game.rooms;
     const spawns = Game.spawns;
@@ -39,8 +39,8 @@ export function RecordStats() {
     stats["gcl.progressTotal"] = Game.gcl.progressTotal;
     stats["gcl.level"] = Game.gcl.level;
     for (let spawnKey in spawns) {
-        let spawn = Game.spawns[spawnKey];
-        stats["spawn." + spawn.name + ".defenderIndex"] = spawn.memory["defenderIndex"];
+        let spawn = spawns[spawnKey];
+        stats[`spawn.${spawn.name}.defenderIndex`] = spawn.memory["defenderIndex"];
     }
 
     stats["cpu.bucket"] = Game.cpu.bucket;
@@ -50,6 +50,8 @@ export function RecordStats() {
     stats["cpu.getUsed"] = used;
     stats["memory.usage"] = RawMemory.get().length;
     stats["processCount"] = global.kernel.getProcessCount();
+    stats["cpu.memoryDeserializationTime"] = memoryInitializationTime;
+    stats["cpu.initialOverhead"] = initialCpuOverhead;
 
     (<StatsMemory>Memory).stats = stats;
 }

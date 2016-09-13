@@ -1,3 +1,11 @@
+const initialCpuOverhead = Game.cpu.getUsed();
+function ProfileMemoryDeserialization(): number {
+    const start = Game.cpu.getUsed();
+    Memory;
+    return Game.cpu.getUsed() - start;
+}
+let initialMemoryInitializationTime = ProfileMemoryDeserialization();
+
 import * as Roles from "./roles";
 import { RecordStats } from "./util/stats";
 import "./extensions/";//Apply extension modules
@@ -115,17 +123,19 @@ function saveProcessTable(k: Kernel): void {
     }
 }
 
+let isInitTick = true;
 const minCpuAlloc = 0.35;
 const minCpuAllocInverse = 1 - minCpuAlloc;
 function mainLoop() {
+    const memoryInitializationTime = (isInitTick ? initialMemoryInitializationTime : ProfileMemoryDeserialization());
     global.tickVolatile = {};
     const bucket = Game.cpu.bucket;
     const cpuLimitRatio = ((bucket * bucket) * minCpuAllocInverse * 10e-8) + minCpuAlloc;
     loadProcessTable(kernel);
     kernel.run(Game.cpu.limit * cpuLimitRatio);
     saveProcessTable(kernel);
-    //(<any>global).spawnBard();
-    RecordStats();
+    RecordStats(initialCpuOverhead, memoryInitializationTime);
+    isInitTick = false;
 };
 
 export const loop = !Memory.config.profile ? mainLoop : Profiler.wrap(mainLoop);
