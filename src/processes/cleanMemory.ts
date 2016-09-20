@@ -1,7 +1,7 @@
 import { Kernel } from "./../kernel/kernel";
 import { Process } from "../kernel/process";
 
-export class PCleanMemory extends Process {
+export class PCleanMemory extends Process<ProcessMemory> {
     public static className: string = "CleanMem";
     public get className(): string { return PCleanMemory.className; }
     public readonly baseHeat: number = 5;
@@ -10,12 +10,7 @@ export class PCleanMemory extends Process {
         super(pid, parentPid);
     }
 
-    public run(): ProcessMemory | undefined {
-        this.cleanMemory();
-        return;
-    }
-
-    public cleanMemory(): void {
+    public run(pmem: ProcessMemory): void {
         const gameAccessible = <{ [name: string]: any }>Game;
         for (let key of ["creeps", "spawns', 'rooms", "flags"]) {
             const memK = Memory[key];
@@ -26,9 +21,5 @@ export class PCleanMemory extends Process {
                 }
             }
         }
-    }
-
-    public reloadFromMemory(pmem: ProcessMemory | undefined): void {
-        this.cleanMemory();
     }
 }

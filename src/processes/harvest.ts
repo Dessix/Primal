@@ -3,9 +3,8 @@ import * as Roles from "../roles";
 import { Process, ProcessStatus } from "../kernel/process";
 import { MiningScanner } from "../util/miningScanner";
 
-export class PHarvest extends Process {
+export class PHarvest extends Process<ProcessMemory> {
     public static className: string = "Harvest";
-    public get className(): string { return PHarvest.className; }
 
     public constructor(pid: ProcessId, parentPid: ProcessId) {
         super(pid, parentPid);
@@ -21,7 +20,7 @@ export class PHarvest extends Process {
             };
             const success = spawn.createCreep(
                 chosenBody,
-                Roles.RoleCourier.generateName(Roles.RoleCourier),
+                Roles.RoleCourier.generateName(Roles.RoleCourier, creepMemory),
                 creepMemory
             );
             if (typeof success === "number") {
@@ -43,7 +42,7 @@ export class PHarvest extends Process {
             const creepMemory: CreepMemory = Roles.RoleDrill.createInitialMemory(spawn, spawn.room, ++(roomSourceInfo.lastSourceIndex));
             const success = spawn.createCreep(
                 chosenBody,
-                Roles.RoleDrill.generateName(Roles.RoleDrill),
+                Roles.RoleDrill.generateName(Roles.RoleDrill, creepMemory),
                 creepMemory
             );
             if (typeof success === "number") {
@@ -71,7 +70,7 @@ export class PHarvest extends Process {
         };
         const success = spawn.createCreep(
             chosenBody,
-            Roles.RoleBootstrapMiner.generateName(Roles.RoleBootstrapMiner),
+            Roles.RoleBootstrapMiner.generateName(Roles.RoleBootstrapMiner, creepMemory),
             creepMemory
         );
         if (typeof success === "number") {
@@ -84,7 +83,7 @@ export class PHarvest extends Process {
         return false;
     }
 
-    public run(): ProcessMemory | undefined {
+    public run(pmem: ProcessMemory): void {
         const roleDrill = Roles.RoleDrill.Instance;
         const roleCourier = Roles.RoleCourier.Instance;
         const roleBard = Roles.RoleBard.Instance;
@@ -173,6 +172,5 @@ export class PHarvest extends Process {
                 }
             }
         }
-        return;
     }
 }

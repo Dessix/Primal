@@ -8,10 +8,9 @@ type RootMemory = {
     memoryCleanerPid?: ProcessId,
 };
 
-export class PRoot extends Process {
+export class PRoot extends Process<RootMemory> {
     public static className: string = "Root";
     public get className(): string { return PRoot.className; }
-    private pmem: RootMemory;
     public readonly baseHeat: number = 1000; 
     public readonly service: boolean = true;
 
@@ -19,9 +18,8 @@ export class PRoot extends Process {
         super(pid, parentPid);
     }
 
-    public run(): ProcessMemory | undefined {
+    public run(pmem: RootMemory) {
         const kernel = <Kernel>this.kernel;
-        const pmem = this.pmem;
         if (!pmem.bootstrapped && kernel.getProcessCount() <= 1) {
             console.log("Processes empty! Bootstrapping!");
             this.spawnChildProcess(PBootstrap);
@@ -31,11 +29,5 @@ export class PRoot extends Process {
             pmem.memoryCleanerPid = this.spawnChildProcess(PCleanMemory);
         }
         return pmem;
-    }
-
-    public reloadFromMemory(pmem: ProcessMemory | undefined): void {
-        this.pmem = (<RootMemory | undefined>pmem) || {
-            bootstrapped: false,
-        };
     }
 }

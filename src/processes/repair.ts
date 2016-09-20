@@ -2,7 +2,7 @@ import { RoleListing } from "./../ipc/roleListing";
 import { RoleCourier, RoleDrill, RoleUpgrader, RoleRepairer } from "../roles";
 import { Process, ProcessStatus } from "../kernel/process";
 
-export class PRepair extends Process {
+export class PRepair extends Process<ProcessMemory> {
     public static className: string = "Repair";
     public get className(): string { return PRepair.className; }
     private pmem: number;
@@ -39,7 +39,7 @@ export class PRepair extends Process {
                 };
                 const success = spawn.createCreep(
                     chosenBody,
-                    RoleRepairer.generateName(RoleRepairer),
+                    RoleRepairer.generateName(RoleRepairer, creepMemory),
                     creepMemory
                 );
                 if (typeof success === "number") {

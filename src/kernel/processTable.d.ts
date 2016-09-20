@@ -1,4 +1,6 @@
-type ProcessMemory = Object;
+interface ProcessMemory {
+
+}
 type ProcessId = number;
 
 type SerializedProcess = {
@@ -13,6 +15,6 @@ interface SerializedProcessTable extends Array<SerializedProcess> {
 }
 
 interface Memory {
-    proc: SerializedProcessTable | undefined;
-    pmem: { [pid: number /*ProcessId*/]: ProcessMemory | undefined } | undefined;
+    proc?: SerializedProcessTable;
+    pmem?: { [pid: number /*ProcessId*/]: ProcessMemory | undefined };
 }

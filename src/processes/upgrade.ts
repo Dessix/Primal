@@ -2,17 +2,14 @@ import { RoleListing } from "./../ipc/roleListing";
 import { RoleDrill, RoleCourier, RoleUpgrader } from "../roles";
 import { Process, ProcessStatus } from "../kernel/process";
 
-export class PUpgrade extends Process {
+export class PUpgrade extends Process<ProcessMemory> {
     public static className: string = "Upgrade";
-    public get className(): string { return PUpgrade.className; }
-    private pmem: number;
 
     public constructor(pid: ProcessId, parentPid: ProcessId) {
         super(pid, parentPid);
     }
 
-    public run(): ProcessMemory | undefined {
-        let pmem = this.pmem;
+    public run(pmem: ProcessMemory): void {
         const roleUpgrader = RoleUpgrader.Instance;
         for (let upgrader of RoleListing.getByRole(RoleUpgrader)) {
             roleUpgrader.run(upgrader);
@@ -33,7 +30,7 @@ export class PUpgrade extends Process {
                     };
                     const success = spawn.createCreep(
                         RoleUpgrader.chooseBody(energyAvailable),
-                        RoleUpgrader.generateName(RoleUpgrader),
+                        RoleUpgrader.generateName(RoleUpgrader, creepMemory),
                         creepMemory
                     );
                     if (typeof success === "number") {
@@ -45,6 +42,5 @@ export class PUpgrade extends Process {
                 }
             }
         }
-        return;
     }
 }

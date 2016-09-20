@@ -1,5 +1,5 @@
 import { ProcessRegistry } from "../src/kernel/processRegistry";
-import { Process } from "../src/kernel/process";
+import { IProcess } from "../src/kernel/process";
 import { KernelSerializer } from "../src/kernel/kernelSerializer";
 import { Kernel } from "../src/kernel/kernel";
 import { MockPRoot } from "./res/mockPRoot";
@@ -26,7 +26,7 @@ describe("Kernel", () => {
     k.loadProcessTable(KernelSerializer.deserializeProcessTable(KernelSerializer.spawnNewProcessTable()));
     const maybeRootProc = k.getProcessById(0);
     assert.isDefined(maybeRootProc);
-    const rootProc = <Process>maybeRootProc;
+    const rootProc = <IProcess>maybeRootProc;
     expect(rootProc).to.have.property("className", "Root");
   });
 
@@ -35,7 +35,7 @@ describe("Kernel", () => {
     k.spawnProcessByClassName("Root");
     const maybeRootProc = k.getProcessById(0);
     assert.isDefined(maybeRootProc);
-    const rootProc = <Process>maybeRootProc;
+    const rootProc = <IProcess>maybeRootProc;
     expect(rootProc).to.have.property("className", "Root");
   });
 

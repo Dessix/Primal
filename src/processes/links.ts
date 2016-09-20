@@ -12,12 +12,10 @@ interface LinkRoomMemory {
     miningLinkIds?: LinkId[];
 }
 
-export class PLinks extends Process {
+export class PLinks extends Process<LinksMemory> {
     public static className: string = "Links";
-    public get className(): string { return PLinks.className; }
     public readonly LinkScanTickrate: number = 50;
     public readonly baseHeat: number = 7;
-    private pmem: LinksMemory;
 
     public constructor(pid: ProcessId, parentPid: ProcessId) {
         super(pid, parentPid);
@@ -28,8 +26,7 @@ export class PLinks extends Process {
         //if (rmem.storageLinkId === nul
     }
 
-    public run(): ProcessMemory | undefined {
-        const pmem = this.pmem;
+    public run(pmem: LinksMemory): void {
         const gTime = Game.time;
         for (let roomName in Game.rooms) {
             const room = Game.rooms[roomName];
@@ -88,16 +85,6 @@ export class PLinks extends Process {
         //     if (closest.my) { console.log("Error: Tower is targetting allied creep!"); continue; }
         //     tower.attack(closest);
         // }
-        return pmem;
-    }
-
-    public reloadFromMemory(pmem: ProcessMemory | undefined): void {
-        if (pmem !== undefined) {
-            this.pmem = <LinksMemory>pmem;
-        } else {
-            this.pmem = {
-            };
-        }
     }
 
     private findLinks(miningPosition: RoomPosition): string | undefined {

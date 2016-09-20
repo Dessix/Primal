@@ -1,21 +1,40 @@
 import { Kernel } from "./kernel";
 import { ProcessRegistry } from "./processRegistry";
 
-export type ProcessConstructor = ((new (_pid: ProcessId, _parentPid: ProcessId) => Process) & { readonly className: string });
 export enum ProcessStatus {
     TERM = -2,
     EXIT = -1,
     RUN = 0,
 }
 
-export abstract class Process {
+export interface ProcessConstructor {
+    new (_pid: ProcessId, _parentPid: ProcessId): IProcess;
+    readonly className: string;
+    Register(this: ProcessConstructor): void;
+};
 
-    public abstract readonly className: string;
+export interface IProcess {
+    readonly className: string;
+    pid: ProcessId;
+    parentPid: ProcessId;
+    kernel: Kernel | null;
+    readonly baseHeat: number;
+    status: ProcessStatus;
+    readonly service: boolean;
+
+    run?(pmem: ProcessMemory): void;
+    reloadFromMemory?(pmem: ProcessMemory): void;
+}
+
+export abstract class Process<TMemory extends ProcessMemory> implements IProcess {
+    public get className(this: Process<TMemory>): string {
+        return (<{ constructor: ProcessConstructor; }><any>this).constructor.className;
+    }
     public pid: ProcessId;
     public parentPid: ProcessId;
     public kernel: Kernel | null;
-    public readonly baseHeat: number = 10;
     public status: ProcessStatus = ProcessStatus.RUN;
+    public readonly baseHeat: number = 10;
     public readonly service: boolean = false;
 
     public get kernelOrThrow(): Kernel {
@@ -30,8 +49,8 @@ export abstract class Process {
         return childPid;
     }
 
-    public static Register(className: string, processCtor: ProcessConstructor): void {
-        ProcessRegistry.register(className, processCtor);
+    public static Register(this: ProcessConstructor): void {
+        ProcessRegistry.register(this.className, this);
     }
 
     constructor(pid: ProcessId, parentPid: ProcessId) {
@@ -39,8 +58,7 @@ export abstract class Process {
         this.parentPid = parentPid;
     }
 
-    public abstract run(): ProcessMemory | undefined;
+    public run?(pmem: TMemory): void;
 
-    public reloadFromMemory(processMemory: ProcessMemory | undefined): void {
-    };
+    public reloadFromMemory?(pmem: TMemory): void;
 }

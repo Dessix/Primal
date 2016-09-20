@@ -8,7 +8,7 @@ import * as chai from "chai";
 const expect = chai.expect;
 const assert = chai.assert;
 
-ProcessRegistry.register(MockPRoot.className, MockPRoot);
+MockPRoot.Register();
 
 describe("KernelSerializer", () => {
 

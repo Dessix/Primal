@@ -13,7 +13,7 @@ interface BootstrapMemory {
     repairPid?: ProcessId;
 };
 
-export class PBootstrap extends Process {
+export class PBootstrap extends Process<BootstrapMemory> {
     public static className: string = "Bootstrap";
     public get className(): string { return PBootstrap.className; }
     private pmem: BootstrapMemory;

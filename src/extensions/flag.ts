@@ -1,6 +1,6 @@
 import { safeExtendPrototype } from "../util/reflection";
 
-class FlagX extends Flag {
+class FlagX {
 
     public get id(this: Flag): string {
         return `flag-${this.name}`;

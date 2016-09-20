@@ -15,7 +15,7 @@ interface ProcWithStatic {
 }
 
 export class Processes {
-    public static readonly ProcessClasses = <(ProcessConstructor & { Register(className: string, processCtor: ProcessConstructor): void })[]>[
+    public static readonly ProcessClasses = <ProcessConstructor[]>[
         PBootstrap,
         PBuild,
         PCleanMemory,
@@ -32,7 +32,7 @@ export class Processes {
         const pclasses = Processes.ProcessClasses;
         for (let i = pclasses.length; --i >= 0;) {
             const pclass = pclasses[i];
-            pclass.Register(pclass.className, pclass);
+            pclass.Register();
         }
     }
 }

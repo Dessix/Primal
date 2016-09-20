@@ -10,10 +10,12 @@
     "strictNullChecks": true,
     "removeComments": true,
     "noUnusedParameters": false,
-    "noUnusedLocals": false
+    "noUnusedLocals": false,
+    "moduleResolution": "node"
   },
   "include": [
     "typings/**/*.d.ts",
+    "src/**/*.d.ts",
     "lib/**/*.ts",
     "src/**/*.ts",
     "test/**/*.ts"

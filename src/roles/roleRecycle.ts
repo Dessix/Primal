@@ -24,7 +24,8 @@ export class RoleRecycle extends BaseRole<RecyclerMemory> {
         const spawn = creep.spawn;
 
         if (creep.pos.getRangeTo(spawn) > 1) {
-            console.log("Recyclemove!", spawn.pos, creep.moveTo(spawn.pos));
+            creep.moveTo(spawn.pos);
+            creep.say("o7");
             return;
         }
 
@@ -38,7 +39,6 @@ export class RoleRecycle extends BaseRole<RecyclerMemory> {
                 creep.drop(RESOURCE_ENERGY);
             }
         } else {
-            creep.say("o7");
             console.log("Creep suiciding");
             spawn.recycleCreep(creep);
         }

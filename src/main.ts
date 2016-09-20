@@ -82,7 +82,7 @@ if (!global.f) { Object.defineProperty(global, "f", { get: () => Game.flags }); 
     };
     const success = spawn.createCreep(
         chosenBody,
-        Roles.RoleBard.generateName(Roles.RoleBard),
+        Roles.RoleBard.generateName(Roles.RoleBard, creepMemory),
         creepMemory
     );
     if (typeof success === "number") {

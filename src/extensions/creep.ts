@@ -1,35 +1,20 @@
 import { safeExtendPrototype } from "../util/reflection";
 
-interface CreepMoveRecord {
-    time: number;
-    pathStep: number;
-    pathLength: number;
-    path: Array<string>;
-}
-
-class CreepX extends Creep {
-    public get cmem(): CreepMemory {
-        return <CreepMemory>this.memory;
+class CreepX {
+    public get role(this: Creep): string | null | undefined {
+        return this.memory.role;
     }
 
-    public set cmem(value: CreepMemory) {
-        this.memory = value;
-    }
-
-    public get role(): string | null | undefined {
-        return this.cmem.role;
-    }
-
-    public set role(value: string | null | undefined) {
+    public set role(this: Creep, value: string | null | undefined) {
         if (value !== undefined) {
-            this.cmem.role = value;
+            this.memory.role = value;
         } else {
-            delete this.cmem.role;
+            delete this.memory.role;
         }
     }
 
-    public get spawn(): Spawn {
-        return Game.spawns[(<CreepMemory>this.memory).spawnName];
+    public get spawn(this: Creep): Spawn {
+        return Game.spawns[this.memory.spawnName];
     }
 
     public set spawn(spawn: Spawn) {
@@ -39,19 +24,19 @@ class CreepX extends Creep {
         (<CreepMemory>this.memory).spawnName = spawn.name;
     }
 
-    public get homeRoom(): Room {
-        return Game.rooms[(<CreepMemory>this.memory).homeRoomName];
+    public get homeRoom(this: Creep): Room {
+        return Game.rooms[this.memory.homeRoomName];
     }
 
     public set homeRoom(homeRoom: Room) {
         if (!homeRoom || !Game.rooms[homeRoom.name]) {
             throw new Error("Null/undefined homeRoom assigned to creep!");
         }
-        (<CreepMemory>this.memory).homeRoomName = homeRoom.name;
+        this.memory.homeRoomName = homeRoom.name;
     }
 
     public recycle(this: Creep): void {
-        this.cmem.role = "recy";
+        this.memory.role = "recy";
     }
 
     public travelTo(this: Creep, target: RoomPosition | RoomObject, opts?: MoveToOpts & FindPathOpts): number {
@@ -69,36 +54,38 @@ class CreepX extends Creep {
 
         const reusePath = opts !== undefined && opts.reusePath;
 
-        let memory = <CreepMemory | undefined>this.memory;
-        if (opts !== undefined && opts.reusePath && memory !== undefined && memory._move !== undefined) {
-            const _move = <CreepMoveRecord>memory._move;
+        const memory = this.memory;
+        if (opts !== undefined && opts.reusePath && memory._move !== undefined) {
+            const tr = memory.t;
 
-            if (Game.time > _move.time + reusePath) {
-                delete this.memory._move;
-            } else if (_move.dest.room == roomName && _move.dest.x == x && _move.dest.y == y) {
+            
+            
+            // if (Game.time > _move.time + reusePath) {
+            //     delete this.memory._move;
+            // } else if (_move.dest.room == roomName && _move.dest.x == x && _move.dest.y == y) {
 
-                var path = _.isString(_move.path) ? utils.deserializePath(_move.path) : _move.path;
+            //     var path = _.isString(_move.path) ? utils.deserializePath(_move.path) : _move.path;
 
-                var idx = _.findIndex(path, { x: this.pos.x, y: this.pos.y });
-                if (idx != -1) {
-                    var oldMove = _.cloneDeep(_move);
-                    path.splice(0, idx + 1);
-                    try {
-                        _move.path = opts.serializeMemory ? utils.serializePath(path) : path;
-                    } catch (e) {
-                        console.log('$ERR', this.pos, x, y, roomName, JSON.stringify(path), '-----', JSON.stringify(oldMove));
-                        throw e;
-                    }
-                }
-                if (path.length == 0) {
-                    return this.pos.isNearTo(targetPos) ? C.OK : C.ERR_NO_PATH;
-                }
-                var result = this.moveByPath(path);
+            //     var idx = _.findIndex(path, { x: this.pos.x, y: this.pos.y });
+            //     if (idx != -1) {
+            //         var oldMove = _.cloneDeep(_move);
+            //         path.splice(0, idx + 1);
+            //         try {
+            //             _move.path = opts.serializeMemory ? utils.serializePath(path) : path;
+            //         } catch (e) {
+            //             console.log('$ERR', this.pos, x, y, roomName, JSON.stringify(path), '-----', JSON.stringify(oldMove));
+            //             throw e;
+            //         }
+            //     }
+            //     if (path.length == 0) {
+            //         return this.pos.isNearTo(targetPos) ? C.OK : C.ERR_NO_PATH;
+            //     }
+            //     var result = this.moveByPath(path);
 
-                if (result == C.OK) {
-                    return C.OK;
-                }
-            }
+            //     if (result == C.OK) {
+            //         return C.OK;
+            //     }
+            // }
         }
 
         throw new Error("Not implemented!");

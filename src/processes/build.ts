@@ -2,18 +2,15 @@ import { RoleListing } from "../ipc/roleListing";
 import * as Roles from "../roles";
 import { Process, ProcessStatus } from "../kernel/process";
 
-export class PBuild extends Process {
+export class PBuild extends Process<ProcessMemory> {
     public static className: string = "Build";
     public get className(): string { return PBuild.className; }
-    private pmem: number;
 
     public constructor(pid: ProcessId, parentPid: ProcessId) {
         super(pid, parentPid);
     }
 
-    public run(): ProcessMemory | undefined {
-        let pmem = this.pmem;
-
+    public run(pmem: ProcessMemory): void {
         const builder = Roles.RoleBuilder.Instance;
         for (let creep of RoleListing.getByRole(Roles.RoleBuilder)) {
             builder.run(creep);
@@ -38,7 +35,7 @@ export class PBuild extends Process {
                 };
                 const success = spawn.createCreep(
                     chosenBody,
-                    Roles.RoleBuilder.generateName(Roles.RoleBuilder),
+                    Roles.RoleBuilder.generateName(Roles.RoleBuilder, creepMemory),
                     creepMemory
                 );
                 if (typeof success !== "string") {
@@ -49,6 +46,5 @@ export class PBuild extends Process {
                 }
             }
         }
-        return;
     }
 }

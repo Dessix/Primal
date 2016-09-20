@@ -1,5 +1,5 @@
 import { ProcessRegistry } from "./processRegistry";
-import { Process, ProcessConstructor, ProcessStatus } from "./process";
+import { IProcess, Process, ProcessConstructor, ProcessStatus } from "./process";
 
 export interface SerializableProcessTableEntry {
     pid: ProcessId;
@@ -21,7 +21,7 @@ interface KernelRecord {
     heat: number;
     service: boolean;
     processCtor: ProcessConstructor;
-    process: Process;
+    process: IProcess;
 }
 
 export class Kernel {
@@ -78,12 +78,16 @@ export class Kernel {
         return this.processTable.size;
     }
 
-    public getProcessMemory(pid: ProcessId): ProcessMemory | undefined {
+    public getProcessMemory(pid: ProcessId): ProcessMemory {
         let pmem = Memory.pmem;
         if (pmem === undefined) {
             Memory.pmem = pmem = {};
         }
-        return pmem[pid];
+        let pmemi = Memory.pmem;
+        if (pmemi === undefined) {
+            pmem[pid] = pmemi = {};
+        }
+        return pmemi;
     }
 
     public setProcessMemory(pid: ProcessId, memory: ProcessMemory): void {
@@ -100,10 +104,8 @@ export class Kernel {
         }
     }
 
-public spawnProcessByClassName(processName: string, parentPid?: number): ProcessId | undefined {
-        if (parentPid === undefined) {
-            parentPid = 0;
-        }
+    public spawnProcessByClassName(processName: string, parentPid?: number): ProcessId | undefined {
+        if (parentPid === undefined) { parentPid = 0; }
         const processCtor = ProcessRegistry.fetch(processName);
         if (processCtor === undefined) {
             console.log("Ω ClassName not defined");
@@ -126,7 +128,7 @@ public spawnProcessByClassName(processName: string, parentPid?: number): Process
         return pid;
     }
 
-    public addProcess(process: Process): ProcessId {
+    public addProcess(process: IProcess): ProcessId {
         this.processTable.set(process.pid, <KernelRecord>{
             heat: process.baseHeat,
             process: process,
@@ -147,17 +149,17 @@ public spawnProcessByClassName(processName: string, parentPid?: number): Process
         return childPids;
     }
 
-    public getProcessesByClass<T>(constructor: ProcessConstructor): Process[] {
-        const processes: Process[] = [];
+    public getProcessesByClass<T>(constructor: ProcessConstructor): IProcess[] {
+        const processes: IProcess[] = [];
         for (let record of this.processTable.values()) {
-            if (<Process>record.process instanceof constructor) {
+            if (<IProcess>record.process instanceof constructor) {
                 processes.push(record.process);
             }
         }
         return processes;
     }
 
-    public getProcessesByClassName<T>(className: string): Process[] {
+    public getProcessesByClassName<T>(className: string): IProcess[] {
         const processCtor = ProcessRegistry.fetch(className);
         if (processCtor === undefined) {
             console.log("Ω ClassName not defined");
@@ -179,7 +181,7 @@ public spawnProcessByClassName(processName: string, parentPid?: number): Process
         }
     }
 
-    public getProcessById(pid: ProcessId): Process | undefined {
+    public getProcessById(pid: ProcessId): IProcess | undefined {
         const record = this.processTable.get(pid);
         if (record !== undefined) {
             return record.process;
@@ -188,11 +190,11 @@ public spawnProcessByClassName(processName: string, parentPid?: number): Process
         }
     }
 
-    public getTypedProcessById<T extends Process>(pid: ProcessId): T | undefined {
+    public getTypedProcessById<T extends IProcess>(pid: ProcessId): T | undefined {
         return <T | undefined>this.getProcessById(pid);
     }
 
-    public getTypedProcessByIdOrThrow<T extends Process>(pid: ProcessId): T {
+    public getTypedProcessByIdOrThrow<T extends IProcess>(pid: ProcessId): T {
         const record = this.processTable.get(pid);
         if (record === undefined) {
             throw new Error("Process not found!");
@@ -209,7 +211,7 @@ public spawnProcessByClassName(processName: string, parentPid?: number): Process
         //TODO: Optimize into two process tables, and differentiate service from process
         const services = new Array<KernelRecord>();
         const processes = new Array<KernelRecord>();
-        for (let entry of this.processTable.values()) { 
+        for (let entry of this.processTable.values()) {
             if (entry.service) {
                 services.push(entry);
             } else {
@@ -220,20 +222,28 @@ public spawnProcessByClassName(processName: string, parentPid?: number): Process
         //Services don't use heat mapping
         services.sort(this.sortKernelRecordsByHeat);
         for (let i = 0, n = services.length; i < n; ++i) {
-            const service = services[i];
-            const process = service.process;
+            const process = services[i].process;
             process.kernel = this;//Services may access the kernel during initialization
-            try {
-                process.reloadFromMemory(this.getProcessMemory(process.pid));
-            } catch (e) {
-                console.log(`Ω Failed to load service memory ${process.pid}:${process.className}: ${e}`);
-                continue;
-            }
-
-            if (process.status !== ProcessStatus.RUN) {
-                this.killProcess(process.pid);
-                console.log(`Ω Process ${process.pid}:${process.className} exited with status ${process.status}.`);
-                continue;
+            if (process.reloadFromMemory !== undefined) {
+                try {
+                    process.reloadFromMemory(this.getProcessMemory(process.pid));
+                } catch (e) {
+                    console.log(`Ω Failed to load service memory ${process.pid}:${process.className}: ${e}`);
+                    const stackTrace = e.stack;
+                    if (stackTrace) {
+                        console.log("Stack Trace:\n" + stackTrace.toString());
+                    }
+                    services.splice(i);
+                    --i;
+                    continue;
+                }
+                if (process.status !== ProcessStatus.RUN) {
+                    this.killProcess(process.pid);
+                    services.splice(i);
+                    --i;
+                    console.log(`Ω Process ${process.pid}:${process.className} exited with status ${process.status}.`);
+                    continue;
+                }
             }
         }
 
@@ -256,42 +266,47 @@ public spawnProcessByClassName(processName: string, parentPid?: number): Process
                 const process = record.process;
                 record.heat = process.baseHeat;
 
-                try {
-                    process.reloadFromMemory(this.getProcessMemory(process.pid));
-                } catch (e) {
-                    console.log(`Ω Failed to load process memory ${process.pid}:${process.className}: ${e}`);
-                    continue;
-                }
-                process.kernel = this;//Kernel access is unavailable during initialization of processes
+                const pmem = this.getProcessMemory(process.pid);
+                
+                if (process.reloadFromMemory !== undefined) {
+                    try {
+                        process.reloadFromMemory(pmem);
+                    } catch (e) {
+                        console.log(`Ω Failed to load process memory ${process.pid}:${process.className}: ${e}`);
+                        const stackTrace = e.stack;
+                        if (stackTrace) {
+                            console.log("Stack Trace:\n" + stackTrace.toString());
+                        }
+                        continue;
+                    }
 
-                //Initial check for exit preconditions
-                if (process.status !== ProcessStatus.RUN) {
-                    this.killProcess(process.pid);
-                    console.log(`Ω Process ${process.pid}:${process.className} exited with status ${process.status}.`);
-                    continue;
-                }
-
-                let postMemory: ProcessMemory | undefined;
-                try {
-                    postMemory = process.run();
-                } catch (e) {
-                    console.log(`Ω Failed to run service ${process.pid}:${process.className}: ${e}`);
-                    const stackTrace = e.stack;
-                    if (stackTrace) {
-                        console.log("Stack Trace:\n" + stackTrace.toString());
+                    //Initial check for exit preconditions
+                    if (process.status !== ProcessStatus.RUN) {
+                        this.killProcess(process.pid);
+                        console.log(`Ω Process ${process.pid}:${process.className} exited with status ${process.status}.`);
+                        continue;
                     }
                 }
 
-                //Post-check for process exit. Early-out before wasting memory storage over a tick.
-                if (process.status !== ProcessStatus.RUN) {
-                    this.killProcess(process.pid);
+                if (process.run !== undefined) {
+                    process.kernel = this;//Kernel access is unavailable during initialization of processes
 
-                    console.log(`Ω Process ${process.pid}:${process.className} exited with status ${process.status}.`);
-                    continue;
-                }
+                    try {
+                        process.run(pmem);
+                    } catch (e) {
+                        console.log(`Ω Failed to run service ${process.pid}:${process.className}: ${e}`);
+                        const stackTrace = e.stack;
+                        if (stackTrace) {
+                            console.log("Stack Trace:\n" + stackTrace.toString());
+                        }
+                    }
 
-                if (postMemory !== undefined) {
-                    this.setProcessMemory(process.pid, postMemory);
+                    //Post-check for process exit. Early-out before wasting memory storage over a tick.
+                    if (process.status !== ProcessStatus.RUN) {
+                        this.killProcess(process.pid);
+                        console.log(`Ω Process ${process.pid}:${process.className} exited with status ${process.status}.`);
+                        continue;
+                    }
                 }
             }
             if (overheat) {
@@ -304,30 +319,25 @@ public spawnProcessByClassName(processName: string, parentPid?: number): Process
 
         //Services are called regardless of CPU- they are required to do their job each tick, so they do not use heat
         for (let i = 0, n = services.length; i < n; ++i) {
-            const service = services[i];
-            const process = service.process;
-            let postMemory: ProcessMemory | undefined;
-            try {
-                postMemory = process.run();
-            } catch (e) {
-                console.log(`Ω Failed to run service ${process.pid}:${process.className}: ${e}`);
-                const stackTrace = e.stack;
-                if (stackTrace) {
-                    console.log("Stack Trace:\n" + stackTrace.toString());
+            const process = services[i].process;
+            if (process.run !== undefined) {
+                try {
+                    process.run(this.getProcessMemory(process.pid));
+                } catch (e) {
+                    console.log(`Ω Failed to run service ${process.pid}:${process.className}: ${e}`);
+                    const stackTrace = e.stack;
+                    if (stackTrace) {
+                        console.log("Stack Trace:\n" + stackTrace.toString());
+                    }
+                }
+            
+                //Post-check for process exit. Early-out before wasting memory storage over a tick.
+                if (process.status !== ProcessStatus.RUN) {
+                    this.killProcess(process.pid);
+                    console.log(`Ω Service ${process.pid}:${process.className} exited with status ${process.status}.`);
+                    continue;
                 }
             }
-
-
-
-            //Post-check for process exit. Early-out before wasting memory storage over a tick.
-            if (process.status !== ProcessStatus.RUN) {
-                this.killProcess(process.pid);
-
-                console.log(`Ω Service ${process.pid}:${process.className} exited with status ${process.status}.`);
-                continue;
-            }
-
-            if (postMemory !== undefined) { this.setProcessMemory(process.pid, postMemory); }
         }
 
     }
