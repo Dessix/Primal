@@ -30,6 +30,12 @@ interface DefaultMoveProfile {
   path: string | Array<PathStep>;
 }
 
+declare const enum TravelCondition {
+  road,
+  plain,
+  swamp,
+}
+
 interface CreepMemory {
   spawnName: string;
   homeRoomName: string;
@@ -105,11 +111,22 @@ interface Global {
 
 declare function fromId<T>(id: string | null | undefined): T | undefined;
 
+interface ArrayConstructor {
+  repeat<T>(this: void, value: T, count: number): Array<T>;
+}
+
+interface Array<T> {
+  padLeft(this: Array<T>, value: T, length: number): Array<T>;
+  padRight(this: Array<T>, value: T, length: number): Array<T>;
+  count(this: Array<T>, predicate: T | ((value: T)=>boolean)): number;
+  countExcept(this: Array<T>, exclusionPredicate: T | ((value: T)=>boolean)): number;
+}
+
 interface String {
-  padRight(length: number): string;
-  padRight(length: number, character: string): string;
-  padLeft(length: number): string;
-  padLeft(length: number, character: string): string;
+  padRight(this: string, length: number): string;
+  padRight(this: string, length: number, character: string): string;
+  padLeft(this: string, length: number): string;
+  padLeft(this: string, length: number, character: string): string;
 }
 
 interface ObjectConstructor {

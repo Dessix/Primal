@@ -16,6 +16,7 @@ interface CourierMemory extends CreepMemory {
     crr_targ?: string | number;//Object ID
 }
 
+//TODO: Drop energy ahead before moving on swamp, pick it up after passing it
 export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
     public static RoleTag: string = "crr";
 

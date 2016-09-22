@@ -34,7 +34,7 @@ interface Global {
 
 declare var global: Global;
 
-type CreepBodyPart = "move" | "work" | "carry" | "attack" | "ranged_attack" | "tough" | "heal" | "claim";
+type CreepBodyPart = "move" | "work" | "carry" | "attack" | "ranged_attack" | "tough" | "heal" | "claim" | string;
 
 interface CoreConfiguration {
     noisy: boolean;

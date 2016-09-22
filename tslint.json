@@ -38,6 +38,7 @@
     "no-unused-variable": [
       false
     ],
+    "no-eval": true,
     "switch-default": false,
     "no-unused-expression": false,
     "no-consecutive-blank-lines": false,
@@ -49,6 +50,9 @@
     "object-literal-sort-keys": false,
     "max-line-length": [
       256
+    ],
+    "one-variable-per-declaration": [
+      false
     ]
   }
 }

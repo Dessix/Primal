@@ -15,7 +15,5 @@ export class PLogisticsRoles extends Process<ProcessMemory> {
         for (let recycleCreep of RoleListing.getByRole(RoleRecycle.RoleTag)) {
             roleRecycle.run(recycleCreep);
         }
-        
-        return;
     }
 }

@@ -49,6 +49,11 @@ export class Kernel {
     public getProcessTable(): SerializableProcessTable {
         const table: SerializableProcessTable = new Array<SerializableProcessTableEntry>();
         for (let record of this.processTable.values()) {
+            switch (record.process.status) {
+                case ProcessStatus.EXIT:
+                case ProcessStatus.TERM:
+                    continue;
+            }
             table.push({
                 heat: record.heat,
                 service: record.service,

@@ -64,7 +64,7 @@ export class PTower extends Process<TowerMemory> {
             }
             
             if (hostiles.length === 0) { continue; }
-            let closest: Creep | undefined = undefined;
+            let closest: Creep | undefined;
             if (hostiles.length === 1) {
                 closest = hostiles[0];
             } else {
