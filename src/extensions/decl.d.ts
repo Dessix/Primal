@@ -96,8 +96,6 @@ interface RoomPositionConstructor {
 
   intersectAll(points: Array<[PointLike, number]>): Array<PointLike>;
   intersectAllRoomPos(roomName: string, points: Array<[PointLike, number]>): Array<RoomPosition>;
-  
-  rectFromPointRange(topLeft: PointLike, bottomRight: PointLike, discludes?: Pos16[]): Array<PointLike>;
 }
 
 interface RoomPosition {
@@ -162,4 +160,4 @@ interface RoomPositionLike extends PointLike {
 /**
  * (y<<8)+x; x = v&255, y = v>>8
  */
-type Pos16 = number;
+type Point16 = number;
