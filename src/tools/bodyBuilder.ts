@@ -46,10 +46,12 @@ export class BodyBuilder {
     const output = new Array<CreepBodyPart>();
     const baseCost = this.bodyCost(base);
 
+    let lastValid: Array<CreepBodyPart>;
     let prevBody = base.slice();
     let curCost: number;
-    while ((curCost = this.bodyCost(prevBody)) <
-    if (output)
-    * * * *
+    while (true) {
+      let fatiguePerMove = this.fatiguePerMove(
+      if (curCost = this.bodyCost(prevBody)
+    }
   }
 }

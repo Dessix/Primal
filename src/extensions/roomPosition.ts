@@ -18,6 +18,130 @@ class RoomPositionConstructorX {
     const integer = character.charCodeAt(0);
     return { x: (integer >> 8), y: (integer & 255) };
   }
+
+  public static __intersectTwoWithDisclusion(
+    point: PointLike,
+    radius: number,
+    discludeOrigin: boolean,
+    point2: PointLike,
+    radius2: number,
+    discludeOrigin2: boolean
+  ): Array<PointLike> {
+    const topLeft = {
+      x: Math.max(point.x - radius, point2.x - radius2),
+      y: Math.max(point.y - radius, point2.y - radius2),
+    };
+    const bottomRight = {
+      x: Math.min(point.x + radius, point2.x + radius2),
+      y: Math.min(point.y + radius, point2.y + radius2),
+    };
+    if (discludeOrigin && discludeOrigin2) {
+      return this.rectFromPointRange(topLeft, bottomRight, [((point.y << 8) + point.x), ((point2.y << 8) + point2.x)]);
+    } else if (discludeOrigin || discludeOrigin2) {
+      return this.rectFromPointRange(
+        topLeft,
+        bottomRight,
+        [discludeOrigin ? ((point.y << 8) + point.x) : ((point2.y << 8) + point2.x)]
+      );
+    } else {
+      return this.rectFromPointRange(topLeft, bottomRight);
+    }
+  }
+
+  private static toPos16(point: PointLike): Pos16 {
+    return (point.y << 8) + point.x;
+  }
+
+  public static __rectFromPointRange(topLeft: PointLike, bottomRight: PointLike, discludes?: Pos16[]): Array<PointLike> {
+    const maxX = bottomRight.x - topLeft.x, maxY = bottomRight.y - topLeft.y;
+    const output = new Array<PointLike>(maxX * maxY);
+    if (discludes !== undefined && discludes.length > 0) {
+      const disHash: { [numPosShifted: number]: boolean } = {};
+      for (let i = discludes.length; i-- > 0;) {
+        disHash[discludes[i]] = true;
+      }
+      for (let y = 0; y < maxY; ++y) {
+        for (let x = 0; x < maxX; ++x) {
+          if (((y << 8) + x).toString() in disHash) { continue; }
+          output.push({ x: x + topLeft.x, y: y + topLeft.y });
+        }
+      }
+    } else {
+      for (let y = 0; y < maxY; ++y) {
+        for (let x = 0; x < maxX; ++x) {
+          output.push({ x: x + topLeft.x, y: y + topLeft.y });
+        }
+      }
+    }
+    return output;
+  }
+
+  public static intersectPoint16(...args: Array<PointLike | number>): Array<Pos16> {
+    if (args.length === 0) { return []; }
+    let tx = 0, ty = 0, bx = 0, by = 0;
+    for (let i = 0, n = args.length; i < n; i += 2) {
+      const p = <PointLike>args[i];
+      const r = <number>args[i+1];
+      tx = Math.max(tx, p.x - r);
+      ty = Math.max(ty, p.y - r);
+      bx = Math.min(bx, p.x + r);
+      by = Math.min(by, p.y + r);
+    }
+    const rowLength = bx - tx;
+    const output = new Array<Pos16>(rowLength * (by - ty));
+    for (let y = ty, rowStart = 0; y < by; ++y, rowStart += rowLength) {
+      const yShift = (ty << 8);
+      for (let x = 0; x < rowLength; ++x) {
+        output[rowStart + x] = tx + x + yShift;
+      }
+    }
+    return output;
+  }
+
+  public static intersect(...args: Array<PointLike | number>): Array<PointLike> {
+    const vals: Array<Pos16 | PointLike> = this.intersectPoint16(...args);
+    for (let i = 0, n = vals.length, v = <Pos16>vals[0]; i < n; ++i, v = <Pos16>vals[i]) {
+      vals[i] = { x: v & 255, y: v >> 8 };
+    }
+    return <PointLike[]>vals;
+  }
+
+  public static intersectRoomPos(roomName: string, ...args: Array<PointLike | number>): Array<RoomPosition> {
+    const vals: Array<Pos16 | PointLike> = this.intersectPoint16(...args);
+    for (let i = 0, n = vals.length, v = <Pos16>vals[0]; i < n; ++i, v = <Pos16>vals[i]) {
+      vals[i] = new RoomPosition(v & 255, v >> 8, roomName);
+    }
+    return <RoomPosition[]>vals;
+  }
+
+  public static intersectAll(points: Array<[PointLike, number]>): Array<PointLike> {
+    if (points.length === 0) { return []; }
+    if (points.length % 2 !== 0) { throw new RangeError("Must be given an array of even length"); }
+    let tx = 0, ty = 0, bx = 0, by = 0;
+    for (let i = 0, n = points.length; i < n; ++i) {
+      const [p, r] = points[i];
+      tx = Math.max(tx, p.x - r);
+      ty = Math.max(ty, p.y - r);
+      bx = Math.min(bx, p.x + r);
+      by = Math.min(by, p.y + r);
+    }
+    const rowLength = bx - tx;
+    const output = new Array<PointLike>(rowLength * (by - ty));
+    for (let y = ty, rowStart = 0; y < by; ++y, rowStart += rowLength) {
+      for (let x = 0; x < rowLength; ++x) {
+        output[rowStart + x] = { x: tx + x, y: ty };
+      }
+    }
+    return output;
+  }
+
+  public static intersectAllRoomPos(roomName: string, points: Array<[PointLike, number]>): Array<RoomPosition> {
+    const vals = this.intersectAll(points);
+    for (let i = 0, n = vals.length, v = vals[0]; i < n; ++i, v = vals[i]) {
+      vals[i] = new RoomPosition(v.x, v.y, roomName);
+    }
+    return <RoomPosition[]>vals;
+  }
 }
 
 Reflect.safeExtendRaw(RoomPosition, RoomPositionConstructorX);
