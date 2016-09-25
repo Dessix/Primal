@@ -60,7 +60,8 @@ export class BodyBuilder {
     while (true) {
       const fatiguePerMove = this.fatiguePerMove(curBody, travelCondition);
       const curCost = this.bodyCost(curBody);
-      if (fatiguePerMove > 0 && curBody.count(MOVE) < max.move) {
+      const moveCount = curBody.count(MOVE);
+      if (fatiguePerMove > 0 && moveCount < max.move) {
         //insufficient moves to meet body count
         const costWithMove = curCost + BODYPART_COST[MOVE];
         if (costWithMove > maxCost) {
@@ -71,14 +72,26 @@ export class BodyBuilder {
       } else {
         lastValid = curBody.slice();
       }
-      const remainingAlloc = maxCost - curCost;
-      if (growBuffer.length > 0 && curBody.length < this.MaxParts) {
+
+      //bypass non-move growth if there's nothing to grow
+      if (growBuffer.length > 0 && ((fatiguePerMove === 0 && moveCount < max.move ? curBody.length + 1 : curBody.length) < this.MaxParts)) {
+        const remainingAlloc = maxCost - curCost - (fatiguePerMove === 0 && moveCount < max.move ? BODYPART_COST[MOVE] : 0);//Needs an additional MOVE
+        let affordablePart: string | undefined = undefined;
         for (let part of growBuffer) {
           if (BODYPART_COST[part] > remainingAlloc || curBody.count(part) >= max[part]) { continue; }
-          growBuffer.unshift(<CreepBodyPart>growBuffer.pop());
-          curBody.push(part);
-          continue grower;
+          affordablePart = part;
+          break;
         }
+        if (affordablePart === undefined) {
+          break grower;//Cannot afford to grow any further
+        }
+        //If we must add a MOVE part to grow the new non-move part
+        if (fatiguePerMove === 0 && moveCount < max.move) {
+          curBody.push(MOVE);
+        }
+        growBuffer.unshift(<CreepBodyPart>growBuffer.pop());
+        curBody.push(affordablePart);
+        continue grower;//Further movement scheduling
       }
       break grower;
     }

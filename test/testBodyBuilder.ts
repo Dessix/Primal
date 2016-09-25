@@ -30,21 +30,55 @@ describe("BodyBuilder", () => {
     assert.equal(BodyBuilder.bodyCost([WORK, CARRY]), 150);
     assert.isBelow(BodyBuilder.bodyCost([WORK]), BodyBuilder.bodyCost([WORK, WORK]));
   });
+
+  it("Should measure creep body fatigue", () => {
+    assert.isBelow(BodyBuilder.fatiguePerMove([WORK, MOVE], TravelCondition.road), 0);
+    assert.equal(BodyBuilder.fatiguePerMove([WORK, CARRY, MOVE], TravelCondition.road), 0);
+    assert.equal(BodyBuilder.fatiguePerMove([WORK, CARRY, MOVE, MOVE], TravelCondition.plain), 0);
+    assert.equal(BodyBuilder.fatiguePerMove([CARRY, MOVE, MOVE, MOVE, MOVE, MOVE], TravelCondition.swamp), 0);
+  });
+
   it("Should create the base creep with all its parts", () => {
     const body = assertDefined(BodyBuilder.buildCreepBody(200, [WORK, CARRY], [], { travel: TravelCondition.road }));
     assert.lengthOf(body, 3);
-    assert.sameMembers(body, [WORK, CARRY, MOVE], "All parts included");
+    assert.sameMembers(body, [WORK, CARRY, MOVE]);
     for (let part of body) { assert.oneOf(part, BODYPARTS_ALL); }
   });
-  it("Should grow proportionately", () => {
-    for (let maxCost of [2, 4, 6, 8].map(x => x * 100)) {
-      const body = assertDefined(BodyBuilder.buildCreepBody(maxCost, [WORK, CARRY], [WORK, CARRY], { travel: TravelCondition.road }));
-      assert.lengthOf(body, maxCost / 200 * 3);
-      assert.sameMembers(body, [WORK, CARRY, MOVE], "All parts included");
-      assert.lengthOf(body.filter(m => m === WORK), maxCost / 200);
-      assert.lengthOf(body.filter(m => m === MOVE), maxCost / 200);
-      assert.lengthOf(body.filter(m => m === CARRY), maxCost / 200);
-      for (let part of body) { assert.oneOf(part, BODYPARTS_ALL); }
-    }
+
+  describe("Growth", () => {
+    it("Should grow with move sliding", () => {
+      const body = assertDefined(BodyBuilder.buildCreepBody(300, [WORK, CARRY], [WORK, CARRY], { travel: TravelCondition.road }));
+      assert.deepEqual(body, [WORK, CARRY, MOVE, MOVE, CARRY]);
+    });
+
+    it("Should grow with growth LTR order prioritisation", () => {
+      const body = assertDefined(BodyBuilder.buildCreepBody(350, [WORK, CARRY], [WORK, ATTACK, CARRY], { travel: TravelCondition.road }));
+      assert.deepEqual(body, [WORK, CARRY, MOVE, MOVE, WORK]);
+    });
+
+    it("Should grow proportionately", () => {
+      for (let maxCost of [2, 4, 6, 8].map(x => x * 100)) {
+        const body = assertDefined(BodyBuilder.buildCreepBody(maxCost, [WORK, CARRY], [WORK, CARRY], { travel: TravelCondition.road }));
+        assert.lengthOf(body, maxCost / 200 * 3);
+        assert.sameMembers(body, [WORK, CARRY, MOVE]);
+        assert.lengthOf(body.filter(m => m === WORK), maxCost / 200);
+        assert.lengthOf(body.filter(m => m === MOVE), maxCost / 200);
+        assert.lengthOf(body.filter(m => m === CARRY), maxCost / 200);
+        for (let part of body) { assert.oneOf(part, BODYPARTS_ALL); }
+      }
+    });
+  });
+  
+
+  describe("Configuration", () => {
+    it("Should structure movement on non-road terrains", () => {
+      const body = assertDefined(BodyBuilder.buildCreepBody(400, [WORK, CARRY], [WORK, CARRY], { travel: TravelCondition.plain }));
+      assert.deepEqual(body, [WORK, CARRY, MOVE, MOVE, MOVE, WORK]);
+    });
+
+    it("Should allow capping MOVEs to 1", () => {
+      const body = assertDefined(BodyBuilder.buildCreepBody(450, [WORK, CARRY], [WORK, CARRY], { travel: TravelCondition.road, maxMove: 1 }));
+      assert.deepEqual(body, [WORK, CARRY, MOVE, WORK, CARRY, WORK]);
+    });
   });
 });
