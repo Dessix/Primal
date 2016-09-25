@@ -1,18 +1,6 @@
-//Mock roomPosition
-class MockRoomPosition implements RoomPositionLike {
-  public readonly x: number;
-  public readonly y: number;
-  public readonly roomName: string;
-  constructor(x: number, y: number, roomName: string) {
-    this.x = x;
-    this.y = y;
-    this.roomName = roomName;
-  }
-}
-
 declare const global: any;
-global.RoomPosition = <RoomPositionConstructor>MockRoomPosition;
 
+import "./res/mockRoomPosition";
 import { Wayfarer } from "../src/util/Wayfarer";
 import "../src/extensions/string";
 import "../src/extensions/roomPosition";

@@ -39,7 +39,7 @@ safeExtendPrototype(Array, ArrayX, false);
 
 class ArrayStaticX {
   public static repeat<T>(this: void, value: T, count: number): Array<T> {
-    if (length === 0) { return []; }
+    if (count === 0) { return []; }
     return new Array<T>(count).fill(value);
   }
 }

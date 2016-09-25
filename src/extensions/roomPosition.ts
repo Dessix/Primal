@@ -21,7 +21,8 @@ class RoomPositionConstructorX {
 
   public static intersectPoint16(...args: Array<PointLike | number>): Array<Point16> {
     if (args.length === 0) { return []; }
-    let tx = 0, ty = 0, bx = 0, by = 0;
+    if (args.length % 2 !== 0) { throw new RangeError("Must be given an array of even length"); }
+    let tx = 0, ty = 0, bx = 49, by = 49;
     for (let i = 0, n = args.length; i < n; i += 2) {
       const p = <PointLike>args[i];
       const r = <number>args[i+1];
@@ -31,10 +32,11 @@ class RoomPositionConstructorX {
       by = Math.min(by, p.y + r);
     }
     const rowLength = bx - tx;
-    const output = new Array<Point16>(rowLength * (by - ty));
-    for (let y = ty, rowStart = 0; y < by; ++y, rowStart += rowLength) {
+    if (rowLength < 0) { return []; }
+    const output = new Array<Point16>((rowLength + 1) * (by - ty + 1));
+    for (let y = ty, rowStart = 0; y <= by; ++y, rowStart += rowLength) {
       const yShift = (ty << 8);
-      for (let x = 0; x < rowLength; ++x) {
+      for (let x = 0; x <= rowLength; ++x) {
         output[rowStart + x] = tx + x + yShift;
       }
     }
@@ -57,31 +59,29 @@ class RoomPositionConstructorX {
     return <RoomPosition[]>vals;
   }
 
-  public static intersectAll(points: Array<[PointLike, number]>): Array<PointLike> {
+  public static intersectAllPoint16(points: Array<[PointLike, number]>): Array<Point16> {
     if (points.length === 0) { return []; }
-    if (points.length % 2 !== 0) { throw new RangeError("Must be given an array of even length"); }
-    let tx = 0, ty = 0, bx = 0, by = 0;
+    const flatPoints = new Array<PointLike | Point16>(points.length * 2);
     for (let i = 0, n = points.length; i < n; ++i) {
-      const [p, r] = points[i];
-      tx = Math.max(tx, p.x - r);
-      ty = Math.max(ty, p.y - r);
-      bx = Math.min(bx, p.x + r);
-      by = Math.min(by, p.y + r);
+      const p = points[i];
+      flatPoints[i * 2] = p[0];
+      flatPoints[i * 2 + 1] = p[1];
     }
-    const rowLength = bx - tx;
-    const output = new Array<PointLike>(rowLength * (by - ty));
-    for (let y = ty, rowStart = 0; y < by; ++y, rowStart += rowLength) {
-      for (let x = 0; x < rowLength; ++x) {
-        output[rowStart + x] = { x: tx + x, y: ty };
-      }
+    return this.intersectPoint16(...<Point16[]>flatPoints);
+  }
+
+  public static intersectAll(points: Array<[PointLike, number]>): Array<PointLike> {
+    const vals: Array<Point16 | PointLike> = this.intersectAllPoint16(points);
+    for (let i = 0, n = vals.length, v = <Point16>vals[0]; i < n; ++i, v = <Point16>vals[i]) {
+      vals[i] = { x: v & 255, y: v >> 8 };
     }
-    return output;
+    return <PointLike[]>vals;
   }
 
   public static intersectAllRoomPos(roomName: string, points: Array<[PointLike, number]>): Array<RoomPosition> {
-    const vals = this.intersectAll(points);
-    for (let i = 0, n = vals.length, v = vals[0]; i < n; ++i, v = vals[i]) {
-      vals[i] = new RoomPosition(v.x, v.y, roomName);
+    const vals: Array<Point16 | RoomPosition> = this.intersectAllPoint16(points);
+    for (let i = 0, n = vals.length, v = <Point16>vals[0]; i < n; ++i, v = <Point16>vals[i]) {
+      vals[i] = new RoomPosition(v & 255, v >> 8, roomName);
     }
     return <RoomPosition[]>vals;
   }

@@ -5,7 +5,7 @@
   "main": "gulpfile.js",
   "scripts": {
     "postinstall": "./node_modules/.bin/typings install",
-    "test": "./node_modules/.bin/mocha --compilers ts:ts-node/register,tsx:ts-node/register test/*.ts",
+    "test": "./node_modules/.bin/mocha --colors --compilers ts:ts-node/register,tsx:ts-node/register test/*.ts",
     "start": "npm run build --silent && npm run test --silent && gulp upload || Echo Failure!",
     "build": "./node_modules/.bin/webpack --colors"
   },
@@ -39,6 +39,7 @@
     "recast": "^0.11.10",
     "run-sequence": "^1.2.2",
     "should": "^11.1.0",
+    "source-map-support": "^0.4.2",
     "stream-combiner2": "^1.1.1",
     "strip-dirs": "^2.0.0",
     "through2": "^2.0.1",
