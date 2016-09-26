@@ -1,31 +1,6 @@
 import { Kernel } from "./kernel";
 import { ProcessRegistry } from "./processRegistry";
 
-export enum ProcessStatus {
-    TERM = -2,
-    EXIT = -1,
-    RUN = 0,
-}
-
-export interface ProcessConstructor {
-    new (_pid: ProcessId, _parentPid: ProcessId): IProcess;
-    readonly className: string;
-    Register(this: ProcessConstructor): void;
-};
-
-export interface IProcess {
-    readonly className: string;
-    pid: ProcessId;
-    parentPid: ProcessId;
-    kernel: Kernel | null;
-    readonly baseHeat: number;
-    status: ProcessStatus;
-    readonly service: boolean;
-
-    run?(pmem: ProcessMemory): void;
-    reloadFromMemory?(pmem: ProcessMemory): void;
-}
-
 export abstract class Process<TMemory extends ProcessMemory> implements IProcess {
     public get className(this: Process<TMemory>): string {
         return (<{ constructor: ProcessConstructor; }><any>this).constructor.className;

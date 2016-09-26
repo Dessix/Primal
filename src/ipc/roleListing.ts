@@ -3,6 +3,7 @@ export class RoleListing {
     public static initialize(): void {
         const map = new Map<string, Creep[]>();
         const all = new Array<Creep>();
+        const roomMap = new Map<string, Creep>();
         for (let creepName in Game.creeps) {
             const creep = Game.creeps[creepName];
             if (creep === undefined || creep.role === undefined || creep.role === null) {
@@ -23,7 +24,7 @@ export class RoleListing {
         all?: Creep[];
         map?: Map<string, Creep[]>
     } {
-        return global.tickVolatile["RoleListing"] || (global.tickVolatile["RoleListing"] = {});
+        return global.TickVolatile["RoleListing"] || (global.TickVolatile["RoleListing"] = {});
     }
 
     private static get _all(): Creep[] | undefined {

@@ -1,4 +1,5 @@
 import * as Reflect from "../util/reflection";
+
 interface RoomWithSlowFind extends Room {
     slowFind<T>(type: number, opts?: { filter: Object | Function | string }): T[];
     fastFindObject: { filter: Object | Function | string };
@@ -15,7 +16,7 @@ interface RoomWithSlowFind extends Room {
 
         //TODO: check if even useful, as find supposedly caches base results
         function fastFind<T>(this: RoomWithSlowFind, type: number, opts?: { filter: ((object: T) => boolean) | Object | string }): T[] {
-            const volatile = global.tickVolatile;
+            const volatile = global.TickVolatile;
 
             //cache for finds
             let volatileFind = volatile["find"];
@@ -61,7 +62,7 @@ interface RoomWithSlowFindExitTo extends Room {
         const fastFindObject = <{ filter: Object | Function | string }>{};//Default to this for perf bonus
 
         function fastFindExitTo(room: string | Room): number {
-            const involatile = Memory.involatile;
+            const involatile = Memory.Involatile;
             let exitDirs = involatile["exitDirs"];
             if (exitDirs === undefined) {
                 Memory["exitDirs"] = exitDirs = {};

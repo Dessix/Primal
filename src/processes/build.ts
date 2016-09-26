@@ -1,6 +1,6 @@
 import { RoleListing } from "../ipc/roleListing";
 import * as Roles from "../roles";
-import { Process, ProcessStatus } from "../kernel/process";
+import { Process } from "../kernel/process";
 
 export class PBuild extends Process<ProcessMemory> {
     public static className: string = "Build";
@@ -20,7 +20,7 @@ export class PBuild extends Process<ProcessMemory> {
         const numCouriers = RoleListing.getByRole(Roles.RoleCourier).length;
         const numUpgraders = RoleListing.getByRole(Roles.RoleUpgrader).length;
         const numBuilders = RoleListing.getByRole(Roles.RoleBuilder).length;
-        if (numDrills >= 2 && numCouriers >= 1 && numUpgraders >= 1 && numBuilders < 1 * global.config.builderMultiplier) {
+        if (numDrills >= 2 && numCouriers >= 1 && numUpgraders >= 1 && numBuilders < 1 * global.config.nBild) {
             for (let spawnName in Game.spawns) {
                 const spawn = Game.spawns[spawnName];
                 if (spawn.spawning) { continue; }

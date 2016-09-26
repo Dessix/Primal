@@ -1,5 +1,3 @@
-import { Process } from "../src/kernel/process";
-import { ProcessRegistry } from "../src/kernel/processRegistry";
 import { KernelSerializer } from "../src/kernel/kernelSerializer";
 import { MockPRoot } from "./res/mockPRoot";
 

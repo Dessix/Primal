@@ -1,7 +1,7 @@
 import { PCleanMemory } from "./cleanMemory";
 import { PBootstrap } from "./bootstrap";
 import { Kernel } from "./../kernel/kernel";
-import { Process, ProcessStatus } from "../kernel/process";
+import { Process } from "../kernel/process";
 
 type RootMemory = {
     bootstrapped?: boolean,

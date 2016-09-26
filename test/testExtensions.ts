@@ -14,7 +14,6 @@ describe("Extensions", () => {
     });
   });
 
-
   describe("RoomPosition", () => {
     describe("Intersection", () => {
       it("Should provide intersection between two points", () => {

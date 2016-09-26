@@ -1,6 +1,6 @@
 import { RoleListing } from "./../ipc/roleListing";
 import * as Roles from "../roles";
-import { Process, ProcessStatus } from "../kernel/process";
+import { Process } from "../kernel/process";
 import { MiningScanner } from "../util/miningScanner";
 
 interface SpawnerMemory {
@@ -19,9 +19,13 @@ export class PSpawner extends Process<SpawnerMemory> {
   public run(pmem: SpawnerMemory): void {
     const creeps = RoleListing.getAllCreeps();
 
+    const drills = Array.from(RoleListing.getByRole(Roles.RoleDrill));
+    const couriers = RoleListing.getByRole(Roles.RoleDrill);
+    const harvies = RoleListing.getByRole(Roles.RoleDrill);
+
     const numDrills = drills.filter(d => d.ticksToLive > 25).length;
     const numCouriers = couriers.length;
-    const numBootstrapMiners = bootstraps.length;
+    const numHarvies = harvies.length;
 
     for (let spawnName in Game.spawns) {
       const spawn = Game.spawns[spawnName];
@@ -30,7 +34,7 @@ export class PSpawner extends Process<SpawnerMemory> {
       const energyAvailable = spawn.room.energyAvailable;
       const energyCapacityAvailable = spawn.room.energyCapacityAvailable;
 
-      if ((numDrills >= 1 && numCouriers < 1) || (numDrills >= 2 && numCouriers < 2 * global.config.courierMultiplier)) {
+      if ((numDrills >= 1 && numCouriers < 1) || (numDrills >= 2 && numCouriers < 2 * global.config.nCrr)) {
         if (numCouriers >= 1 && numDrills >= 1) {
           if (energyCapacityAvailable === 300 && energyAvailable < energyCapacityAvailable) {
             break;
@@ -62,7 +66,7 @@ export class PSpawner extends Process<SpawnerMemory> {
         if (this.trySpawnDrill(spawn, energyAvailable, energyCapacityAvailable)) {
           break;
         }
-      } else if (numDrills >= 2 && numCouriers >= 2 && numBootstrapMiners < 4) {
+      } else if (numDrills >= 2 && numCouriers >= 2 && numHarvies < 4) {
         if (numCouriers >= 1 && numDrills >= 1) {
           if (energyCapacityAvailable === 300 && energyAvailable < energyCapacityAvailable) {
             break;

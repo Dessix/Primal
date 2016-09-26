@@ -1,6 +1,6 @@
 import { RoleListing } from "./../ipc/roleListing";
 import { BaseRole } from "../roles";
-import { Process, ProcessStatus } from "../kernel/process";
+import { Process } from "../kernel/process";
 
 export class PLogisticsRoles extends Process {
     public static className: string = "LogisticsRoles";

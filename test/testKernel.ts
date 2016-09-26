@@ -1,5 +1,4 @@
 import { ProcessRegistry } from "../src/kernel/processRegistry";
-import { IProcess } from "../src/kernel/process";
 import { KernelSerializer } from "../src/kernel/kernelSerializer";
 import { Kernel } from "../src/kernel/kernel";
 import { MockPRoot } from "./res/mockPRoot";
@@ -13,16 +12,20 @@ declare const global: any;
 global.Memory = {};
 
 ProcessRegistry.register(MockPRoot.className, MockPRoot);
-
+function newKmem(): KernelMemory {
+  return {
+    pmem: {},
+  };
+}
 describe("Kernel", () => {
-
   it("Should have no processes at startup, before loading a table", () => {
-    const k = new Kernel();
+    
+    const k = new Kernel(newKmem());
     assert.equal(k.getProcessCount(), 0);
   });
 
   it("Should initialize from blank with a root process", () => {
-    const k = new Kernel();
+    const k = new Kernel(newKmem());
     k.loadProcessTable(KernelSerializer.deserializeProcessTable(KernelSerializer.spawnNewProcessTable()));
     const maybeRootProc = k.getProcessById(0);
     assert.isDefined(maybeRootProc);
@@ -31,7 +34,7 @@ describe("Kernel", () => {
   });
 
   it("Should be able to spawn a process", () => {
-    const k = new Kernel();
+    const k = new Kernel(newKmem());
     k.spawnProcessByClassName("Root");
     const maybeRootProc = k.getProcessById(0);
     assert.isDefined(maybeRootProc);
@@ -40,7 +43,7 @@ describe("Kernel", () => {
   });
 
   it("Should be able to kill a process", () => {
-    const k = new Kernel();
+    const k = new Kernel(newKmem());
     const pid = <number>k.spawnProcessByClassName("Root");
     assert.equal(k.getProcessCount(), 1);
     k.killProcess(pid);
@@ -48,11 +51,11 @@ describe("Kernel", () => {
   });
 
   it("Should reload to the same values", () => {
-    const k = new Kernel();
+    const k = new Kernel(newKmem());
     k.spawnProcessByClassName("Root");
     const kproc = k.getProcessTable();
 
-    const k2 = new Kernel();
+    const k2 = new Kernel(newKmem());
     k2.loadProcessTable(kproc);
 
     const k2proc = k2.getProcessTable();

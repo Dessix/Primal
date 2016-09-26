@@ -4,7 +4,7 @@ import { PBuild } from "./build";
 import { PRepair } from "./repair";
 import { PUpgrade } from "./upgrade";
 import { PHarvest } from "./harvest";
-import { Process, ProcessStatus } from "../kernel/process";
+import { Process } from "../kernel/process";
 
 interface BootstrapMemory {
     harvestPid?: ProcessId;

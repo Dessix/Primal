@@ -1,4 +1,4 @@
-import { Process, ProcessConstructor } from "./../kernel/process";
+import { Process } from "./../kernel/process";
 import { ProcessRegistry } from "./../kernel/processRegistry";
 import * as ProcessTypes from "../processes"; 
 

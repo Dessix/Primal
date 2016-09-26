@@ -1,4 +1,4 @@
-import { Process, ProcessStatus } from "../kernel/process";
+import { Process } from "../kernel/process";
 
 type TowerId = string;
 interface TowerMemory extends ProcessMemory {

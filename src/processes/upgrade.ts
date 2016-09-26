@@ -1,6 +1,6 @@
 import { RoleListing } from "./../ipc/roleListing";
 import { RoleDrill, RoleCourier, RoleUpgrader } from "../roles";
-import { Process, ProcessStatus } from "../kernel/process";
+import { Process } from "../kernel/process";
 
 export class PUpgrade extends Process<ProcessMemory> {
     public static className: string = "Upgrade";
@@ -18,7 +18,7 @@ export class PUpgrade extends Process<ProcessMemory> {
         const numDrills = RoleListing.getByRole(RoleDrill).length;
         const numCouriers = RoleListing.getByRole(RoleCourier).length;
         const numUpgraders = RoleListing.getByRole(RoleUpgrader).length;
-        if (numDrills >= 2 && numCouriers >= 1 && numUpgraders < 2 * global.config.upgraderMultiplier) {
+        if (numDrills >= 2 && numCouriers >= 1 && numUpgraders < 2 * global.config.nUpgr) {
             for (let spawnName in Game.spawns) {
                 const spawn = Game.spawns[spawnName];
                 const energyAvailable = spawn.room.energyAvailable;

@@ -1,6 +1,6 @@
 import { RoleListing } from "./../ipc/roleListing";
 import { RoleCourier, RoleDrill, RoleUpgrader, RoleRepairer } from "../roles";
-import { Process, ProcessStatus } from "../kernel/process";
+import { Process } from "../kernel/process";
 
 export class PRepair extends Process<ProcessMemory> {
     public static className: string = "Repair";
@@ -23,7 +23,7 @@ export class PRepair extends Process<ProcessMemory> {
         const numCouriers = RoleListing.getByRole(RoleCourier).length;
         const numUpgraders = RoleListing.getByRole(RoleUpgrader).length;
         const numRepairers = RoleListing.getByRole(RoleRepairer).length;
-        if (RoleListing.getByRole(RoleDrill).length >= 2 && numCouriers >= 1 && numUpgraders >= 1 && numRepairers < 2 * global.config.repairerMultiplier) {
+        if (RoleListing.getByRole(RoleDrill).length >= 2 && numCouriers >= 1 && numUpgraders >= 1 && numRepairers < 2 * global.config.nRepr) {
             for (let spawnName in Game.spawns) {
                 const spawn = Game.spawns[spawnName];
                 if (spawn.spawning) { continue; }

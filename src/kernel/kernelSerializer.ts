@@ -1,11 +1,8 @@
-import { SerializableProcessTable, SerializableProcessTableEntry } from "./kernel";
-import { Process } from "./process";
 import { ProcessRegistry } from "./processRegistry";
-import { BitComp } from "./../bitcomp";
+
 /**
  * Handles serialization and deserialization of kernel memory
  */
-
 export class KernelSerializer {
 
     public static createBlankProcessTable(): SerializedProcessTable {

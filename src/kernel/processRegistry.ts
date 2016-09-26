@@ -1,4 +1,4 @@
-import { Process, ProcessConstructor } from "./process";
+import { Process } from "./process";
 
 export class ProcessRegistry {
     private static readonly registry = new Map<string, ProcessConstructor>();

@@ -8,7 +8,7 @@ interface StatsMemory extends Memory {
 declare const global: { kernel: Kernel; };
 declare const RawMemory: RawMemory;
 
-export function RecordStats(initialCpuOverhead: number, memoryInitializationTime: number) {
+export function recordStats(initialCpuOverhead: number, memoryInitializationTime: number) {
     const stats = <StatsRecord>{};
     const rooms = Game.rooms;
     const spawns = Game.spawns;
