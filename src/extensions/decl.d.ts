@@ -44,6 +44,7 @@ interface CreepMemory {
 
   t?: TravelProfile;
   _move?: {};
+  d?: boolean;
 }
 
 interface Creep {

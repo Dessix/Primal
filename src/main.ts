@@ -30,6 +30,7 @@ if (Memory.config.profile) {
 
 Processes.RegisterAll();
 
+if (Memory.pmem == null) { Memory.pmem = {}; }
 const kernel = global.kernel = new Kernel(Memory);
 initCli(global, Memory, kernel);
 

@@ -20,11 +20,8 @@ export class RoleListing {
         RoleListing._map = map;
     }
 
-    private static get listingStore(): {
-        all?: Creep[];
-        map?: Map<string, Creep[]>
-    } {
-        return global.TickVolatile["RoleListing"] || (global.TickVolatile["RoleListing"] = {});
+    private static get listingStore(): { all?: Creep[]; map?: Map<string, Creep[]>; } {
+        return TickVolatile["RoleListing"] || (TickVolatile["RoleListing"] = {});
     }
 
     private static get _all(): Creep[] | undefined {

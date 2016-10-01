@@ -12,7 +12,7 @@ export class PCleanMemory extends Process<ProcessMemory> {
 
     public run(pmem: ProcessMemory): void {
         const gameAccessible = <{ [name: string]: any }>Game;
-        for (let key of ["creeps", "spawns', 'rooms", "flags"]) {
+        for (let key of ["spawns', 'rooms", "flags"]) {
             const memK = Memory[key];
             const gameK = gameAccessible[key];
             for (let i in memK) {
@@ -21,5 +21,21 @@ export class PCleanMemory extends Process<ProcessMemory> {
                 }
             }
         }
+        {
+            const mCreeps = Memory.creeps;
+            const gCreeps = Game.creeps;
+            for (let i in mCreeps) {
+                const creep = gCreeps[i];
+                if (creep !== undefined) { continue; }
+                const cmem = mCreeps[i];
+                if (cmem.d !== undefined) {
+                    delete mCreeps[i];
+                    continue;
+                }
+                delete cmem.d;
+                DeadPool.registerPost(i, cmem);
+            }
+        }
+        //TODO: store creeps not marked "d":1, to Deadpool
     }
 }

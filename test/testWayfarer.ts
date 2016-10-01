@@ -21,11 +21,15 @@ const testPath = new Array<RoomPosition>(
 
 describe("Wayfarer", () => {
   it("Should have the correct room tags and length", () => {
-    const serialized = Wayfarer.serializePath(<RoomPosition[]>testPath);
-    assert.lengthOf(serialized, 3);
+    let serialized = Wayfarer.serializePath(<RoomPosition[]>testPath);
+    serialized = serialized.concat(serialized.slice().reverse());
+    assert.lengthOf(serialized, 6);
     assert.strictEqual(serialized[0].substr(0, Wayfarer.RoomTagLength).trim(), "E0N0");
     assert.strictEqual(serialized[1].substr(0, Wayfarer.RoomTagLength).trim(), "E0S0");
     assert.strictEqual(serialized[2].substr(0, Wayfarer.RoomTagLength).trim(), "E0N0");
+    assert.strictEqual(serialized[3].substr(0, Wayfarer.RoomTagLength).trim(), "E0N0");
+    assert.strictEqual(serialized[4].substr(0, Wayfarer.RoomTagLength).trim(), "E0S0");
+    assert.strictEqual(serialized[5].substr(0, Wayfarer.RoomTagLength).trim(), "E0N0");
   });
   it("Should be able to serialize and deserialize back the original path", () => {
     const serialized = Wayfarer.serializePath(testPath);
@@ -59,5 +63,19 @@ describe("Wayfarer", () => {
   it("Should throw if before the first step", () => {
     const serialized = Wayfarer.serializePath(testPath);
     assert.throws(() => Wayfarer.deserializePathStep(serialized, -1), RangeError);
+  });
+  it("Should be able to mix steps between two adjacent chunks in the same room", () => {
+    const serialized = Wayfarer.serializePath(<RoomPosition[]>testPath);
+    const multichunk = serialized.concat(serialized.slice().reverse());
+    assert.deepEqual(Wayfarer.deserializePathStep(multichunk, testPath.length - 1), testPath[testPath.length - 1]);
+    assert.deepEqual(Wayfarer.deserializePathStep(multichunk, testPath.length), testPath[testPath.length - 1]);
+    assert.deepEqual(Wayfarer.deserializePathStep(multichunk, testPath.length - 1), Wayfarer.deserializePathStep(multichunk, testPath.length - 1));
+  });
+  it("Should be able to mix linkages between pseudo paths", () => {
+    const serialized = testPath.map(p => Wayfarer.serializePath([p])).reduce((p, c) => (p.push(...c), p), new Array<string>());
+    for (let i = 0, n = testPath.length; i < n; ++i) {
+      assert.deepEqual(Wayfarer.deserializePathStep(serialized, i), testPath[i]);
+    }
+    assert.equal(Wayfarer.getPathLength(serialized), testPath.length);
   });
 });

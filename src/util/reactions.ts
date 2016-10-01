@@ -1,5 +1,5 @@
 export const Reagents: { [resourceNameToSources: string]: string[] } = {};
-const reactions: { [str: string]: { [str: string]: string } } = REACTIONS;
+const reactions: { [reagent: string]: { [reagent: string]: string } } = REACTIONS;
 for (let first of Object.keys(reactions)) {
     for (let second of Object.keys(reactions[first])) {
         Reagents[reactions[first][second]] = [first, second];
