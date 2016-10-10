@@ -1,5 +1,6 @@
 import { Kernel } from "./../kernel/kernel";
 import { Process } from "../kernel/process";
+import { DeadPool } from "../ipc/deadPool";
 
 export class PCleanMemory extends Process<ProcessMemory> {
     public static className: string = "CleanMem";
@@ -28,14 +29,13 @@ export class PCleanMemory extends Process<ProcessMemory> {
                 const creep = gCreeps[i];
                 if (creep !== undefined) { continue; }
                 const cmem = mCreeps[i];
-                if (cmem.d !== undefined) {
+                if (cmem.d != null) {
+                    //Has acknowledged its death ahead of time, showing that considerations were made
                     delete mCreeps[i];
                     continue;
                 }
-                delete cmem.d;
-                DeadPool.registerPost(i, cmem);
+                DeadPool.registerPosthumous(i, cmem);
             }
         }
-        //TODO: store creeps not marked "d":1, to Deadpool
     }
 }

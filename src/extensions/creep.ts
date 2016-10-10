@@ -24,15 +24,12 @@ class CreepX {
         (<CreepMemory>this.memory).spawnName = spawn.name;
     }
 
-    public get homeRoom(this: Creep): Room {
-        return Game.rooms[this.memory.homeRoomName];
+    public get homeRoomName(this: Creep): string {
+        return this.memory.homeRoomName;
     }
 
-    public set homeRoom(homeRoom: Room) {
-        if (!homeRoom || !Game.rooms[homeRoom.name]) {
-            throw new Error("Null/undefined homeRoom assigned to creep!");
-        }
-        this.memory.homeRoomName = homeRoom.name;
+    public get homeRoom(this: Creep): Room | undefined {
+        return Game.rooms[this.memory.homeRoomName];
     }
 
     public recycle(this: Creep): void {

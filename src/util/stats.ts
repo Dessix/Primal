@@ -27,8 +27,12 @@ export function recordStats(initialCpuOverhead: number, memoryInitializationTime
             let storedCapacity = 0;
 
             if (room.storage) {
-                stored = room.storage.store[RESOURCE_ENERGY] || 0;
+                const store = room.storage.store;
+                stored = store[RESOURCE_ENERGY] || 0;
                 storedCapacity = room.storage.storeCapacity || 0;
+                for (let resName in store) {
+                    stats[`room.${room.name}.resources.${resName}`] = store[resName];
+                }
             }
             stats[`room.${room.name}.storedEnergy`] = stored;
         } else {

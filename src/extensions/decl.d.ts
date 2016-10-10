@@ -59,11 +59,13 @@ interface Creep {
     //, opts?: MoveToOpts & FindPathOpts
   ): number;
 
+  readonly homeRoomName: string;
+
   /**
    * Home room of the creep.
    * Unavailable if fog of war is occluding access.
    */
-  homeRoom?: Room;
+  readonly homeRoom?: Room;
   recycle(): void;
 }
 
@@ -147,6 +149,10 @@ interface String {
 
 interface ObjectConstructor {
   values<T>(object: { [key: string]: T;[key: number]: T; }): T[];
+}
+
+interface Object extends Iterable<any> {
+  [Symbol.iterator](): Iterator<any>;
 }
 
 interface PointLike {
