@@ -11,7 +11,7 @@ interface Global {
     spawnProcessByClassName(processName: string, parentPid?: number): ProcessId | undefined;
   };
   launchNew(className: string): number | undefined;
-  reset(): SerializedProcessTable;
+  reset(): void;
   spawnBard(): void;
   showBuildQueue(room: Room): void;
 

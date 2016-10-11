@@ -1,13 +1,11 @@
-import { KernelSerializer } from "../kernel/kernelSerializer";
 import * as Roles from "../roles";
 
 export default function initCli(g: Global, m: Memory, kernel: IKernel): void {
-  g.reset = function (): SerializedProcessTable {
+  g.reset = function (): void {
     console.log("Ω Rebooting...");
-    kernel.mem.proc = KernelSerializer.spawnNewProcessTable();
+    kernel.mem.proc = null;
     kernel.mem.pmem = {};
     kernel.reboot();
-    return kernel.mem.proc;
   };
 
   const inspect = (val: any) => JSON.stringify(val, undefined, 2);
@@ -28,7 +26,7 @@ export default function initCli(g: Global, m: Memory, kernel: IKernel): void {
     if (procId === undefined) {
       return;
     }
-    m.proc = KernelSerializer.serializeProcessTable(kernel.getProcessTable());
+    kernel.saveProcessTable();
     return procId;
   };
 

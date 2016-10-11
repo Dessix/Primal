@@ -16,6 +16,10 @@
     "interface-name": [
       false
     ],
+    "indent": [
+      true,
+      2
+    ],
     "no-console": [
       false
     ],
