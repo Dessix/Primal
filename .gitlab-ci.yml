@@ -6,6 +6,7 @@ cache:
 
 build:
   script:
-   - npm install
-   - npm testonce
-   - npm build
+   - npm install --quiet
+   - ./node_modules/.bin/typings install
+   - npm run testonce
+   - npm run build
