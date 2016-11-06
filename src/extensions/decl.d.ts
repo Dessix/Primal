@@ -47,6 +47,9 @@ interface CreepMemory {
   d?: boolean;
 }
 
+interface TravelToOpts {
+}
+
 interface Creep {
   memory: CreepMemory;
   role: string | null | undefined;
@@ -56,7 +59,7 @@ interface Creep {
   //Custom MoveTo
   travelTo(
     target: RoomPosition | RoomObject
-    //, opts?: MoveToOpts & FindPathOpts
+    , opts?: TravelToOpts
   ): number;
 
   readonly homeRoomName: string;
@@ -90,7 +93,7 @@ interface RoomPositionConstructor {
   intersect(p: PointLike, rad: number, p2: PointLike, rad2: number, p3: PointLike, rad3: number): Array<PointLike>;
   intersect(p: PointLike, rad: number, p2: PointLike, rad2: number, p3: PointLike, rad3: number, p4: PointLike, rad4: number): Array<PointLike>;
   intersect(p: PointLike, rad: number, p2: PointLike, rad2: number, p3: PointLike, rad3: number, p4: PointLike, rad4: number, p5: PointLike, rad5: number): Array<PointLike>;
-  
+
   intersectRoomPos(roomName: string, p: PointLike, rad: number): Array<RoomPosition>;
   intersectRoomPos(roomName: string, p: PointLike, rad: number, p2: PointLike, rad2: number): Array<RoomPosition>;
   intersectRoomPos(roomName: string, p: PointLike, rad: number, p2: PointLike, rad2: number, p3: PointLike, rad3: number): Array<RoomPosition>;
@@ -134,6 +137,7 @@ interface ArrayConstructor {
 }
 
 interface Array<T> {
+	flatMap<O>(this: Array<T>, predicate: ((value: T)=>O[])): O[];
   padLeft(this: Array<T>, value: T, length: number): Array<T>;
   padRight(this: Array<T>, value: T, length: number): Array<T>;
   count(this: Array<T>, predicate: T | ((value: T)=>boolean)): number;
@@ -151,9 +155,9 @@ interface ObjectConstructor {
   values<T>(object: { [key: string]: T;[key: number]: T; }): T[];
 }
 
-interface Object extends Iterable<any> {
-  [Symbol.iterator](): Iterator<any>;
-}
+// interface Object extends Iterable<any> {
+//   // [Symbol.iterator](): Iterator<any>; // Disabled due to VM Deopt of iterations
+// }
 
 interface PointLike {
   x: number;

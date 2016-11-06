@@ -9,10 +9,14 @@ interface BodyOpts {
 }
 
 export class BodyBuilder {
+	private static partCost(p: CreepBodyPart) {
+		return BODYPART_COST[p];
+	}
+
   public static bodyCost(body: CreepBodyPart[]) {
     let cost = 0;
-    for (let i = 0, n = body.length; i < n; ++i) {
-      cost += BODYPART_COST[body[i]];
+    for (let i = 0; i < body.length; ++i) {
+      cost = cost + this.partCost(body[i]);
     }
     return cost;
   }

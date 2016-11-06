@@ -23,7 +23,7 @@ class RoomPositionConstructorX {
     if (args.length === 0) { return []; }
     if (args.length % 2 !== 0) { throw new RangeError("Must be given an array of even length"); }
     let tx = 0, ty = 0, bx = 49, by = 49;
-    for (let i = 0, n = args.length; i < n; i += 2) {
+    for (let i = 0, n = args.length; i < n; i = i + 2) {
       const p = <PointLike>args[i];
       const r = <number>args[i+1];
       tx = Math.max(tx, p.x - r);
@@ -34,7 +34,7 @@ class RoomPositionConstructorX {
     const rowLength = bx - tx;
     if (rowLength < 0) { return []; }
     const output = new Array<Point16>((rowLength + 1) * (by - ty + 1));
-    for (let y = ty, rowStart = 0; y <= by; ++y, rowStart += rowLength) {
+    for (let y = ty, rowStart = 0; y <= by; ++y, rowStart = rowStart + rowLength) {
       const yShift = (ty << 8);
       for (let x = 0; x <= rowLength; ++x) {
         output[rowStart + x] = tx + x + yShift;

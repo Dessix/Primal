@@ -12,7 +12,7 @@ export class Wayfarer {
   public static getPathLength(this: void, pathChunks: string[]): number {
     let totalStepLength = 0;
     for (let i = pathChunks.length; i-- > 0;) {
-      totalStepLength += pathChunks[i].length - ROOM_TAG_LENGTH;
+      totalStepLength = totalStepLength + pathChunks[i].length - ROOM_TAG_LENGTH;
     }
     return totalStepLength;
   }
@@ -34,7 +34,7 @@ export class Wayfarer {
         }
         currentRoomName = pos.roomName;
       }
-      currentRoomPath += RoomPosition.toUnicode(pos);
+      currentRoomPath = currentRoomPath + RoomPosition.toUnicode(pos);
     }
     if (currentRoomName !== undefined && currentRoomPath.length !== 0) {
       outputPaths.push(currentRoomName.padRight(ROOM_TAG_LENGTH) + currentRoomPath);
@@ -45,7 +45,7 @@ export class Wayfarer {
   public static deserializePath(this: void, pathChunks: string[]): RoomPosition[] {
     let totalStepLength = 0;
     for (let i = pathChunks.length; i-- > 0;) {
-      totalStepLength += pathChunks[i].length - ROOM_TAG_LENGTH;
+      totalStepLength = totalStepLength + pathChunks[i].length - ROOM_TAG_LENGTH;
     }
     const outputs = new Array<RoomPosition>(totalStepLength);
     let lastOffset = 0;
@@ -55,7 +55,7 @@ export class Wayfarer {
       for (let p = 0, np = chunk.length - ROOM_TAG_LENGTH; p < np; ++p) {
         outputs[lastOffset + p] = RoomPosition.fromUnicode(chunk[ROOM_TAG_LENGTH + p], roomName);
       }
-      lastOffset += chunk.length - ROOM_TAG_LENGTH;
+      lastOffset = lastOffset + chunk.length - ROOM_TAG_LENGTH;
     }
     return outputs;
   }
@@ -66,7 +66,7 @@ export class Wayfarer {
     for (let i = 0, n = pathChunks.length; i < n; ++i) {
       const chunk = pathChunks[i];
       if (chunk.length - ROOM_TAG_LENGTH <= step) {
-        step -= (chunk.length - ROOM_TAG_LENGTH);
+        step = step - (chunk.length - ROOM_TAG_LENGTH);
       } else {
         chosenPathChunk = chunk;
         break;

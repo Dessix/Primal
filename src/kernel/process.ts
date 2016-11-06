@@ -18,7 +18,7 @@ export abstract class Process<TMemory extends ProcessMemory> implements IProcess
         }
         return this.kernel;
     }
-    
+
     public spawnChildProcess(processCtor: ProcessConstructor) {
         const childPid = this.kernelOrThrow.spawnProcess(processCtor, this.pid);
         return childPid;
@@ -31,6 +31,7 @@ export abstract class Process<TMemory extends ProcessMemory> implements IProcess
     constructor(pid: ProcessId, parentPid: ProcessId) {
         this.pid = pid;
         this.parentPid = parentPid;
+				this.kernel = null;
     }
 
     public run?(pmem: TMemory): void;

@@ -65,9 +65,9 @@ export default function initCli(g: Global, m: Memory, kernel: IKernel): void {
     const buildQueue = room.find<ConstructionSite>(FIND_CONSTRUCTION_SITES);
     let str: string | null = "<table>\n";
     for (let i = 0, n = buildQueue.length; i < n; ++i) {
-      str += `<tr><td>${i + 1}:</td><td>${buildQueue[i].structureType}</td></tr>\n`;
+      str = str + `<tr><td>${i + 1}:</td><td>${buildQueue[i].structureType}</td></tr>\n`;
     }
-    str += "</table>\n";
+    str = str + "</table>\n";
     console.log(str);
     str = null;
   };

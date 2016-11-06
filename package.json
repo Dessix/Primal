@@ -12,6 +12,8 @@
   },
   "author": "Dessix <Dessix@Dessix.net>",
   "devDependencies": {
+    "babili": "0.0.7",
+    "babili-webpack-plugin": "0.0.5",
     "chai": "^3.5.0",
     "deep-equal": "^1.0.1",
     "del": "^2.2.1",

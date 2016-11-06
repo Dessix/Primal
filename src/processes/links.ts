@@ -28,18 +28,19 @@ export class PLinks extends Process<LinksMemory> {
 
   public run(pmem: LinksMemory): void {
     const gTime = Game.time;
-    for (let roomName in Game.rooms) {
-      const room = Game.rooms[roomName];
+		const roomNames = Object.keys(Game.rooms);
+		for (let i = 0, n = roomNames.length; i < n; ++i) {
+			const roomName = roomNames[i], room = Game.rooms[roomName];
       const rmem = <LinkRoomMemory>(room.memory || (room.memory = {}));
       if (rmem.nextLinkScanTick === undefined || gTime >= rmem.nextLinkScanTick) {
         this.rescanRoom(room, rmem);
       }
-    }
+		}
 
     // if (pmem.nextTowerScanTick === undefined || gTime >= pmem.nextTowerScanTick) {
     //     const towers = pmem.towers;
     //     const structures = Game.structures;
-    //     for (let structureName in structures) {
+    //     for (let structureName of Object.keys(structures)) {
     //         const structure = structures[structureName];
     //         if (structure.structureType !== STRUCTURE_TOWER || !(<StructureTower>structure).my) { continue; }
     //         const tower = <StructureTower>structure;

@@ -30,11 +30,7 @@
     "no-bitwise": false,
     "curly": true,
     "variable-name": [
-      true,
-      "ban-keywords",
-      "check-format",
-      "allow-pascal-case",
-      "allow-leading-underscore"
+      false
     ],
     "comment-format": [
       false

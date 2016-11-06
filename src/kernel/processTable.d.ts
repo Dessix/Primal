@@ -9,7 +9,7 @@ type SerializedProcess = {
 	className: string;
 };
 
-interface SerializedProcessTable extends Array<SerializedProcess | null | undefined> {
+interface SerializedProcessTable extends Array<SerializedProcess> {
 }
 
 interface Memory extends KernelMemory {

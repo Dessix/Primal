@@ -1,11 +1,12 @@
 "use strict";
 const webpack = require("webpack");
 const path = require("path");
+const BabiliPlugin = require("babili-webpack-plugin");
 
 module.exports = {
     plugins: [
         require("webpack-fail-plugin"),
-
+				//new BabiliPlugin({ comments: false }),
     ],
     entry: {
         main: "./src/main.ts",
@@ -29,7 +30,6 @@ module.exports = {
         extensions: ["", ".webpack.js", ".web.js", ".ts", ".tsx", ".js"]
     },
     module: {
-        noParse: [/lib[\\\/]inspect[\\\/]index\.js$/],
         preLoaders: [
             {
                 test: /\.tsx?$/,
@@ -48,6 +48,7 @@ module.exports = {
                 configFileName: "tsconfig.json",
             },
         ],
+
     },
     tslint: {
         configuration: require("./tslint.json"),

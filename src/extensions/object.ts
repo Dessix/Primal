@@ -18,11 +18,11 @@ class ObjectConstructorX {
 
 Reflect.safeExtendRaw(Object, ObjectConstructorX);
 
-class ObjectX implements Iterable<any> {
-  public [Symbol.iterator]() {
-    const itr: IterableIterator<any> = ObjectConstructorX.iterateObject(<{ [key: string]: any }>this);
-    return itr;
-  }
-}
+// class ObjectX implements Iterable<any> {
+//   public [Symbol.iterator]() {
+//     const itr: IterableIterator<any> = ObjectConstructorX.iterateObject(<{ [key: string]: any }>this);
+//     return itr;
+//   }
+// }
 
-Reflect.safeExtendPrototype(Object, ObjectX);
+//Reflect.safeExtendPrototype(Object, ObjectX);

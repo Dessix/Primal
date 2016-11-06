@@ -4,8 +4,9 @@ export class RoleListing {
         const all = new Array<Creep>();
         const byRole = new Map<string, Creep[]>();
         const byRoom = new Map<string, Creep[]>();
-        for (let creepName in Game.creeps) {
-            const creep = Game.creeps[creepName];
+				const creepNames = Object.keys(Game.creeps);
+        for (let i = 0, n = creepNames.length; i < n; ++i) {
+						const creepName = creepNames[i], creep = Game.creeps[creepName];
             if (creep === undefined || creep.role === undefined || creep.role === null) {
                 continue;
             }

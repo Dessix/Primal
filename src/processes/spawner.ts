@@ -26,9 +26,9 @@ export class PSpawner extends Process<SpawnerMemory> {
     const numDrills = drills.filter(d => d.ticksToLive > 25).length;
     const numCouriers = couriers.length;
     const numHarvies = harvies.length;
-
-    for (let spawnName in Game.spawns) {
-      const spawn = Game.spawns[spawnName];
+		const spawns = Game.spawns, spawnNames = Object.keys(spawns);
+		for(let i = 0, n = spawnNames.length; i < n; ++i) {
+			const spawnName = spawnNames[i], spawn = spawns[spawnName];
       if (spawn.spawning) { continue; }
       const room = spawn.room;
       const energyAvailable = spawn.room.energyAvailable;

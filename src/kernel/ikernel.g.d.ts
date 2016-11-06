@@ -12,17 +12,6 @@ interface KernelMemory {
 	pmem?: { [pid: number /*ProcessId*/]: ProcessMemory | null | undefined } | undefined;
 }
 
-interface SerializableProcessTableEntry {
-	pid: ProcessId;
-	parentPid: ProcessId;
-	heat: number;
-	service: boolean;
-	processCtor: ProcessConstructor;
-}
-
-interface SerializableProcessTable extends Array<SerializableProcessTableEntry> {
-}
-
 interface IProcess {
 	readonly className: string;
 	pid: ProcessId;

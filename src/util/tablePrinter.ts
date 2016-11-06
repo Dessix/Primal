@@ -42,7 +42,7 @@ export class TablePrinter {
 // // Usage
 // let globalStats = []
 // globalStats.push(['GID', 'Start Tick', 'Last Tick', 'Elapsed'])
-// for (let i in Memory.globals) {
+// for (let i of Object.keys(Memory.globals)) {
 //   let gd = Memory.globals[i]
 //   let since = Game.time - gd.lastTick
 //   if (since < 30)
