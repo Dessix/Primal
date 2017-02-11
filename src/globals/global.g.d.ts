@@ -1,5 +1,5 @@
-interface Global {
+declare interface Global {
     [key: string]: any;
 }
 
-declare var global: Global;
+declare const global: Global;

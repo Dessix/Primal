@@ -43,7 +43,7 @@ export class RoleBuilder extends BaseRole<BuilderMemory> {
     private getResources(creep: Creep, cmem: BuilderMemory): void {
         const spawn = creep.spawn;
 
-        let container: StructureContainer | undefined;
+        let container: StructureContainer | StructureStorage | undefined;
 
         {
             const containers = new Array<StructureContainer>();

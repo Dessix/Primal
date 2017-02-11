@@ -6,6 +6,8 @@ import "../src/extensions/string";
 import "../src/extensions/roomPosition";
 import * as _ from "lodash";
 import * as chai from "chai";
+import "mocha";
+
 const expect = chai.expect;
 const assert = chai.assert;
 

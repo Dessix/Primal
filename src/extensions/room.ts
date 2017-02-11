@@ -61,7 +61,7 @@ interface RoomWithSlowFindExitTo extends Room {
         const slowFind = Room.prototype.findExitTo;
         const fastFindObject = <{ filter: Object | Function | string }>{};//Default to this for perf bonus
 
-        function fastFindExitTo(room: string | Room): number {
+        function fastFindExitTo(this: Room, room: string | Room): number {
             const involatile = Memory.Involatile;
             let exitDirs = involatile["exitDirs"];
             if (exitDirs === undefined) {

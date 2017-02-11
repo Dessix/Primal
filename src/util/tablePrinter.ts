@@ -9,7 +9,7 @@ export class TablePrinter {
 			[hBar, vBar, hSBar, vSBar] = ["═", "║", "─", "│"],
 			[bottomDSTee, topDSTee, centerS] = ["╧", "╤", "┼"];
 
-		const contents = _.map(data, function (row, rowIndex) {
+		const contents = _(data).map(function (row, rowIndex) {
 			return _.map(row, function (col: Stringable | null | undefined, colIndex) {
 				if(col !== null && col !== undefined) {
 					return col.toString();
@@ -17,18 +17,17 @@ export class TablePrinter {
 					return col;
 				}
 			});
-		});
+		}).flatten<string | null | undefined>().value();
 
 		console.log(contents);
 		contents.reduce(function(acc: { [key: string]: number }, item) {
-					if(item == null) { continue; }
-					const saved = acc[itemKey];
+					if(item == null) { return acc; }
+					const saved = acc[item];
 					if(saved !== null && saved !== undefined) {
-						acc[itemKey] = Math.max(saved, item.length);
+						acc[item] = Math.max(saved, item.length);
 					}
 					return acc;
-				}
-			});
+				}, {});
 		widths = widths || _.assign({}, contents, function (memo: number | null | undefined, sourceValue: string | null | undefined): any {
 			if(!sourceValue) { return memo; }
 			if(!memo) {
