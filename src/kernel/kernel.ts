@@ -64,7 +64,7 @@ export class Kernel implements IKernel {
 		for(let i = 0, n = proc.length; i < n; ++i) {
 			const entry = proc[i];
 			const record = this.loadProcessEntry(entry);
-			if (record !== null) {
+			if(record !== null) {
 				this.processTable.set(entry.pid, record);
 			}
 		}
@@ -115,8 +115,8 @@ export class Kernel implements IKernel {
 		const mem = this.getKmem();
 		let pmem = mem.pmem;
 		if(pmem === undefined) { mem.pmem = pmem = {}; }
-		let pmemi = mem.pmem;
-		if(pmemi === undefined) { pmem[pid] = pmemi = {}; }
+		let pmemi = pmem[pid];
+		if(pmemi === undefined || pmemi === null) { pmem[pid] = pmemi = {}; }
 		return pmemi;
 	}
 

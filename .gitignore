@@ -7,3 +7,4 @@ typings
 .idea
 .vscode/symbols.json
 test/**.js
+/src/util/snippets/*

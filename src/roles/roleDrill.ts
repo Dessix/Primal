@@ -1,6 +1,5 @@
 import { FsmRole } from "./";
 import { MiningScanner } from "./../util/miningScanner";
-import { PathUtils } from "./../util/pathUtils";
 
 enum DrillState {
     Initialize = 0,
@@ -18,7 +17,7 @@ interface DrillMemory extends CreepMemory {
     linkId?: string;
     storageLinkId?: string;
 
-    pathCache?: string;
+    pathCache?: string;//TODO
     sourceId?: string;
 }
 
