@@ -1,12 +1,13 @@
-declare type CreepBodyPart =
-    typeof MOVE
+declare type CreepBodyPart = (
+    | typeof MOVE
     | typeof WORK
     | typeof CARRY
     | typeof ATTACK
     | typeof RANGED_ATTACK
     | typeof TOUGH
     | typeof HEAL
-    | typeof CLAIM;
+    | typeof CLAIM
+);
 
 declare const enum Direction {
     TOP = 1,

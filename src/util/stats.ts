@@ -47,7 +47,7 @@ export function recordStats(initialCpuOverhead: number, memoryInitializationTime
 		const spawns = Game.spawns, spawnNames = Object.keys(spawns);
 		for(let i = 0, n = spawnNames.length; i < n; ++i) {
 		const spawnName = spawnNames[i], spawn = spawns[spawnName];
-		stats[`spawn.${spawn.name}.defenderIndex`] = spawn.memory["defenderIndex"];
+		stats[`spawn.${spawn.name}.defenderIndex`] = (<DICT<StatsRecord>>spawn.memory)["defenderIndex"];
 	}
 
 	stats["cpu.bucket"] = Game.cpu.bucket;

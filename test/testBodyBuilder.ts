@@ -20,9 +20,9 @@ describe("BodyBuilder", () => {
   it("Should measure creep part costs", () => {
     assert.equal(BodyBuilder.bodyCost([]), 0, "empty bodies should be free");
     assert.isAtLeast(BodyBuilder.MaxParts, 30);
-    for (let part of BODYPARTS_ALL) {
+    for (let part of <CreepBodyPart[]>BODYPARTS_ALL) {
       for (let i = 1; i <= BodyBuilder.MaxParts; ++i) {
-        assert.equal(BodyBuilder.bodyCost(Array.repeat(part, i)), BODYPART_COST[part] * i);
+        assert.equal(BodyBuilder.bodyCost(Array.repeat<CreepBodyPart>(part, i)), BODYPART_COST[part] * i);
       }
     }
     assert.equal(BodyBuilder.bodyCost([WORK, CARRY]), 150);

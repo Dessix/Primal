@@ -36,6 +36,10 @@ declare const enum TravelCondition {
   swamp,
 }
 
+declare type DIRECTION = typeof TOP | typeof TOP_RIGHT | typeof RIGHT | typeof BOTTOM_RIGHT | typeof BOTTOM | typeof BOTTOM_LEFT | typeof LEFT | typeof TOP_LEFT;
+
+declare type DICT<V> = { [k: string]: V; [k: number]: V; };
+
 interface CreepMemory {
   spawnName: string;
   homeRoomName: string;

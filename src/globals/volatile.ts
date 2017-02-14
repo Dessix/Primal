@@ -1,7 +1,7 @@
 
 export function initVolatile(g: Global, m: Memory) {
-  if (m.Involatile == null) { m.Involatile = {}; }
-  g.Involatile = m.Involatile;
+  if (m.involatile == null) { m.involatile = {}; }
+  g.Involatile = m.involatile;
   g.Volatile = {};
   initTickVolatile(g);
 };

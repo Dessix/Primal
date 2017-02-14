@@ -14,7 +14,7 @@ export class PCleanMemory extends Process<ProcessMemory> {
 	public run(pmem: ProcessMemory): void {
 		const gameAccessible = <{ [name: string]: any }>Game;
 		for(let key of ["spawns', 'rooms", "flags"]) {
-			const memK = Memory[key];
+			const memK = (<DICT<DICT<any>>><any>Memory)[key];
 			const gameK = gameAccessible[key];
 			const memIKeys = Object.keys(memK);
 			for(let i = 0, n = memIKeys.length; i < n; ++i) {
@@ -36,12 +36,12 @@ export class PCleanMemory extends Process<ProcessMemory> {
 				const creep = gCreeps[creepName];
 				if(creep !== undefined) { continue; }
 				const cmem = mCreeps[creepName];
-				if(cmem.d != null) {
+				if(cmem!.d != null) {
 					//Has acknowledged its death ahead of time, showing that considerations were made
 					delete mCreeps[creepName];
 					continue;
 				}
-				DeadPool.registerPosthumous(creepName, cmem);
+				DeadPool.registerPosthumous(creepName, cmem!);
 			}
 		}
 	}

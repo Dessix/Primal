@@ -80,7 +80,7 @@ export class BodyBuilder {
       //bypass non-move growth if there's nothing to grow
       if (growBuffer.length > 0 && ((fatiguePerMove === 0 && moveCount < max.move ? curBody.length + 1 : curBody.length) < this.MaxParts)) {
         const remainingAlloc = maxCost - curCost - (fatiguePerMove === 0 && moveCount < max.move ? BODYPART_COST[MOVE] : 0);//Needs an additional MOVE
-        let affordablePart: string | undefined = undefined;
+        let affordablePart: CreepBodyPart | undefined = undefined;
         for (let part of growBuffer) {
           if (BODYPART_COST[part] > remainingAlloc || curBody.count(part) >= max[part]) { continue; }
           affordablePart = part;

@@ -2,6 +2,14 @@ interface Volatile {
   [key: string]: any;
 }
 
+interface Involatile extends Volatile {
+  exitDirs?: {
+    [roomName: string]: {
+      [targetRoomName: string]: DIRECTION;
+    }
+  }
+}
+
 interface Global {
   /** 
    * Resets every reinitialization 
@@ -23,7 +31,7 @@ interface Memory {
   /**
    * Does not reset, but is not guaranteed to survive
    */
-  Involatile: Volatile;
+  involatile: Involatile;
 }
 
 /** 
@@ -39,4 +47,4 @@ declare const TickVolatile: Volatile;
 /**
  * Contents are not guaranteed to survive, but are agnostic of resets
  */
-declare const Involatile: Volatile;
+declare const Involatile: Involatile;

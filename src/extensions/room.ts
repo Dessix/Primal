@@ -52,7 +52,7 @@ interface RoomWithSlowFind extends Room {
 }
 
 interface RoomWithSlowFindExitTo extends Room {
-    slowFindExitTo(room: string | Room): number;
+    slowFindExitTo(room: string | Room): DIRECTION;
 }
 
 {
@@ -62,10 +62,10 @@ interface RoomWithSlowFindExitTo extends Room {
         const fastFindObject = <{ filter: Object | Function | string }>{};//Default to this for perf bonus
 
         function fastFindExitTo(this: Room, room: string | Room): number {
-            const involatile = Memory.Involatile;
+            const involatile = Memory.involatile;
             let exitDirs = involatile["exitDirs"];
             if (exitDirs === undefined) {
-                Memory["exitDirs"] = exitDirs = {};
+                involatile["exitDirs"] = exitDirs = {};
             }
             let roomEntry = exitDirs[this.name];
             if (roomEntry === undefined) {

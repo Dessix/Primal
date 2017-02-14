@@ -106,7 +106,7 @@ export class RoleUpgrader extends BaseRole<UpgraderMemory> {
             //order of preference: flagged container, storage, sources
 
             const spawn = creep.spawn;
-            let container: StructureContainer | undefined;
+            let container: StructureContainer | StructureStorage | undefined;
 
             {
                 const containers = new Array<StructureContainer>();
