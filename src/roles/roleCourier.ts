@@ -47,7 +47,7 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
         delete cmem.crr_targ;
     }
 
-    public static chooseBody(energyAvailable: number): CreepBodyPart[] | undefined {
+    public static chooseBody(energyAvailable: number): BODYPART[] | undefined {
         let chosenBody: string[];
         if (energyAvailable >= 750) {
             chosenBody = [MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
@@ -64,7 +64,7 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
         } else {
             return undefined;
         }
-        return <CreepBodyPart[]>chosenBody;
+        return <BODYPART[]>chosenBody;
     }
 
     private readonly waitTickCount: number = 5;
@@ -74,7 +74,7 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
             cmem.crr_targ = Game.time + this.waitTickCount;
         }
         if (Game.time < cmem.crr_targ) {
-            const idleFlag = Game.spawns[cmem.spawnName].room.find<Flag>(FIND_FLAGS).find(x => x.color === COLOR_BROWN && x.secondaryColor === COLOR_BROWN);
+            const idleFlag = Game.spawns[cmem.spawnName].room.find(FIND_FLAGS).find(x => x.color === COLOR_BROWN && x.secondaryColor === COLOR_BROWN);
             if (idleFlag !== undefined) {
                 creep.moveTo(idleFlag, { reusePath: 20 });
             }
@@ -109,19 +109,19 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
 
         const spawn = creep.spawn;
 
-        const dropped = spawn.room.find<Resource>(FIND_DROPPED_ENERGY);
+        const dropped = spawn.room.find(FIND_DROPPED_ENERGY);
         if (dropped.length > 0) {
             return _.max<Resource>(dropped, _dropped => _dropped.amount);
         }
 
         let containers: StructureContainer[] = [];
         {
-            const flags = spawn.room.find<Flag>(FIND_FLAGS);
+            const flags = spawn.room.find(FIND_FLAGS);
             for (let flag of flags) {
                 if (flag.color !== COLOR_CYAN || flag.secondaryColor !== COLOR_YELLOW) {
                     continue;
                 }
-                const container = flag.pos.lookForStructure<StructureContainer>(STRUCTURE_CONTAINER);
+                const container = flag.pos.lookForStructure(STRUCTURE_CONTAINER);
                 if (container !== undefined && container.store["energy"] > 0) {
                     containers.push(container);
                 }
@@ -223,7 +223,7 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
         let myStructures: Structure[] | undefined = undefined;
         if (spawn.room.energyAvailable < spawn.room.energyCapacityAvailable) {
             //Worth scanning for non-full extensions
-            if (myStructures === undefined) { myStructures = spawn.room.find<Structure>(FIND_MY_STRUCTURES); }
+            if (myStructures === undefined) { myStructures = spawn.room.find(FIND_MY_STRUCTURES); }
 
             for (let ext of myStructures) {
                 if (
@@ -237,7 +237,7 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
             }
         }
 
-        if (myStructures === undefined) { myStructures = spawn.room.find<Structure>(FIND_MY_STRUCTURES); }
+        if (myStructures === undefined) { myStructures = spawn.room.find(FIND_MY_STRUCTURES); }
         for (let tower of myStructures) {
             if (
                 tower.structureType !== STRUCTURE_TOWER ||
@@ -260,14 +260,14 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
 
 
         {
-            const flags = spawn.room.find<Flag>(FIND_FLAGS);
+            const flags = spawn.room.find(FIND_FLAGS);
             for (let flag of flags) {
                 if (
                     flag.color !== COLOR_GREY || flag.secondaryColor !== COLOR_YELLOW
                 ) {
                     continue;
                 }
-                const container = flag.pos.lookForStructure<StructureContainer>(STRUCTURE_CONTAINER);
+                const container = flag.pos.lookForStructure(STRUCTURE_CONTAINER);
                 if (container !== undefined && _.sum(container.store) < container.storeCapacity) {
                     return container;
                 }
@@ -304,25 +304,25 @@ export class RoleCourier extends FsmRole<CourierMemory, CourierState> {
         }
 
         if (isFull) {
-            const nearbyPossibleReceivers = spawn.room.find<Creep>(FIND_MY_CREEPS)
+            const nearbyPossibleReceivers = spawn.room.find(FIND_MY_CREEPS)
                 .filter(c => c.role !== RoleBootstrapMiner.RoleTag && c.carry.energy < c.carryCapacity);
 
             const builderOrRepairer = nearbyPossibleReceivers.find(c => c.role === RoleBuilder.RoleTag || c.role === RoleRepairer.RoleTag);
             if (builderOrRepairer !== undefined) {
-                if (creep.transfer(builderOrRepairer, "energy") === ERR_NOT_IN_RANGE) {
+                if (creep.transfer(builderOrRepairer, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
                     creep.moveTo(builderOrRepairer, { reusePath: 20 });
                 }
                 return;
             }
 
-            const idleFlag = Game.spawns[cmem.spawnName].room.find<Flag>(FIND_FLAGS).find(x => x.color === COLOR_BROWN && x.secondaryColor === COLOR_BROWN);
+            const idleFlag = Game.spawns[cmem.spawnName].room.find(FIND_FLAGS).find(x => x.color === COLOR_BROWN && x.secondaryColor === COLOR_BROWN);
             if (idleFlag !== undefined) {
                 creep.moveTo(idleFlag, { reusePath: 20 });
             }
             return;
         }
 
-        if (creep.transfer(target, "energy") === ERR_NOT_IN_RANGE) {
+        if (creep.transfer(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
             creep.moveTo(target, { reusePath: 20 });
         }
     }

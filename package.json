@@ -8,6 +8,7 @@
     "test": "./node_modules/.bin/mocha --colors --reporter spec --watch --compilers ts:ts-node/register,tsx:ts-node/register test/*.ts",
     "testonce": "./node_modules/.bin/mocha --colors --reporter spec --compilers ts:ts-node/register,tsx:ts-node/register test/*.ts",
     "start": "npm run build --silent && npm run testonce --silent && gulp upload || Echo Failure!",
+    "upload-private": "npm run build --silent && npm run testonce --silent && gulp upload || Echo Failure!",
     "build": "./node_modules/.bin/webpack --colors"
   },
   "author": "Dessix <Dessix@Dessix.net>",

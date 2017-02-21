@@ -59,7 +59,7 @@ export class PTower extends Process<TowerMemory> {
 			}
 			let hostiles = scannedHostiles[tower.room.name];
 			if(hostiles === undefined) {
-				hostiles = tower.room.find<Creep>(FIND_HOSTILE_CREEPS);
+				hostiles = tower.room.find(FIND_HOSTILE_CREEPS);
 				scannedHostiles[tower.room.name] = hostiles;
 			}
 

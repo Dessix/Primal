@@ -89,29 +89,30 @@ class RoomX extends Room {
         if (onlyMine && (structureType === STRUCTURE_WALL || structureType === STRUCTURE_ROAD || structureType === STRUCTURE_CONTAINER)) {
             onlyMine = false;
         }
-        return <T | undefined>this.find<Structure>(onlyMine ? FIND_MY_STRUCTURES : FIND_STRUCTURES).find(x => x.structureType === structureType);
+        return <T | undefined>this.find(onlyMine ? FIND_MY_STRUCTURES : FIND_STRUCTURES).find(x => x.structureType === structureType);
     }
 
     public findStructuresOfType<T extends Structure>(this: Room, structureType: string, onlyMine: boolean = true): T[] {
         if (onlyMine && (structureType === STRUCTURE_WALL || structureType === STRUCTURE_ROAD || structureType === STRUCTURE_CONTAINER)) {
             onlyMine = false;
         }
-        return <T[]>this.find<Structure>(onlyMine ? FIND_MY_STRUCTURES : FIND_STRUCTURES).filter(x => x.structureType === structureType);
+        return <T[]>this.find(onlyMine ? FIND_MY_STRUCTURES : FIND_STRUCTURES).filter(x => x.structureType === structureType);
     }
 
 
-    public findFirstStructureOfTypeMatching<TReturn extends TCallback, TCallback extends Structure>(this: Room, structureType: string, condition: (structure: TCallback) => boolean, onlyMine: boolean = true): TReturn | undefined {
+    //TODO: Typematch structure by targeted type assoc in typings STRUCTURE_TARGET
+    public findFirstStructureOfTypeMatching<TReturn extends TCallback, TCallback extends Structure>(this: Room, structureType: STRUCTURE, condition: (structure: TCallback) => boolean, onlyMine: boolean = true): TReturn | undefined {
         if (onlyMine && (structureType === STRUCTURE_WALL || structureType === STRUCTURE_ROAD || structureType === STRUCTURE_CONTAINER)) {
             onlyMine = false;
         }
-        return <TReturn | undefined>this.find<TCallback>(onlyMine ? FIND_MY_STRUCTURES : FIND_STRUCTURES).find(x => x.structureType === structureType && condition(<TCallback>x));
+        return <TReturn | undefined>this.find(onlyMine ? FIND_MY_STRUCTURES : FIND_STRUCTURES).find(x => x.structureType === structureType && condition(<TCallback>x));
     }
 
     public findStructuresOfTypeMatching<TReturn extends TCallback, TCallback extends Structure>(this: Room, structureType: string, condition: (structure: TCallback) => boolean, onlyMine: boolean = true): TReturn[] {
         if (onlyMine && (structureType === STRUCTURE_WALL || structureType === STRUCTURE_ROAD || structureType === STRUCTURE_CONTAINER)) {
             onlyMine = false;
         }
-        return <TReturn[]>this.find<Structure>(onlyMine ? FIND_MY_STRUCTURES : FIND_STRUCTURES).filter(x => x.structureType === structureType && condition(<TCallback>x));
+        return <TReturn[]>this.find(onlyMine ? FIND_MY_STRUCTURES : FIND_STRUCTURES).filter(x => x.structureType === structureType && condition(<TCallback>x));
     }
 }
 

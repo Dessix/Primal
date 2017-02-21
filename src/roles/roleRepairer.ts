@@ -72,7 +72,7 @@ export class RoleRepairer extends FsmRole<RepairerMemory, RepairerState> {
 		return instance;
 	}
 
-	public static chooseBody(energyAvailable: number): CreepBodyPart[] | undefined {
+	public static chooseBody(energyAvailable: number): BODYPART[] | undefined {
 		let chosenBody: string[];
 		if(energyAvailable >= 750) {
 			chosenBody = [
@@ -89,7 +89,7 @@ export class RoleRepairer extends FsmRole<RepairerMemory, RepairerState> {
 		} else {
 			return undefined;
 		}
-		return <CreepBodyPart[]>chosenBody;
+		return <BODYPART[]>chosenBody;
 	}
 
 	protected runState(state: RepairerState, creep: Creep, cmem: RepairerMemory): RepairerState | undefined {
@@ -114,14 +114,14 @@ export class RoleRepairer extends FsmRole<RepairerMemory, RepairerState> {
 			return RepairerState.WalkToHomeRoom;
 		}
 
-		const idleFlag = homeRoom.find<Flag>(FIND_FLAGS).find(x => x.color === COLOR_BROWN && x.secondaryColor === COLOR_BROWN);
+		const idleFlag = homeRoom.find(FIND_FLAGS).find(x => x.color === COLOR_BROWN && x.secondaryColor === COLOR_BROWN);
 		if(idleFlag !== undefined) { cmem.idleFlagId = idleFlag.id; }
 
 		const storage = homeRoom.storage;
 		if(storage !== undefined) { cmem.storageId = storage.id; }
 
 		{
-			const designatedStorageFlags = homeRoom.find<Flag>(FIND_FLAGS).filter(flag => flag.color === COLOR_GREY && flag.secondaryColor === COLOR_YELLOW);
+			const designatedStorageFlags = homeRoom.find(FIND_FLAGS).filter(flag => flag.color === COLOR_GREY && flag.secondaryColor === COLOR_YELLOW);
 			const flagIds = new Array<string>(designatedStorageFlags.length);
 			for(let i = designatedStorageFlags.length; i-- > 0;) {
 				flagIds[i] = designatedStorageFlags[i].id;
@@ -230,7 +230,7 @@ export class RoleRepairer extends FsmRole<RepairerMemory, RepairerState> {
 		const ctrller = room.controller;
 		const ctrlLvl = ctrller ? ctrller.level : 0;
 		const maxWallRepairThreshold = 55000 * ctrlLvl;
-		const structuresNeedingRepair = room.find<Structure>(FIND_STRUCTURES)
+		const structuresNeedingRepair = room.find(FIND_STRUCTURES)
 			.filter(s => {
 				if(s.hits === s.hitsMax) { return false; }
 				switch(s.structureType) {

@@ -16,8 +16,9 @@ export class RoleUpgrader extends BaseRole<UpgraderMemory> {
         return instance;
     }
 
-    public static chooseBody(energyAvailable: number): CreepBodyPart[] {
-        let chosenBody: string[];
+    public static chooseBody(energyAvailable: number): BODYPART[] {
+        //TODO: Scaling!
+        let chosenBody: BODYPART[];
         if (energyAvailable >= 750) {
             chosenBody = [
                 MOVE, MOVE, MOVE, MOVE,//4 = 200
@@ -31,7 +32,7 @@ export class RoleUpgrader extends BaseRole<UpgraderMemory> {
         } else {
             chosenBody = [MOVE, MOVE, CARRY, CARRY, WORK];
         }
-        return <CreepBodyPart[]>chosenBody;
+        return chosenBody;
     }
 
     private performHarvest(creep: Creep, cmem: UpgraderMemory): void {
@@ -42,7 +43,7 @@ export class RoleUpgrader extends BaseRole<UpgraderMemory> {
         {
             const containers = new Array<StructureContainer>();
             //Try flagged storage containers
-            const flags = spawn.room.find<Flag>(FIND_FLAGS);
+            const flags = spawn.room.find(FIND_FLAGS);
             for (let flag of flags) {
                 if (
                     flag.color !== COLOR_GREY || flag.secondaryColor !== COLOR_YELLOW
@@ -67,7 +68,7 @@ export class RoleUpgrader extends BaseRole<UpgraderMemory> {
 
         if (container === undefined) {
             //Try any container
-            container = spawn.room.findFirstStructureOfTypeMatching<StructureContainer>(STRUCTURE_CONTAINER, c => c.store.energy > 0, false);
+            container = spawn.room.findFirstStructureOfTypeMatching(STRUCTURE_CONTAINER, c => c.store.energy > 0, false);
         }
 
         if (container !== undefined) {
@@ -75,7 +76,7 @@ export class RoleUpgrader extends BaseRole<UpgraderMemory> {
                 creep.moveTo(container);
             }
         } else {
-            let sources = creep.room.find<Source>(FIND_SOURCES);
+            let sources = creep.room.find(FIND_SOURCES);
             if (creep.harvest(sources[0]) === ERR_NOT_IN_RANGE) {
                 creep.moveTo(sources[0]);
             }
@@ -111,7 +112,7 @@ export class RoleUpgrader extends BaseRole<UpgraderMemory> {
             {
                 const containers = new Array<StructureContainer>();
                 //Try flagged storage containers
-                const flags = spawn.room.find<Flag>(FIND_FLAGS);
+                const flags = spawn.room.find(FIND_FLAGS);
                 for (let flag of flags) {
                     if (
                         flag.color !== COLOR_GREY || flag.secondaryColor !== COLOR_YELLOW
@@ -144,7 +145,7 @@ export class RoleUpgrader extends BaseRole<UpgraderMemory> {
                         }
                     }
                 } else {
-                    let sources = spawn.room.find<Source>(FIND_SOURCES);
+                    let sources = spawn.room.find(FIND_SOURCES);
                     if (creep.harvest(sources[0]) === ERR_NOT_IN_RANGE) {
                         creep.moveTo(sources[0]);
                     }

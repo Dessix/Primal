@@ -30,24 +30,25 @@ export class MiningScanner {
     public static findMiningPosition(source: Source): RoomPosition {
         //look for mining position flags (those starting with Cyan)
         const sourcePos = source.pos;
-        const miningSiteFlag = sourcePos.lookForInBox<Flag>(LOOK_FLAGS, 1)
+        const miningSiteFlag = sourcePos.lookForInBox(LOOK_FLAGS, 1)
             .find(flag => flag.color === COLOR_CYAN && flag.secondaryColor === COLOR_YELLOW);
         if (miningSiteFlag !== undefined) { return miningSiteFlag.pos; }
 
-        const miningContainer = sourcePos.lookForInBox<Structure>(LOOK_STRUCTURES, 1)
+        const miningContainer = sourcePos.lookForInBox(LOOK_STRUCTURES, 1)
             .find(function (s) { return s instanceof StructureContainer; });
         if (miningContainer !== undefined) { return miningContainer.pos; }
 
-        const terrain = sourcePos.lookTerrainInBox(1)
-            .filter(function (res) { return (res.terrain === "plain" || res.terrain === "swamp"); })
-            .sort(function (a, b) { return (a.terrain === "swamp") ? 1 : -1; });
+        throw new Error();
+        // const terrain = sourcePos.lookTerrainInBox(1)
+        //     .filter(function (res) { return (res.terrain === "plain" || res.terrain === "swamp"); })
+        //     .sort(function (a, b) { return (a.terrain === "swamp") ? 1 : -1; });
 
-        if (terrain.length === 0) {
-            throw new Error(`Hidden source? Cannot reach through terrain at ${source.room}:${source.pos}.`);
-        }
+        // if (terrain.length === 0) {
+        //     throw new Error(`Hidden source? Cannot reach through terrain at ${source.room}:${source.pos}.`);
+        // }
 
-        const selectedTile = terrain[0];//Maybe prefer closer to center of room? Currently prefers plain over swamp.
-        return new RoomPosition(terrain[0].x, terrain[0].y, source.room.name);
+        // const selectedTile = terrain[0];//Maybe prefer closer to center of room? Currently prefers plain over swamp.
+        // return new RoomPosition(terrain[0].x, terrain[0].y, source.room.name);
     }
 
     private static scan(room: Room): SourceScanInfo {
@@ -56,7 +57,7 @@ export class MiningScanner {
             sources: [],
             lastSourceIndex: -1,
         };
-        const sources = room.find<Source>(FIND_SOURCES);
+        const sources = room.find(FIND_SOURCES);
         for (let source of sources) {
             const {x: miningX, y: miningY } = MiningScanner.findMiningPosition(source);
             roomInfo.sources.push({

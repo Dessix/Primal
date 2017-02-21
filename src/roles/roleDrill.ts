@@ -56,7 +56,7 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
     }
 
     private static getContainerOnPosition(pos: RoomPosition) {
-        return pos.lookForStructure<StructureContainer>(STRUCTURE_CONTAINER);
+        return pos.lookForStructure(STRUCTURE_CONTAINER);
     }
 
     private getSourceId(creep: Creep, cmem: DrillMemory) {
@@ -78,7 +78,7 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
         };
     }
 
-    public static chooseBody(energyAvailable: number): CreepBodyPart[] | undefined {
+    public static chooseBody(energyAvailable: number): BODYPART[] | undefined {
         let chosenBody: string[] | undefined;
         if (energyAvailable >= 800) {
             chosenBody = [MOVE, CARRY, WORK, WORK, WORK, WORK, WORK, WORK, WORK];
@@ -97,7 +97,7 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
         } else {
             chosenBody = undefined;
         }
-        return <CreepBodyPart[] | undefined>chosenBody;
+        return <BODYPART[] | undefined>chosenBody;
     }
 
     public handleInitialize(creep: Creep, cmem: DrillMemory): DrillState | undefined {
@@ -140,7 +140,7 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
     private findLinks(miningPosition: RoomPosition): string | undefined {
         const room = Game.rooms[miningPosition.roomName];
         if (room === undefined) { throw new Error("Room inaccessible"); }
-        const miningLink = miningPosition.lookForInBox<Structure>(LOOK_STRUCTURES, 1).find(s => s.structureType === STRUCTURE_LINK);
+        const miningLink = miningPosition.lookForInBox(LOOK_STRUCTURES, 1).find(s => s.structureType === STRUCTURE_LINK);
         return miningLink && miningLink.id || undefined;
     }
 
@@ -159,7 +159,7 @@ export class RoleDrill extends FsmRole<DrillMemory, DrillState> {
 
         if (creep.moveTo(miningPosition) === ERR_NO_PATH) {
             if (creep.pos.getRangeTo(miningPosition) === 1) {
-                const creepsInTheWay = miningPosition.lookFor<Creep>(LOOK_CREEPS);
+                const creepsInTheWay = miningPosition.lookFor(LOOK_CREEPS);
                 if (creepsInTheWay.length !== 0 && creepsInTheWay[0].my) {
                     creepsInTheWay[0].moveTo(creep.pos);
                     creep.moveTo(miningPosition);

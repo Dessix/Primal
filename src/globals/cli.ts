@@ -62,7 +62,7 @@ export default function initCli(g: Global, m: Memory, kernel: IKernel): void {
   };
 
   g.showBuildQueue = function (room: Room): void {
-    const buildQueue = room.find<ConstructionSite>(FIND_CONSTRUCTION_SITES);
+    const buildQueue = room.find(FIND_CONSTRUCTION_SITES);
     let str: string | null = "<table>\n";
     for (let i = 0, n = buildQueue.length; i < n; ++i) {
       str = str + `<tr><td>${i + 1}:</td><td>${buildQueue[i].structureType}</td></tr>\n`;

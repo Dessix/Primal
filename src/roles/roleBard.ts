@@ -19,7 +19,7 @@ export class RoleBard extends BaseRole<BardMemory> {
         return instance;
     }
 
-    public static chooseBody(energyAvailable: number): CreepBodyPart[] | undefined {
+    public static chooseBody(energyAvailable: number): BODYPART[] | undefined {
         let chosenBody: string[];
         if (energyAvailable >= 650) {
             chosenBody = [
@@ -33,7 +33,7 @@ export class RoleBard extends BaseRole<BardMemory> {
         } else {
             return undefined;
         }
-        return <CreepBodyPart[]>chosenBody;
+        return <BODYPART[]>chosenBody;
     }
 
     public onRun(creep: Creep, cmem: BardMemory): void {
@@ -42,7 +42,7 @@ export class RoleBard extends BaseRole<BardMemory> {
         let flag = _.find(Game.flags, f => f.color === COLOR_RED && f.secondaryColor === COLOR_RED);
         if (flag === undefined) {
             creep.say("No Orders");
-            const idleAttackFlag = Game.spawns[cmem.spawnName].room.find<Flag>(FIND_FLAGS).find(x => x.color === COLOR_BROWN && x.secondaryColor === COLOR_RED);
+            const idleAttackFlag = Game.spawns[cmem.spawnName].room.find(FIND_FLAGS).find(x => x.color === COLOR_BROWN && x.secondaryColor === COLOR_RED);
             if (creep.ticksToLive > 1450) {
                 if (idleAttackFlag !== undefined) {
                     creep.moveTo(idleAttackFlag);
@@ -68,13 +68,13 @@ export class RoleBard extends BaseRole<BardMemory> {
             }
         }
 
-        const enemySpawn = creep.room.find<Spawn>(FIND_HOSTILE_SPAWNS);
+        const enemySpawn = creep.room.find(FIND_HOSTILE_SPAWNS);
         if ((target = enemySpawn.pop()) !== undefined) {
             console.log("TARGET SPAWN");
             const attackRet = creep.attack(target);
             if (attackRet === ERR_NOT_IN_RANGE) {
                 creep.moveTo(target);
-                let hostileCreepsAndStructures = creep.room.find<Structure | Creep>(FIND_HOSTILE_STRUCTURES).concat(creep.room.find<Creep>(FIND_HOSTILE_CREEPS));
+                let hostileCreepsAndStructures = [...creep.room.find(FIND_HOSTILE_STRUCTURES), ...creep.room.find(FIND_HOSTILE_CREEPS)];
                 if (hostileCreepsAndStructures.length === 0) {
                     return;
                 }
@@ -91,7 +91,7 @@ export class RoleBard extends BaseRole<BardMemory> {
             return;
         }
 
-        let hostileCreep = creep.pos.findClosestByRange<Creep>(FIND_HOSTILE_CREEPS);
+        let hostileCreep = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
         console.log("HOSTILES: " + hostileCreep);
         if (hostileCreep) {
             target = hostileCreep;
@@ -107,13 +107,13 @@ export class RoleBard extends BaseRole<BardMemory> {
             return;
         }
 
-        const enemyStructures = creep.room.find<Structure>(FIND_HOSTILE_STRUCTURES);
+        const enemyStructures = creep.room.find(FIND_HOSTILE_STRUCTURES);
         if (enemyStructures.length > 0 && (target = creep.pos.getClosest(enemyStructures)) !== undefined) {
             console.log("TARGET STRUCTURE");
             const attackRet = creep.attack(target);
             if (attackRet === ERR_NOT_IN_RANGE) {
                 creep.moveTo(target);
-                let hostileCreepsAndStructures = creep.room.find<Structure | Creep>(FIND_HOSTILE_STRUCTURES).concat(creep.room.find<Creep>(FIND_HOSTILE_CREEPS));
+                let hostileCreepsAndStructures = [...creep.room.find(FIND_HOSTILE_STRUCTURES), ...creep.room.find(FIND_HOSTILE_CREEPS)];
                 if (hostileCreepsAndStructures.length === 0) {
                     return;
                 }

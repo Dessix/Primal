@@ -56,7 +56,7 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
 		return (creep.ticksToLive < 75 && spawn.room.energyAvailable >= spawn.room.energyCapacityAvailable / 2 && creep.body.length > 13);
 	}
 
-	public static chooseBody(energyAvailable: number): CreepBodyPart[] | undefined {
+	public static chooseBody(energyAvailable: number): BODYPART[] | undefined {
 		let chosenBody: string[];
 		if(energyAvailable >= 1300) {
 			chosenBody = [
@@ -95,7 +95,7 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
 		} else {
 			return undefined;
 		}
-		return <CreepBodyPart[]>chosenBody;
+		return <BODYPART[]>chosenBody;
 	}
 
 	private getCarryTarget(creep: Creep, cmem: BootstrapMinerMemory): Spawn | Structure | undefined {
@@ -141,7 +141,7 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
 			return spawn;
 		}
 
-		let myStructures: Structure[] | undefined = spawn.room.find<Structure>(FIND_MY_STRUCTURES);
+		let myStructures = spawn.room.find(FIND_MY_STRUCTURES);
 		for(let tower of myStructures) {
 			if(
 				tower.structureType !== STRUCTURE_TOWER ||
@@ -188,13 +188,13 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
 
 	private doRoadMaintenance(creep: Creep, cmem: BootstrapMinerMemory): boolean {
 		if(!Memory.config.boostrapsRepair) { return false; }
-		const constructions = creep.pos.lookFor<ConstructionSite>(LOOK_CONSTRUCTION_SITES);
+		const constructions = creep.pos.lookFor(LOOK_CONSTRUCTION_SITES);
 		if(constructions.length > 0) {
 			creep.build(constructions[0]);
 			return true;
 		}
 
-		const road = <StructureRoad | undefined>creep.pos.lookFor<Structure>(LOOK_STRUCTURES).find(x => x.structureType === STRUCTURE_ROAD || x.structureType === STRUCTURE_CONTAINER);
+		const road = <StructureRoad | undefined>creep.pos.lookFor(LOOK_STRUCTURES).find(x => x.structureType === STRUCTURE_ROAD || x.structureType === STRUCTURE_CONTAINER);
 		if(road !== undefined && road.hits < road.hitsMax) {
 			creep.repair(road);
 			return true;
@@ -264,7 +264,7 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
 
 		/*const occupiedSources: Source[] = [];
 		{
-				const roomSources = spawn.room.find<Source>(FIND_SOURCES_ACTIVE);
+				const roomSources = spawn.room.find(FIND_SOURCES_ACTIVE);
 				let unoccupiedSources: Source[] = [];
 				for (let i = roomSources.length; i-- > 0;) {
 						const source = roomSources[i];
@@ -286,7 +286,7 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
 		{
 			const remoteMiningRoomNames: string[] = [];
 			{
-				const spawnRoomFlags = spawn.room.find<Flag>(FIND_FLAGS);
+				const spawnRoomFlags = spawn.room.find(FIND_FLAGS);
 				for(let flag of spawnRoomFlags) {
 					if(flag.color !== COLOR_GREEN || flag.secondaryColor !== COLOR_GREEN) {
 						continue;
@@ -358,7 +358,7 @@ export class RoleBootstrapMiner extends FsmRole<BootstrapMinerMemory, BootstrapM
 			return;
 		}
 
-		const sourcesAtPos = target.pos.lookFor<Source>(LOOK_SOURCES);
+		const sourcesAtPos = target.pos.lookFor(LOOK_SOURCES);
 		if(sourcesAtPos.length !== 0) {
 			const source = sourcesAtPos[0];
 			if(creep.harvest(source) === ERR_NOT_IN_RANGE) {

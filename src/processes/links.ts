@@ -71,7 +71,7 @@ export class PLinks extends Process<LinksMemory> {
     //         continue;//TODO: Request energy from courier job queue someday?
     //     }
 
-    //     const hostiles = tower.room.find<Creep>(FIND_HOSTILE_CREEPS);
+    //     const hostiles = tower.room.find(FIND_HOSTILE_CREEPS);
     //     if (hostiles.length === 0) { continue; }
 
     //     let closest: Creep | undefined = undefined;
@@ -95,7 +95,7 @@ export class PLinks extends Process<LinksMemory> {
     // if (storage === undefined) {
     //     return undefined;
     // }
-    const links = room.find<Structure>(FIND_STRUCTURES).filter(s => s.structureType === STRUCTURE_LINK);
+    const links = room.find(FIND_STRUCTURES).filter(s => s.structureType === STRUCTURE_LINK);
     const closest = miningPosition.getClosest(links);
     if (closest === undefined) {
       return;

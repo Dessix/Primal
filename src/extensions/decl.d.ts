@@ -15,7 +15,7 @@ interface StructureStorage {
   readonly capacityAvailable: number;
   getCapacityReservation(this: StructureStorage, reserverId?: string): number;
   removeCapacityReservation(this: StructureStorage, reserverId: string): boolean;
-  reserveCapacity(this: StructureStorage, reserverId: string, quantity: number): void
+  reserveCapacity(this: StructureStorage, reserverId: string, quantity: number): void;
 }
 
 interface TravelProfile {
@@ -31,23 +31,26 @@ interface DefaultMoveProfile {
 }
 
 declare const enum TravelCondition {
-  road,
-  plain,
-  swamp,
+  road = 0,
+  plain = 1,
+  swamp = 2,
 }
 
-declare type DIRECTION = typeof TOP | typeof TOP_RIGHT | typeof RIGHT | typeof BOTTOM_RIGHT | typeof BOTTOM | typeof BOTTOM_LEFT | typeof LEFT | typeof TOP_LEFT;
+//declare type DIRECTION = typeof TOP | typeof TOP_RIGHT | typeof RIGHT | typeof BOTTOM_RIGHT | typeof BOTTOM | typeof BOTTOM_LEFT | typeof LEFT | typeof TOP_LEFT;
 
 declare type DICT<V> = { [k: string]: V; [k: number]: V; };
+
+interface CreepDefaultMoveMemory {
+
+}
 
 interface CreepMemory {
   spawnName: string;
   homeRoomName: string;
   role: string | null | undefined;
-  [key: string]: any;
 
   t?: TravelProfile;
-  _move?: {};
+  _move?: CreepDefaultMoveMemory;
   d?: boolean;
 }
 
@@ -77,14 +80,24 @@ interface Creep {
 }
 
 interface Flag {
-  id: string;
+  readonly id: string;
   lookForStructureAtPosition<T extends Structure>(this: Flag, structureType: string): T | undefined;
 }
 
-interface LookForInBoxTerrainResult {
+interface LookForInBoxTerrainResult extends LookAtResultWithPos {
+  type: LOOK_TERRAIN;
   x: number;
   y: number;
   terrain: string;
+  constructionSite: undefined;
+  creep: undefined;
+  energy: undefined;
+  exit: undefined;
+  flag: undefined;
+  source: undefined;
+  structure: undefined;
+  mineral: undefined;
+  resource: undefined;
 }
 
 interface RoomPositionConstructor {
@@ -112,22 +125,23 @@ interface RoomPosition {
   getRangeToLinearSqr(this: RoomPosition, other: RoomPosition): number;
   getClosest<T extends RoomObject | { pos: RoomPosition }>(this: RoomPosition, targets: T[]): T | undefined;
   getClosestLinear<T extends RoomObject | { pos: RoomPosition }>(this: RoomPosition, targets: T[]): T | undefined;
-  lookForStructure<T extends Structure>(this: RoomPosition, structureType: string): T | undefined;
-  lookForInBox<T extends Creep | Flag | Structure | Resource | Source | ConstructionSite | LookForInBoxTerrainResult>(this: RoomPosition, structureType: string, radius: number): T[];
-  lookTerrainInBox(this: RoomPosition, radius: number): LookForInBoxTerrainResult[];
+  //TODO: AUTOTYPE STRUCTURE_TARGET
+  lookForStructure<TSTRUCTURE extends STRUCTURE>(this: RoomPosition, structureType: TSTRUCTURE): STRUCTURE_TARGET<TSTRUCTURE> | undefined;
+  lookForInBox<TLOOK extends LOOK>(this: RoomPosition, lookType: TLOOK, radius: number): LOOK_TARGET<TLOOK>[];
+  //lookTerrainInBox(this: RoomPosition, radius: number): LookForInBoxTerrainResult[];
 
   toUnicode(this: RoomPosition): string;
 }
 
 interface Room {
-  findFirstStructureOfType<T extends Structure>(this: Room, structureType: string, onlyMine?: Boolean): T | undefined;
-  findStructuresOfType<T extends Structure>(this: Room, structureType: string, onlyMine?: Boolean): T[];
+  findFirstStructureOfType<TSTRUCTURE extends STRUCTURE>(this: Room, structureType: TSTRUCTURE, onlyMine?: Boolean): STRUCTURE_TARGET<TSTRUCTURE> | undefined;
+  findStructuresOfType<TSTRUCTURE extends STRUCTURE>(this: Room, structureType: TSTRUCTURE, onlyMine?: Boolean): STRUCTURE_TARGET<TSTRUCTURE>[];
 
-  findFirstStructureOfTypeMatching<T extends Structure>(this: Room, structureType: string, condition: (structure: T) => boolean, onlyMine?: Boolean): T | undefined;
-  findFirstStructureOfTypeMatching<TReturn extends TCallback, TCallback extends Structure>(this: Room, structureType: string, condition: (structure: TCallback) => boolean, onlyMine?: Boolean): TReturn | undefined;
+  findFirstStructureOfTypeMatching<TSTRUCTURE extends STRUCTURE>(this: Room, structureType: TSTRUCTURE, condition: (structure: STRUCTURE_TARGET<TSTRUCTURE>) => boolean, onlyMine?: Boolean): STRUCTURE_TARGET<TSTRUCTURE> | undefined;
+  findFirstStructureOfTypeMatching<TReturn extends STRUCTURE_TARGET<TSTRUCTURE>, TSTRUCTURE extends STRUCTURE>(this: Room, structureType: TSTRUCTURE, condition: (structure: STRUCTURE_TARGET<TSTRUCTURE>) => boolean, onlyMine?: Boolean): TReturn | undefined;
 
-  findStructuresOfTypeMatching<T extends Structure>(this: Room, structureType: string, condition: (structure: T) => boolean, onlyMine?: Boolean): T[];
-  findStructuresOfTypeMatching<TReturn extends TCallback, TCallback extends Structure>(this: Room, structureType: string, condition: (structure: TCallback) => boolean, onlyMine?: Boolean): TReturn[];
+  findStructuresOfTypeMatching<TSTRUCTURE extends STRUCTURE>(this: Room, structureType: TSTRUCTURE, condition: (structure: STRUCTURE_TARGET<TSTRUCTURE>) => boolean, onlyMine?: Boolean): STRUCTURE_TARGET<TSTRUCTURE>[];
+  findStructuresOfTypeMatching<TReturn extends STRUCTURE_TARGET<TSTRUCTURE>, TSTRUCTURE extends STRUCTURE>(this: Room, structureType: TSTRUCTURE, condition: (structure: STRUCTURE_TARGET<TSTRUCTURE>) => boolean, onlyMine?: Boolean): TReturn[];
 }
 
 interface Global {

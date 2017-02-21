@@ -6,8 +6,8 @@ class FlagX {
         return `flag-${this.name}`;
     }
 
-    public lookForStructureAtPosition<T extends Structure>(this: Flag, structureType: string): T | undefined {
-        return this.pos.lookForStructure<T>(structureType);
+    public lookForStructureAtPosition<TSTRUCTURE extends STRUCTURE>(this: Flag, structureType: TSTRUCTURE): STRUCTURE_TARGET<TSTRUCTURE> | undefined {
+        return this.pos.lookForStructure(structureType);
     }
 
     public readonly isFlag: boolean = true;

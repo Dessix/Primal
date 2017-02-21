@@ -1,4 +1,4 @@
-export interface BaseCreep extends Array<CreepBodyPart> {
+export interface BaseCreep extends Array<BODYPART> {
 }
 
 interface BodyOpts {
@@ -9,19 +9,19 @@ interface BodyOpts {
 }
 
 export class BodyBuilder {
-	private static partCost(p: CreepBodyPart) {
+	private static partCost(p: BODYPART) {
 		return BODYPART_COST[p];
 	}
 
-  public static bodyCost(body: CreepBodyPart[]) {
+  public static bodyCost(body: BODYPART[]) {
     let cost = 0;
     for (let i = 0; i < body.length; ++i) {
-      cost = cost + this.partCost(body[i]);
+      cost += this.partCost(body[i]);
     }
     return cost;
   }
 
-  public static fatiguePerMove(body: CreepBodyPart[], travelCondition: TravelCondition) {
+  public static fatiguePerMove(body: BODYPART[], travelCondition: TravelCondition) {
     //TODO: account for boosts
     let terrainFactor: number;
     switch (travelCondition) {
@@ -45,10 +45,10 @@ export class BodyBuilder {
 
   public static buildCreepBody(
     maxCost: number,
-    base: CreepBodyPart[],
-    grow: CreepBodyPart[],
+    base: BODYPART[],
+    grow: BODYPART[],
     opts: BodyOpts = {}
-  ): CreepBodyPart[] | undefined {
+  ): BODYPART[] | undefined {
     const baseCost = this.bodyCost(base);
     const travelCondition = opts.travel !== undefined ? opts.travel : TravelCondition.road;
     const max: { [partName: string]: number; move: number; carry: number; work: number; } = {
@@ -58,7 +58,7 @@ export class BodyBuilder {
     };
     const growBuffer = grow.slice();
 
-    let lastValid: Array<CreepBodyPart> | undefined = undefined;
+    let lastValid: Array<BODYPART> | undefined = undefined;
     let curBody = base.slice();
     grower:
     while (true) {
@@ -80,7 +80,7 @@ export class BodyBuilder {
       //bypass non-move growth if there's nothing to grow
       if (growBuffer.length > 0 && ((fatiguePerMove === 0 && moveCount < max.move ? curBody.length + 1 : curBody.length) < this.MaxParts)) {
         const remainingAlloc = maxCost - curCost - (fatiguePerMove === 0 && moveCount < max.move ? BODYPART_COST[MOVE] : 0);//Needs an additional MOVE
-        let affordablePart: CreepBodyPart | undefined = undefined;
+        let affordablePart: BODYPART | undefined = undefined;
         for (let part of growBuffer) {
           if (BODYPART_COST[part] > remainingAlloc || curBody.count(part) >= max[part]) { continue; }
           affordablePart = part;
@@ -93,7 +93,7 @@ export class BodyBuilder {
         if (fatiguePerMove === 0 && moveCount < max.move) {
           curBody.push(MOVE);
         }
-        growBuffer.unshift(<CreepBodyPart>growBuffer.pop());
+        growBuffer.unshift(<BODYPART>growBuffer.pop());
         curBody.push(affordablePart);
         continue grower;//Further movement scheduling
       }
@@ -103,7 +103,10 @@ export class BodyBuilder {
     return lastValid !== undefined ? this.sortParts(lastValid) : undefined;
   }
 
-  private static sortParts(body: Array<CreepBodyPart>): Array<CreepBodyPart> {
+  private static sortParts(body: BODYPART[]): BODYPART[] {
+    //tough first
+    //attack after move (?)
+    //heal last
     return body;//TODO: Implement, then add tests
   }
 }

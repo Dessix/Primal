@@ -28,13 +28,12 @@ const process = require("process");
 const cpSpawn = child_process.spawn;
 
 
-const secrets = require("./secrets.js");
 const webpackConfig = require("./webpack.config.js");
 
 
-const gulpUploadSingleVinylAsModule = () => through2.obj((fileVinyl, enc, cb) => {
+const gulpUploadSingleVinylAsModule = (privServ) => through2.obj((fileVinyl, enc, cb) => {
     const cbd = Q.defer();
-    _gulpUploadVinylsAsModules([ fileVinyl ], cbd.makeNodeResolver());
+    _gulpUploadVinylsAsModules([ fileVinyl ], cbd.makeNodeResolver(), privServ);
     cbd.promise.then(_ => cb(null, _), _ => cb(_));
 });
 
@@ -44,7 +43,8 @@ const gulpTraceSync = (onEntryCb) => through2.obj((f, e, cb) => {
 });
 
 let __lastUploaded = null;
-function _gulpUploadVinylsAsModules(fileVinyls, cb) {
+function _gulpUploadVinylsAsModules(fileVinyls, cb, privServ) {
+    const secrets = (!privServ) ? require("./secrets.js") : require("./secrets.private.js");;//Private server support
     const email = secrets.email;
     const password = secrets.password;
     const modules = {}
@@ -61,8 +61,8 @@ function _gulpUploadVinylsAsModules(fileVinyls, cb) {
     __lastUploaded = data;
     process.stdout.write("Uploading... ");
     const req = https.request({
-        hostname: "screeps.com",
-        port: 443,
+        hostname: secrets.server || ((!privServ) ? "screeps.com" : "127.0.0.1"),
+        port: secrets.port || ((!privServ) ? 443 : 21025),
         path: "/api/user/code",
         method: "POST",
         auth: `${email}:${password}`,
@@ -98,13 +98,19 @@ gulp.task("adv-watch-upload", () => {
         .pipe(gulpDebounce({ fnHash: (v) => "0", timeout: 250 }))//Dummy hash such that any file trigger is debounced
         .pipe(gulpRename(path => { path.dirname = ""; path.extname = ""; }))//strip module extension
         //.pipe(gulpTraceSync(f => console.log(`${f.relative}`)))
-        .pipe(gulpUploadSingleVinylAsModule());
+        .pipe(gulpUploadSingleVinylAsModule(false));
 });
 
 gulp.task("upload", () => {
     return gulp.src("./dist/main.js")
         .pipe(gulpRename(path => { path.dirname = ""; path.extname = ""; }))//strip module extension
-        .pipe(gulpUploadSingleVinylAsModule());
+        .pipe(gulpUploadSingleVinylAsModule(false));
+});
+
+gulp.task("upload-private", () => {
+    return gulp.src("./dist/main.js")
+        .pipe(gulpRename(path => { path.dirname = ""; path.extname = ""; }))//strip module extension
+        .pipe(gulpUploadSingleVinylAsModule(true));
 });
 
 gulp.task("default", ["adv-watch", "adv-watch-upload"]);

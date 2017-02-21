@@ -1,5 +1,5 @@
 interface Memory {
-    sources?: { [roomName: string]: SourceScanInfo | undefined }
+    sources?: { [roomName: string]: SourceScanInfo | undefined };
 }
 
 interface SourceInfo {
