@@ -1,5 +1,4 @@
-declare interface Global {
-    [key: string]: any;
+interface Global {
 }
 
 declare const global: Global;

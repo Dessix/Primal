@@ -19,15 +19,14 @@ export class PRoot extends Process<RootMemory> {
     }
 
     public run(pmem: RootMemory) {
-        const kernel = <Kernel>this.kernel;
-        if (!pmem.bootstrapped && kernel.getProcessCount() <= 1) {
-            console.log("Processes empty! Bootstrapping!");
-            this.spawnChildProcess(PBootstrap);
-            pmem.bootstrapped = true;
-        }
-        if (pmem.memoryCleanerPid === undefined) {
-            pmem.memoryCleanerPid = this.spawnChildProcess(PCleanMemory);
-        }
-        return pmem;
+        // if (!pmem.bootstrapped && kernel.getProcessCount() <= 1) {
+        //     console.log("Processes empty! Bootstrapping!");
+        //     this.spawnChildProcess(PBootstrap);
+        //     pmem.bootstrapped = true;
+        // }
+        // if (pmem.memoryCleanerPid === undefined) {
+        //     pmem.memoryCleanerPid = this.spawnChildProcess(PCleanMemory);
+        // }
+        
     }
 }

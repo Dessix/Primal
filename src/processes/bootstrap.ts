@@ -25,7 +25,7 @@ export class PBootstrap extends Process<BootstrapMemory> {
     }
 
     public run(): ProcessMemory | undefined {
-        const kernel = this.kernelOrThrow;
+        const kernel = this.kernel;
         const pmem = this.pmem;
         if (pmem.harvestPid === undefined) {
             console.log("Bootstrap spawning Harvest...");

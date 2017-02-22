@@ -7,20 +7,19 @@ export abstract class Process<TMemory extends ProcessMemory> implements IProcess
     }
     public pid: ProcessId;
     public parentPid: ProcessId;
-    public kernel: Kernel | null;
+    public kernel: IKernel;
     public status: ProcessStatus = ProcessStatus.RUN;
     public readonly baseHeat: number = 10;
     public readonly service: boolean = false;
 
-    public get kernelOrThrow(): Kernel {
-        if (this.kernel === null) {
-            throw new Error("Kernel not available!");
-        }
-        return this.kernel;
+    bind(kernel: IKernel, pid: ProcessId, parentPid: ProcessId): void {
+        this.kernel = kernel;
+        this.pid = pid;
+        this.parentPid = parentPid;
     }
 
     public spawnChildProcess(processCtor: ProcessConstructor) {
-        const childPid = this.kernelOrThrow.spawnProcess(processCtor, this.pid);
+        const childPid = this.kernel.spawnProcess(processCtor, this.pid);
         return childPid;
     }
 
@@ -31,7 +30,6 @@ export abstract class Process<TMemory extends ProcessMemory> implements IProcess
     constructor(pid: ProcessId, parentPid: ProcessId) {
         this.pid = pid;
         this.parentPid = parentPid;
-				this.kernel = null;
     }
 
     public run?(pmem: TMemory): void;
