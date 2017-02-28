@@ -12,5 +12,4 @@ type SerializedProcess = {
 interface SerializedProcessTable extends Array<SerializedProcess> {
 }
 
-interface Memory extends KernelMemory {
-}
+//interface Memory extends KernelMemory { }

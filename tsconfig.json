@@ -22,6 +22,7 @@
   },
   "include": [
     "typings/**/*.d.ts",
+    "src/**/*.g.d.ts",
     "src/**/*.d.ts",
     "lib/**/*.ts",
     "src/**/*.ts",

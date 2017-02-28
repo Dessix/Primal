@@ -47,7 +47,7 @@ export class Kernel implements IKernel {
       return null;
     }
     return {
-      process: new processConstructor(entry.pid,entry.parentPid),
+      process: new processConstructor(this,entry.pid,entry.parentPid),
       processCtor: processConstructor,
       heat: entry.heat,
       service: entry.service,
@@ -111,21 +111,19 @@ export class Kernel implements IKernel {
     return this.processTable.size;
   }
 
-  public getProcessMemory(pid: ProcessId): ProcessMemory {
+  public getProcessMemory(processId: ProcessId): ProcessMemory {
     const mem = this.getKmem();
     let pmem = mem.pmem;
     if(pmem === undefined) { mem.pmem = pmem = {}; }
-    let pmemi = pmem[pid];
-    if(pmemi === undefined || pmemi === null) { pmem[pid] = pmemi = {}; }
+    let pmemi = pmem[processId];
+    if(pmemi === undefined || pmemi === null) { pmem[processId] = pmemi = {}; }
     return pmemi;
   }
 
   public setProcessMemory(pid: ProcessId,memory: ProcessMemory): void {
     const mem = this.getKmem();
     let pmem = mem.pmem;
-    if(pmem === undefined) {
-      mem.pmem = pmem = {};
-    }
+    if(pmem === undefined) { mem.pmem = pmem = {}; }
     pmem[pid] = memory;
   }
 
@@ -136,7 +134,7 @@ export class Kernel implements IKernel {
     }
   }
 
-  public spawnProcessByClassName(processName: string,parentPid?: number): ProcessId | undefined {
+  public spawnProcessByClassName(processName: string, args: Array<any>, parentPid?: ProcessId): ProcessId | undefined {
     if(parentPid === undefined) { parentPid = 0; }
     const processCtor = ProcessRegistry.fetch(processName);
     if(processCtor === undefined) {
@@ -146,17 +144,16 @@ export class Kernel implements IKernel {
     return this.spawnProcess(processCtor,parentPid);
   }
 
-  public spawnProcess(processCtor: ProcessConstructor,parentPid: number): ProcessId {
+  public spawnProcess<TLaunchArgs extends Array<any>, TProcessMemory extends ProcessMemory>(processCtor: TypedProcessConstructor<ITypedProcess<TLaunchArgs, TProcessMemory>>, parentPid: ProcessId): TypedProcessId<ITypedProcess<TLaunchArgs, TProcessMemory>> {
     const pid = this.getFreePid();
-    const process = new processCtor(pid,parentPid);
+    const process = new processCtor(this,pid,parentPid);
     const record: KernelRecord = {
       process: process,
       heat: process.baseHeat,
       service: process.service,
       processCtor: processCtor,
     };
-    process.pid = pid;
-    this.processTable.set(process.pid,record);
+    this.processTable.set(pid,record);//TODO: Replace with js object
     return pid;
   }
 
@@ -164,13 +161,13 @@ export class Kernel implements IKernel {
     this.processTable.set(process.pid,<KernelRecord>{
       heat: process.baseHeat,
       process: process,
-      processCtor: ProcessRegistry.fetch(process.className),
+      processCtor: ProcessRegistry.fetch(process.className),//TODO: ".constructor"?
       service: process.service,
     });
-
     return process.pid;
   }
 
+  //TODO: Child tracking
   public getChildProcesses(parentPid: ProcessId): ProcessId[] {
     const childPids: ProcessId[] = [];
     const records = Array.from(this.processTable.values());
@@ -198,43 +195,37 @@ export class Kernel implements IKernel {
   public getProcessesByClassName<T>(className: string): IProcess[] {
     const processCtor = ProcessRegistry.fetch(className);
     if(processCtor === undefined) {
-      console.log("Ω ClassName not defined");
+      console.log(`Ω ClassName ${className} not defined`);
       return [];
     }
     return this.getProcessesByClass(processCtor);
   }
 
-  public killProcess(pid: number): void {
-    const process = this.getProcessById(pid);
+  public killProcess(processId: ProcessId): void {
+    const process = this.getProcessById(processId);
     if(process === undefined) { return; }
-    this.processTable.delete(pid);
-    this.deleteProcessMemory(pid);
+    this.processTable.delete(processId);
+    this.deleteProcessMemory(processId);
 
-    const childPids = this.getChildProcesses(pid);
+    const childPids = this.getChildProcesses(processId);
     for(let i = 0,n = childPids.length;i < n;++i) {
       const childPid = childPids[i];
       this.killProcess(childPid);
     }
   }
 
-  public getProcessById(pid: ProcessId): IProcess | undefined {
+  public getProcessById<TPROCESS extends IProcess>(pid: ProcessId): TPROCESS | undefined {
     const record = this.processTable.get(pid);
     if(record !== undefined) {
-      return record.process;
+      return <TPROCESS>record.process;
     } else {
       return;
     }
   }
 
-  public getTypedProcessById<TPROCESS extends IProcess>(pid: ProcessId): TPROCESS | undefined {
-    return <TPROCESS | undefined>this.getProcessById(pid);
-  }
-
-  public getTypedProcessByIdOrThrow<TPROCESS extends IProcess>(pid: ProcessId): TPROCESS {
+  public getProcessByIdOrThrow<TPROCESS extends IProcess>(pid: ProcessId): TPROCESS {
     const record = this.processTable.get(pid);
-    if(record === undefined) {
-      throw new Error("Process not found!");
-    }
+    if(record === undefined) { throw new Error("Process not found!"); }
     return <TPROCESS>record.process;
   }
 
@@ -242,19 +233,16 @@ export class Kernel implements IKernel {
     return b.heat - a.heat;
   }
 
-  private runService(services: Array<KernelRecord>,process: IProcess,initial: boolean): number {
-    const pmem = this.getProcessMemory(process.pid);
-    return this.tryRunProc(process,pmem,true,initial);
+  private runService(services: Array<KernelRecord>,process: IProcess): number {
+    return this.tryRunProc(process);//TODO: Services should never need error handling.
   }
 
-  private tryCallProc(procFn: (pmem: ProcessMemory) => void,pthis: IProcess,pMem: ProcessMemory): Error | undefined {
-    try { procFn.call(pthis,pMem); return; } catch(er) { return er; }
+  private tryCallProc(proc: IProcess): Error | undefined {
+    try { proc.run(); return; } catch(er) { return er; }
   }
 
-  private tryRunProc(process: IProcess,processMemory: ProcessMemory,isService: boolean,isInitial: boolean): number {
-    const procToCall = (isInitial ? process.reloadFromMemory : process.run);
-    if(procToCall == null) { return 0; }
-    const e = this.tryCallProc(procToCall,process,processMemory);
+  private tryRunProc(process: IProcess): number {
+    const e = this.tryCallProc(process);
     if(e !== undefined) {
       console.log(`Ω Failed to run service ${process.pid}:${process.className}: ${e}`);
       const stackTrace = e.stack;
@@ -267,10 +255,10 @@ export class Kernel implements IKernel {
     return 0;
   }
 
-  private runAllServices(services: KernelRecord[],initial: boolean): void {
+  private runAllServices(services: KernelRecord[]): void {
     for(let i = 0,n = services.length;i < n;++i) {
       const process = services[i].process;
-      const returnCode = this.runService(services,process,initial);
+      const returnCode = this.runService(services,process);
       if(returnCode !== 0) {
         services.splice(i);
         --i;
@@ -297,21 +285,7 @@ export class Kernel implements IKernel {
       const record = processes[i],process = record.process;
       record.heat = process.baseHeat;
 
-      const pmem = this.getProcessMemory(process.pid);
-      {
-        const pStatus = this.tryRunProc(process,pmem,false,true);
-        if(pStatus !== 0) {
-          //Initial check for exit preconditions
-          if(pStatus !== ProcessStatus.RUN) {
-            this.killProcess(process.pid);
-            console.log(`Ω Process ${process.pid}:${process.className} exited with status ${process.status}.`);
-          }
-          continue;
-        }
-      }
-
-      //Post-check for process exit. Early-out before wasting memory storage over a tick.
-      if(this.tryRunProc(process,pmem,false,false) === -2) {
+      if(this.tryRunProc(process) === -2) {
         this.killProcess(process.pid);
         console.log(`Ω Process ${process.pid}:${process.className} exited with status ${process.status}.`);
         continue;
@@ -338,17 +312,14 @@ export class Kernel implements IKernel {
       } else {
         processes.push(record);
       }
-      record.process.kernel = this;
     }
 
-    //Services don't use heat mapping
-    this.runAllServices(services,true);
+    //Services don't use heat mapping or cpu limiting
+    this.runAllServices(services);
 
     processes.sort(this.sortKernelRecordsByHeat);
 
     this.runAllProcesses(processes,maxCpu,lastPidRun);
-
-    this.runAllServices(services,false);
 
   }
 }

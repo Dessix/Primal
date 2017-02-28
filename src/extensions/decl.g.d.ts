@@ -1,35 +1,6 @@
 
 interface StructureMemory { }
 
-interface Memory {
-  structures: { [structureId: string]: StructureMemory | undefined };
-  containers?: ContainerMemoryList;
-}
-
-interface ContainerMemoryList { [containerId: string]: ContainerMemory; }
-
-interface ContainerMemory extends StructureMemory {
-  reservations?: { [reserverId: string ]: number };
-}
-
-//TODO: Wtf?
-interface StructureStorage {
-  memory: ContainerMemory;
-  readonly capacityAvailable: number;
-  getCapacityReservation(this: StructureStorage, reserverId?: string): number;
-  removeCapacityReservation(this: StructureStorage, reserverId: string): boolean;
-  reserveCapacity(this: StructureStorage, reserverId: string, quantity: number): void;
-}
-
-//TODO: Wtf?
-interface StructureContainer {
-  memory: ContainerMemory;
-  readonly capacityAvailable: number;
-  getCapacityReservation(this: StructureStorage, reserverId?: string): number;
-  removeCapacityReservation(this: StructureStorage, reserverId: string): boolean;
-  reserveCapacity(this: StructureStorage, reserverId: string, quantity: number): void;
-}
-
 interface TravelProfile {
   time: number;
   pathStep: number;
@@ -53,14 +24,32 @@ declare type DICT<V> = { [k: string]: V; [k: number]: V; };
 
 interface CreepDefaultMoveMemory { }
 
-interface CreepMemory {
+type CreepName = typeof Creep.name & (keyof (typeof Game.creeps));
+
+interface ICreepProcess extends IProcess {
+  creepName: CreepName;
+  readonly creep?: Creep;
+}
+
+interface CreepProcessMemory extends ProcessMemory {
+    c: CreepName;
+}
+
+interface CreepProcessMemoryOld {
   spawnName: string;
   homeRoomName: string;
-  role: string | null | undefined;
+  role: string | null | undefined;//Obsolete, defined more by process type
 
   t?: TravelProfile;
+  d?: boolean;//Dead-ness? Obsolete with process model.
+}
+
+interface CreepMemory {
+  s: TypedProcessId<ISpawnRequestingProcess>;
+  c: TypedProcessId<ICreepProcess>;
+
+  /**@deprecated*/
   _move?: CreepDefaultMoveMemory;
-  d?: boolean;
 }
 
 interface TravelToOpts {

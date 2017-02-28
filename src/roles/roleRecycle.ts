@@ -1,32 +1,28 @@
-import { BaseRole } from "./baseRole";
+import { CreepProcess } from "../kernel/creepProcess";
 
-interface RecyclerMemory extends CreepMemory {
+interface PRecycleMemory extends CreepProcessMemory {
 }
 
-export class RoleRecycle extends BaseRole<RecyclerMemory> {
-    public static RoleTag: string = "recy";
+export class PRecycle extends CreepProcess<[Creep],PRecycleMemory> {
+    public static readonly className: string = "Recycle";
+    public get className(): string { return PRecycle.className; }
 
-    public constructor() {
-        super();
+    public launch(args: [Creep]): void {
+        this.creepName = args[0].name;
     }
 
-    private static _instance: RoleRecycle | undefined;
-    public static get Instance(): RoleRecycle {
-        const instance = RoleRecycle._instance;
-        if (instance === undefined) {
-            return (RoleRecycle._instance = new RoleRecycle());
-        }
-        return instance;
-    }
-
-    public onRun(creep: Creep, cmem: RecyclerMemory): void {
+    public run(): void {
+        const creep = this.creep;
+        if (creep === undefined) { this.status = ProcessStatus.EXIT; return; }
+        //Game.creeps[]
         if (creep.spawning) { return; }
         const spawn = creep.spawn;
 
         if (creep.pos.getRangeTo(spawn) > 1) {
             creep.moveTo(spawn.pos);
-            creep.say("o7");
             return;
+        } else {
+            creep.say("o7", true);
         }
 
         const carriedEnergy = creep.carry.energy;

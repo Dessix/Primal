@@ -32,7 +32,7 @@ export class PBootstrap extends Process<BootstrapMemory> {
             pmem.harvestPid = this.spawnChildProcess(PHarvest);
         }
 
-        const harvester = kernel.getTypedProcessById<PHarvest>(pmem.harvestPid);
+        const harvester = kernel.getProcessById<PHarvest>(pmem.harvestPid);
         if (harvester === undefined) {
             pmem.harvestPid = undefined;
             return this.run();
@@ -44,7 +44,7 @@ export class PBootstrap extends Process<BootstrapMemory> {
             pmem.upgradePid = this.spawnChildProcess(PUpgrade);
         }
 
-        const upgrader = kernel.getTypedProcessById<PUpgrade>(pmem.upgradePid);
+        const upgrader = kernel.getProcessById<PUpgrade>(pmem.upgradePid);
         if (upgrader === undefined) {
             pmem.upgradePid = undefined;
         }
