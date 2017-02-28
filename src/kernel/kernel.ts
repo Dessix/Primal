@@ -1,6 +1,4 @@
-import { Processes } from './processes';
 import { ProcessRegistry } from "./processRegistry";
-import { Process } from "./process";
 
 const enum ProcessRunState {
   CPU_OVERLOAD = -1,
@@ -134,7 +132,7 @@ export class Kernel implements IKernel {
     }
   }
 
-  public spawnProcessByClassName(processName: string, args: Array<any>, parentPid?: ProcessId): ProcessId | undefined {
+  public spawnProcessByClassName(processName: string, parentPid?: ProcessId): IProcess | undefined {
     if(parentPid === undefined) { parentPid = 0; }
     const processCtor = ProcessRegistry.fetch(processName);
     if(processCtor === undefined) {
@@ -144,9 +142,9 @@ export class Kernel implements IKernel {
     return this.spawnProcess(processCtor,parentPid);
   }
 
-  public spawnProcess<TLaunchArgs extends Array<any>, TProcessMemory extends ProcessMemory>(processCtor: TypedProcessConstructor<ITypedProcess<TLaunchArgs, TProcessMemory>>, parentPid: ProcessId): TypedProcessId<ITypedProcess<TLaunchArgs, TProcessMemory>> {
+  public spawnProcess<TPROCESS, TCPROC extends TPROCESS & IProcess>(processCtor: MetaProcessCtor<TPROCESS, TCPROC>, parentPid: ProcessId): TPROCESS {
     const pid = this.getFreePid();
-    const process = new processCtor(this,pid,parentPid);
+    const process = <TCPROC>(new processCtor(this,pid,parentPid));
     const record: KernelRecord = {
       process: process,
       heat: process.baseHeat,
@@ -154,17 +152,17 @@ export class Kernel implements IKernel {
       processCtor: processCtor,
     };
     this.processTable.set(pid,record);//TODO: Replace with js object
-    return pid;
+    return process;
   }
 
-  public addProcess(process: IProcess): ProcessId {
+  public addProcess<TPROCESS extends IProcess>(process: TPROCESS): TPROCESS {
     this.processTable.set(process.pid,<KernelRecord>{
       heat: process.baseHeat,
       process: process,
       processCtor: ProcessRegistry.fetch(process.className),//TODO: ".constructor"?
       service: process.service,
     });
-    return process.pid;
+    return process;
   }
 
   //TODO: Child tracking

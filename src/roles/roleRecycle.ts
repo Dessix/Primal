@@ -3,12 +3,13 @@ import { CreepProcess } from "../kernel/creepProcess";
 interface PRecycleMemory extends CreepProcessMemory {
 }
 
-export class PRecycle extends CreepProcess<[Creep],PRecycleMemory> {
+export class PRecycle extends CreepProcess<PRecycleMemory> {
     public static readonly className: string = "Recycle";
     public get className(): string { return PRecycle.className; }
 
-    public launch(args: [Creep]): void {
-        this.creepName = args[0].name;
+    public init(creep: Creep): this {
+        this.creepName = creep.name;
+        return this;
     }
 
     public run(): void {

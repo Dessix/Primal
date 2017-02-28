@@ -8,7 +8,7 @@ declare const enum ProcessStatus {
   RUN = 0,
 }
 
-interface ITypedProcess<TLaunchArgs extends Array<any>, TMemory extends ProcessMemory> {
+interface ITypedProcess<TMemory extends ProcessMemory> {
   readonly className: string;
   readonly pid: ProcessId;
   readonly parentPid: ProcessId;
@@ -18,32 +18,29 @@ interface ITypedProcess<TLaunchArgs extends Array<any>, TMemory extends ProcessM
   readonly memory: TMemory;
 
   status: ProcessStatus;
-  
-  /**
-   * Called to create new processes
-   * Calling this should only occur on processes that were not loaded from existing memory
-   */
-  launch: (args: TLaunchArgs) => void;
 
   run(): void;
 }
 
-type IProcess = ITypedProcess<Array<any>, ProcessMemory>;
+type IProcess = ITypedProcess<ProcessMemory>;
 
-interface TypedMemoryProcess<TMEMORY extends ProcessMemory> extends ITypedProcess<Array<any>, TMEMORY> { }
+interface TypedMemoryProcess<TMEMORY extends ProcessMemory> extends ITypedProcess<TMEMORY> { }
 
-interface TypedProcessConstructor<TPROCESS extends IProcess> {
+type TypedProcessConstructor<TPROCESS extends IProcess> = {
   new (kernel: IKernel, pid: TypedProcessId<TPROCESS>, parentPid: ProcessId): TPROCESS;
   Register(this: TypedProcessConstructor<TPROCESS>): void;
   readonly className: string;
-}
+};
 
 type ProcessConstructor = TypedProcessConstructor<IProcess>;
 
+type __MetaProcessCtor<TPROC> = new (k: IKernel, pid: ProcessId, parentPid: ProcessId) => TPROC;
+type MetaProcessCtor<TPROCESS, TCPROC extends TPROCESS & IProcess> = __MetaProcessCtor<TPROCESS> & TypedProcessConstructor<TCPROC>;
+
 interface ITaskManager {
-  spawnProcess<TLaunchArgs extends Array<any>, TProcessMemory extends ProcessMemory>(processCtor: TypedProcessConstructor<ITypedProcess<TLaunchArgs, TProcessMemory>>, parentPid: ProcessId): TypedProcessId<ITypedProcess<TLaunchArgs, TProcessMemory>>;
-  spawnProcessByClassName(processName: string, args: Array<any>, parentPid?: ProcessId): ProcessId | undefined;
-  addProcess<TPROCESS extends IProcess>(process: TPROCESS): TypedProcessId<TPROCESS>;
+  spawnProcess<TPROCESS, TCPROC extends TPROCESS & IProcess>(processCtor: MetaProcessCtor<TPROCESS, TCPROC>, parentPid: ProcessId): TPROCESS;
+  spawnProcessByClassName(processName: string, parentPid?: ProcessId): IProcess | undefined;
+  addProcess<TPROCESS extends IProcess>(process: TPROCESS): TPROCESS;
   killProcess(processId: ProcessId): void;
 
   getProcessById<TPROCESS extends IProcess>(pid: TypedProcessId<TPROCESS>): TPROCESS | undefined;

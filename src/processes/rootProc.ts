@@ -5,7 +5,7 @@ import { Process } from "../kernel/process";
 interface RootProcMemory extends ProcessMemory {
 };
 
-export class RootProc extends Process<[void],RootProcMemory> {
+export class RootProc extends Process<RootProcMemory> {
   public readonly baseHeat: number = 1000;
   public run() {
     const kernel = this.kernel;
@@ -24,7 +24,7 @@ export class RootProc extends Process<[void],RootProcMemory> {
           if(colonizer !== undefined) {
             rmem.r = colonizer.createRoomProc(room,rmem);
           } else {
-            rmem.r = this.spawnIndependentProcess(RoomProc,[room]);
+            rmem.r = this.spawnIndependentProcess(RoomProc).init(room).pid;
           }
         }
       }
@@ -41,7 +41,7 @@ export class RootProc extends Process<[void],RootProcMemory> {
           if(spawner !== undefined) {
             creep.memory.c = spawner.createProcessForCreep(creep,creep.memory);
           } else {
-            creep.memory.c = this.spawnChildProcess(PRecycle,[creep]);
+            creep.memory.c = this.spawnChildProcess(PRecycle).init(creep).pid;
           }
         }
       }
