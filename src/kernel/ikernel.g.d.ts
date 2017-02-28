@@ -1,6 +1,5 @@
-interface __TypedProcessId<TPROCESS extends IProcess> extends Number { }
-type TypedProcessId<TPROCESS extends IProcess> = __TypedProcessId<TPROCESS> & number;
-type ProcessId = TypedProcessId<IProcess>;
+interface __TypedProcessId<TPROCESS extends IProcess = IProcess> extends Number { }
+type ProcessId<TPROCESS extends IProcess = IProcess> = __TypedProcessId<TPROCESS> & number;
 
 declare const enum ProcessStatus {
   TERM = -2,
@@ -8,7 +7,7 @@ declare const enum ProcessStatus {
   RUN = 0,
 }
 
-interface ITypedProcess<TMemory extends ProcessMemory> {
+interface IProcess<TMemory extends ProcessMemory = ProcessMemory> {
   readonly className: string;
   readonly pid: ProcessId;
   readonly parentPid: ProcessId;
@@ -22,20 +21,13 @@ interface ITypedProcess<TMemory extends ProcessMemory> {
   run(): void;
 }
 
-type IProcess = ITypedProcess<ProcessMemory>;
-
-interface TypedMemoryProcess<TMEMORY extends ProcessMemory> extends ITypedProcess<TMEMORY> { }
-
-type TypedProcessConstructor<TPROCESS extends IProcess> = {
-  new (kernel: IKernel, pid: TypedProcessId<TPROCESS>, parentPid: ProcessId): TPROCESS;
-  Register(this: TypedProcessConstructor<TPROCESS>): void;
+type ProcessConstructor<TPROCESS extends IProcess = IProcess> = {
+  new (kernel: IKernel, pid: ProcessId<TPROCESS>, parentPid: ProcessId): TPROCESS;
+  Register(this: ProcessConstructor<TPROCESS>): void;
   readonly className: string;
 };
 
-type ProcessConstructor = TypedProcessConstructor<IProcess>;
-
-type __MetaProcessCtor<TPROC> = new (k: IKernel, pid: ProcessId, parentPid: ProcessId) => TPROC;
-type MetaProcessCtor<TPROCESS, TCPROC extends TPROCESS & IProcess> = __MetaProcessCtor<TPROCESS> & TypedProcessConstructor<TCPROC>;
+type MetaProcessCtor<TPROCESS, TCPROC extends TPROCESS & IProcess> = (new (k: IKernel, pid: ProcessId, parentPid: ProcessId) => TPROCESS) & ProcessConstructor<TCPROC>;
 
 interface ITaskManager {
   spawnProcess<TPROCESS, TCPROC extends TPROCESS & IProcess>(processCtor: MetaProcessCtor<TPROCESS, TCPROC>, parentPid: ProcessId): TPROCESS;
@@ -43,17 +35,17 @@ interface ITaskManager {
   addProcess<TPROCESS extends IProcess>(process: TPROCESS): TPROCESS;
   killProcess(processId: ProcessId): void;
 
-  getProcessById<TPROCESS extends IProcess>(pid: TypedProcessId<TPROCESS>): TPROCESS | undefined;
-  getProcessByIdOrThrow<TPROCESS extends IProcess>(pid: TypedProcessId<TPROCESS>): TPROCESS;
+  getProcessById<TPROCESS extends IProcess>(pid: ProcessId<TPROCESS>): TPROCESS | undefined;
+  getProcessByIdOrThrow<TPROCESS extends IProcess>(pid: ProcessId<TPROCESS>): TPROCESS;
   getChildProcesses(parentPid: ProcessId): ProcessId[];
-  getProcessesByClass<TPROCESS extends IProcess>(constructor: TypedProcessConstructor<TPROCESS>): TPROCESS[];
+  getProcessesByClass<TPROCESS extends IProcess>(constructor: ProcessConstructor<TPROCESS>): TPROCESS[];
   getProcessesByClassName<TPROCESS extends IProcess>(className: string): TPROCESS[];
 
   run(maxCpu: number): void;
 }
 
 interface IMemoryManager {
-  getProcessMemory<TMEMORY extends ProcessMemory>(pid: TypedProcessId<TypedMemoryProcess<TMEMORY>>): TMEMORY;
+  getProcessMemory<TMEMORY extends ProcessMemory>(pid: ProcessId<IProcess<TMEMORY>>): TMEMORY;
   getProcessMemory(pid: ProcessId): ProcessMemory;
   setProcessMemory(pid: ProcessId, memory: ProcessMemory): void;
   deleteProcessMemory(pid: ProcessId): void;

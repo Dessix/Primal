@@ -5,8 +5,8 @@ import { ProcessRegistry } from "./processRegistry";
 //type getRes<TFunc extends ((...args: any[]) => TReturn), TReturn> = TReturn;
 //type Return<T extends new (k: Kernel, pid: ProcessId, par: ProcessId) => S, S = any> = S;
 
-export abstract class Process<TMemory extends ProcessMemory> implements ITypedProcess<TMemory> {
-    constructor(kernel: IKernel, pid: TypedProcessId<Process<TMemory>>, parentPid: ProcessId) {
+export abstract class Process<TMemory extends ProcessMemory> implements IProcess<TMemory> {
+    constructor(kernel: IKernel, pid: ProcessId<Process<TMemory>>, parentPid: ProcessId) {
         this.kernel = kernel;
         this.pid = pid;
         this.parentPid = parentPid;
@@ -16,10 +16,10 @@ export abstract class Process<TMemory extends ProcessMemory> implements ITypedPr
     public static get className(): string { return this.name; }
 
     public get className(this: Process<TMemory>): string {
-        return (<{ constructor: TypedProcessConstructor<Process<TMemory>>; }><any>this).constructor.className;
+        return (<{ constructor: ProcessConstructor<Process<TMemory>>; }><any>this).constructor.className;
     }
     
-    public readonly pid: TypedProcessId<Process<TMemory>>;
+    public readonly pid: ProcessId<Process<TMemory>>;
     public readonly parentPid: ProcessId;
     public readonly kernel: IKernel;
     public get memory(): TMemory {
@@ -37,7 +37,7 @@ export abstract class Process<TMemory extends ProcessMemory> implements ITypedPr
         return this.kernel.spawnProcess<TCPROC, TCPROC>(processCtor, 0);
     }
 
-    public static Register(this: TypedProcessConstructor<IProcess>): void {
+    public static Register(this: ProcessConstructor<IProcess>): void {
         ProcessRegistry.register(this.className, this);
     }
     

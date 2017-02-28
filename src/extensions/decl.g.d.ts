@@ -45,8 +45,8 @@ interface CreepProcessMemoryOld {
 }
 
 interface CreepMemory {
-  s: TypedProcessId<ISpawnRequestingProcess>;
-  c: TypedProcessId<ICreepProcess>;
+  s: ProcessId<ISpawnRequestingProcess>;
+  c: ProcessId<ICreepProcess>;
 
   /**@deprecated*/
   _move?: CreepDefaultMoveMemory;

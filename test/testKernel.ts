@@ -42,7 +42,7 @@ describe("Kernel", () => {
 
 	it("Should be able to kill a process", () => {
 		const k = new Kernel(newKmem());
-		const pid = <number>k.spawnProcessByClassName("Root");
+		const pid = k.spawnProcessByClassName("Root")!.pid;
 		assert.equal(k.getProcessCount(), 1);
 		k.killProcess(pid);
 		assert.equal(k.getProcessCount(), 0);
