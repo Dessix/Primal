@@ -33,6 +33,7 @@ interface ICreepProcess extends IProcess {
 
 interface CreepProcessMemory extends ProcessMemory {
     c: CreepName;
+    t?: TravelProfile;
 }
 
 interface CreepProcessMemoryOld {
@@ -72,11 +73,6 @@ interface Creep {
    */
   readonly homeRoom?: Room;
   recycle(): void;
-}
-
-interface Flag {
-  readonly id: string;
-  lookForStructureAtPosition<T extends Structure>(this: Flag, structureType: string): T | undefined;
 }
 
 interface LookForInBoxTerrainResult extends LookAtResultWithPos {

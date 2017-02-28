@@ -4,12 +4,8 @@ interface CliIdProxy {
 }
 
 interface Global {
-  kernel: {
-    spawnProcessByClassName(processName: string, parentPid?: number): ProcessId | undefined;
-  };
-  k: {
-    spawnProcessByClassName(processName: string, parentPid?: number): ProcessId | undefined;
-  };
+  kernel: IKernel;
+  k: IKernel;
   launchNew(className: string): number | undefined;
   reset(): void;
   spawnBard(): void;

@@ -29,8 +29,8 @@ if(Memory.config.profile) {
 
 Processes.RegisterAll();
 
-if(Memory.pmem == null) { Memory.pmem = {}; }
-const kernel: IKernel = global.kernel = new Kernel(() => Memory);
+if((<KernelMemory>Memory).pmem == null) { (<KernelMemory>Memory).pmem = {}; }
+const kernel: IKernel = global.kernel = new Kernel(() => (<KernelMemory>Memory));
 initCli(global, Memory, kernel);
 
 let isInitTick = true;
@@ -39,6 +39,7 @@ function mainLoop() {
 	const memoryInitializationTime = (isInitTick ? (isInitTick = false, deserializationTime) : ProfileMemoryDeserialization());
 	initTickVolatile(global);
 	const bucket = Game.cpu.bucket, cpuLimitRatio = (bucket * bucket) * minCpuAllocInverseFactor + minCpuAlloc;
+	//TODO: Consider skipping load if on the same shard as last time? Consider costs of loss of one-tick-volatility storage.
 	kernel.loadProcessTable();
 	kernel.run(Game.cpu.limit * cpuLimitRatio);
 	kernel.saveProcessTable();

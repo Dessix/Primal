@@ -5,7 +5,7 @@ import { ProcessRegistry } from "./processRegistry";
 //type getRes<TFunc extends ((...args: any[]) => TReturn), TReturn> = TReturn;
 //type Return<T extends new (k: Kernel, pid: ProcessId, par: ProcessId) => S, S = any> = S;
 
-export abstract class Process<TMemory extends ProcessMemory> implements IProcess<TMemory> {
+export abstract class Process<TMemory extends ProcessMemory = ProcessMemory> implements IProcess<TMemory> {
     constructor(kernel: IKernel, pid: ProcessId<Process<TMemory>>, parentPid: ProcessId) {
         this.kernel = kernel;
         this.pid = pid;
