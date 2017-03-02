@@ -1,5 +1,5 @@
-interface __TypedProcessId<TPROCESS extends IProcess = IProcess> extends Number { }
-type ProcessId<TPROCESS extends IProcess = IProcess> = __TypedProcessId<TPROCESS> & number;
+interface __ProcessId<TPROCESS extends IProcess = IProcess> extends Number, TypeTag<__ProcessId<TPROCESS>, TPROCESS> { }
+declare type ProcessId<TPROCESS extends IProcess = IProcess> = __ProcessId<TPROCESS> & number;
 
 declare const enum ProcessStatus {
   TERM = -2,
@@ -21,9 +21,14 @@ interface IProcess<TMemory extends ProcessMemory = ProcessMemory> {
   run(): void;
 }
 
+interface Initialized<T> { }
+
+interface INeedInitialized<T> {
+    init(...args: any[]): T & Initialized<T>;
+}
+
 type ProcessConstructor<TPROCESS extends IProcess = IProcess> = {
   new (kernel: IKernel, pid: ProcessId<TPROCESS>, parentPid: ProcessId): TPROCESS;
-  Register(this: ProcessConstructor<TPROCESS>): void;
   readonly className: string;
 };
 

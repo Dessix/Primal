@@ -124,12 +124,6 @@ interface RoomPosition {
   toUnicode(this: RoomPosition): string;
 }
 
-interface Global {
-  fromId<T>(id: string | null | undefined): T | undefined;
-}
-
-declare function fromId<T>(id: string | null | undefined): T | undefined;
-
 interface Room {
   findFirstStructureOfType<TSTRUCTURE extends STRUCTURE>(this: Room, structureType: TSTRUCTURE, onlyMine?: Boolean): STRUCTURE_TARGET<TSTRUCTURE> | undefined;
   findStructuresOfType<TSTRUCTURE extends STRUCTURE>(this: Room, structureType: TSTRUCTURE, onlyMine?: Boolean): STRUCTURE_TARGET<TSTRUCTURE>[];

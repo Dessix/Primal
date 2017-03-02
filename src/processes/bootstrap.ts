@@ -1,6 +1,6 @@
 import { PLogisticsRoles } from "./logisticsRoles";
 import { PTower } from "./tower";
-import { PBuild } from "./build";
+import { BuildProc } from "./build";
 import { PRepair } from "./repair";
 import { PUpgrade } from "./upgrade";
 import { PHarvest } from "./harvest";
@@ -19,10 +19,6 @@ export class PBootstrap extends Process<BootstrapMemory> {
     private pmem: BootstrapMemory;
     
     public readonly baseHeat: number = 1;
-
-    public constructor(pid: ProcessId, parentPid: ProcessId) {
-        super(pid, parentPid);
-    }
 
     public run(): ProcessMemory | undefined {
         const kernel = this.kernel;
@@ -52,7 +48,7 @@ export class PBootstrap extends Process<BootstrapMemory> {
 
         if (pmem.upgradePid !== undefined && pmem.buildPid === undefined) {
             console.log("Bootstrap spawning Build...");
-            pmem.buildPid = this.spawnChildProcess(PBuild);
+            pmem.buildPid = this.spawnChildProcess(BuildProc);
         }
 
         if (pmem.upgradePid !== undefined && pmem.repairPid === undefined) {

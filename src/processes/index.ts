@@ -1,8 +1,9 @@
+//TODO: Barrelling via awesome-ts-loader!
 export { PBootstrap } from "./bootstrap";
-export { PBuild } from "./build";
-export { PCleanMemory } from "./cleanMemory";
+export { BuildProc } from "./buildProc";
+export { CleanMemoryProc } from "./cleanMemoryProc";
 export { PHarvest } from "./harvest";
 export { PRepair } from "./repair";
-export { RootProc } from "./rootProc";
-export { PTower } from "./tower";
+export { InitProc } from "./initProc";
+export { TowerProc } from "./towerProc";
 export { PUpgrade } from "./upgrade";

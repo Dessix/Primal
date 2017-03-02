@@ -1,15 +1,8 @@
+import { BuilderMemory } from "../processes/buildProc";
 import { BaseRole } from "./baseRole";
-
-interface BuilderMemory extends CreepMemory {
-    bild_building?: boolean;
-}
 
 export class RoleBuilder extends BaseRole<BuilderMemory> {
     public static RoleTag: string = "bild";
-
-    public constructor() {
-        super();
-    }
 
     private static _instance: RoleBuilder | undefined;
     public static get Instance(): RoleBuilder {

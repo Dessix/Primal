@@ -1,5 +1,5 @@
 export interface IRole {
-    run(creep: Creep): void;
+    run(creep: Creep, memory: CreepProcessMemory): void;
 }
 
 export interface RoleConstructor {
@@ -8,15 +8,15 @@ export interface RoleConstructor {
     readonly RoleTag: string;
 }
 
-export abstract class BaseRole<TMemory extends CreepMemory> implements IRole {
-    public run(this: BaseRole<TMemory>, creep: Creep): void {
-        this.onRun(creep, <TMemory>creep.memory);
+export abstract class BaseRole<TMemory extends CreepProcessMemory> implements IRole {
+    public run(this: BaseRole<TMemory>, creep: Creep, memory: CreepProcessMemory): void {
+        this.onRun(creep, <TMemory>memory);
     }
 
     protected abstract onRun(creep: Creep, cmem: TMemory): void;
 
-    public static generateName(roleCtor: RoleConstructor, cmem: CreepMemory) {
-        return `${roleCtor.RoleTag}_${cmem.homeRoomName}_${Game.time}`;
+    public static generateName(roleCtor: RoleConstructor, cmem: CreepProcessMemory) {
+        return `${roleCtor.RoleTag}_${Game.time}`;
     }
 
     public moveOffBorder(creep: Creep): boolean {
