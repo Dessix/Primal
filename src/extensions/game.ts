@@ -1,5 +1,5 @@
 
-function flaggedGetObjectById<T>(id: string | null | undefined): T | undefined {
+function flaggedGetObjectById<T>(id: string | IdFor<T> | undefined | null): T | undefined {
     if (id === null || id === undefined) {
         return undefined;
     } if (id.startsWith("flag-")) {

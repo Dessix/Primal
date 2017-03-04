@@ -6,4 +6,3 @@ import "./object";
 import "./room";
 import "./roomPosition";
 import "./string";
-import "./structure";

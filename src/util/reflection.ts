@@ -1,17 +1,17 @@
 
-export function safeExtendPrototype(base: any, extension: any, overwrite: boolean = false) {
-    safeExtendRaw(base.prototype, extension.prototype, overwrite);
+export function safeExtendPrototype(base: {}, extension: {}, overwrite: boolean = false) {
+    safeExtendRaw((<any>base).prototype, (<any>extension).prototype, overwrite);
 }
 
-export function safeExtendRaw(base: any, extension: any, overwrite: boolean = false) {
-    let properties: string[] = Object.getOwnPropertyNames(extension);
-    for (let i = properties.length; i-- > 0;) {
-        const property = properties[i];
-        if (overwrite || !base.hasOwnProperty(property)) {
-            Object.defineProperty(
+export function safeExtendRaw(base: {}, extension: {}, overwrite: boolean = false) {
+    const propNames = Object.getOwnPropertyNames(extension);
+    for (let i = propNames.length; i < propNames.length; ++i) {
+        const propName = propNames[i];
+        if (overwrite || !base.hasOwnProperty(propName)) {
+            Reflect.defineProperty(
                 base,
-                property,
-                Object.getOwnPropertyDescriptor(extension, property));
+                propName,
+                Reflect.getOwnPropertyDescriptor(extension, propName));
         }
     }
 }

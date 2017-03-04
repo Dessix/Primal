@@ -1,57 +1,60 @@
-import { Process } from "../kernel/process";
+import { StorageLink } from "../structureRoles/links";
+import { Process,registerProc } from "../kernel/process";
 
-type ID<T extends Structure> = string;
-type LinkId = ID<Link>;
+type StructureID<T extends Structure> = IdFor<T>;
+type LinkId = StructureID<Link>;
 
-interface LinksMemory extends ProcessMemory {
+interface LinkProcMemory extends ProcessMemory {
+  roomName: typeof Room.name;
+  miningLinks: LinkId[];
+  storageLink?: LinkId;
+  nextScan?: typeof Game.time;
 }
 
-interface LinkRoomMemory {
-  nextLinkScanTick?: number;
-  storageLinkId?: LinkId;
-  miningLinkIds?: LinkId[];
-}
-
-export class PLinks extends Process<LinksMemory> {
-  public static className: string = "Links";
+@registerProc
+export class LinkProc extends Process<LinkProcMemory> {
   public readonly LinkScanTickrate: number = 50;
   public readonly baseHeat: number = 7;
 
-  public constructor(pid: ProcessId, parentPid: ProcessId) {
-    super(pid, parentPid);
+  public init(room: Room) {
+    this.memory.roomName = room.name;
   }
 
-  private rescanRoom(room: Room, rmem: LinkRoomMemory) {
-    const storageLink = fromId<StructureLink>(rmem.storageLinkId);
+  public get room(): Room {
+    return Game.rooms[this.memory.roomName]
+  }
+
+  private rescanRoom(room: Room, mem: LinkProcMemory) {
+    const structures = room.find(FIND_MY_STRUCTURES);
+    for (let i = 0; i < structures.length; ++i) {
+      const s = structures[i];
+      if (!(s instanceof StructureLink)) { continue; }
+      const linkId = <LinkId & string>s.id;
+      //if (mem.miningLinks.indexOf(linkId) >= 0) { continue; }
+      //mem.miningLinks.push(linkId);
+      const pos = s.pos;
+      console.log(`Link registered: ${linkId} in room ${room.name} at pos ${pos.x}:${pos.y}`);
+      throw new Error("Not implemented");
+    }
+
+    const storageLink = fromId(mem.storageLink);
     //if (rmem.storageLinkId === nul
   }
 
-  public run(pmem: LinksMemory): void {
-    const gTime = Game.time;
-		const roomNames = Object.keys(Game.rooms);
-		for (let i = 0, n = roomNames.length; i < n; ++i) {
-			const roomName = roomNames[i], room = Game.rooms[roomName];
-      const rmem = <LinkRoomMemory>(room.memory || (room.memory = {}));
-      if (rmem.nextLinkScanTick === undefined || gTime >= rmem.nextLinkScanTick) {
-        this.rescanRoom(room, rmem);
-      }
-		}
+  private isStorageLink(link: StructureLink): boolean {
+    //TODO: Not implemented
+    throw new Error("Not implemented");
+  }
 
-    // if (pmem.nextTowerScanTick === undefined || gTime >= pmem.nextTowerScanTick) {
-    //     const towers = pmem.towers;
-    //     const structures = Game.structures;
-    //     for (let structureName of Object.keys(structures)) {
-    //         const structure = structures[structureName];
-    //         if (structure.structureType !== STRUCTURE_TOWER || !(<StructureTower>structure).my) { continue; }
-    //         const tower = <StructureTower>structure;
-    //         const towerId = tower.id;
-    //         if (towers.indexOf(towerId) >= 0) { continue; }
-    //         pmem.towers.push(towerId);
-    //         const pos = tower.pos;
-    //         console.log(`Tower registered: ${towerId} in room ${pos.roomName} at pos ${pos.x}:${pos.y}`);
-    //     }
-    //     pmem.nextTowerScanTick = gTime + this.TowerScanTickrate;
-    // }
+  public run(): void {
+    if (this.kernel.getProcessById(this.parentPid) === undefined) { this.status = ProcessStatus.EXIT; return; }
+    const mem = this.memory, room = this.room, gTime = Game.time;
+    
+    if (mem.nextScan === undefined || gTime >= mem.nextScan) {
+      this.rescanRoom(room, mem);
+      mem.nextScan = gTime + this.LinkScanTickrate;
+    }
+    
 
     // for (let i = pmem.towers.length; i-- > 0;) {
     //     const towerId = pmem.towers[i];
@@ -88,7 +91,7 @@ export class PLinks extends Process<LinksMemory> {
     // }
   }
 
-  private findLinks(miningPosition: RoomPosition): string | undefined {
+  private findLinks(miningPosition: RoomPosition): (string & IdFor<StructureLink>) | undefined {
     const room = Game.rooms[miningPosition.roomName];
     if (room === undefined) { throw new Error("Room inaccessible"); }
     // const storage = room.storage;
@@ -105,7 +108,7 @@ export class PLinks extends Process<LinksMemory> {
       return;
     }
     if (links.length > 0) {
-      return links[0].id;
+      return <IdFor<StructureLink> & typeof StructureLink.prototype.id>links[0].id;
     }
     return;
   }

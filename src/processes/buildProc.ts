@@ -1,11 +1,13 @@
 import { RoleBuilder } from "../roles/roleBuilder";
 import { CreepProcess } from "../kernel/creepProcess";
+import { registerProc } from "../kernel/process";
 
 export interface BuilderMemory extends CreepProcessMemory {
     bild_building?: boolean;
     spawnName: typeof StructureSpawn.name;
 }
 
+@registerProc
 export class BuildProc extends CreepProcess<BuilderMemory> {
   public init(creep: Creep) {
     this.creepName = creep.name;

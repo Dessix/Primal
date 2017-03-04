@@ -59,7 +59,7 @@ export class BodyBuilder {
     const growBuffer = grow.slice();
 
     let lastValid: Array<BODYPART> | undefined = undefined;
-    let curBody = base.slice();
+    const curBody = base.slice();
     grower:
     while (true) {
       const fatiguePerMove = this.fatiguePerMove(curBody, travelCondition);

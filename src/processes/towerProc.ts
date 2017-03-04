@@ -9,7 +9,6 @@ interface TowerProcMemory extends ProcessMemory {
 
 @registerProc
 export class TowerProc extends Process<TowerProcMemory> {
-  public static className: string = "Tower";
   public readonly baseHeat: number = 15;
 
   public readonly ScanRate: number = 50;

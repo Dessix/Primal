@@ -1,5 +1,4 @@
-interface __ProcessId<TPROCESS extends IProcess = IProcess> extends Number, TypeTag<__ProcessId<TPROCESS>, TPROCESS> { }
-declare type ProcessId<TPROCESS extends IProcess = IProcess> = __ProcessId<TPROCESS> & number;
+interface ProcessId<TPROCESS extends IProcess = IProcess> extends Number, TypeTag<ProcessId<TPROCESS>, TPROCESS> { }
 
 declare const enum ProcessStatus {
   TERM = -2,

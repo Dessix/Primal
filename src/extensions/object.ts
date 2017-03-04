@@ -1,4 +1,4 @@
-import * as Reflect from "../util/reflection";
+import * as Reflector from "../util/reflection";
 
 class ObjectConstructorX {
   public static *iterateObject(obj: { [key: string]: any }): IterableIterator<any> {
@@ -16,7 +16,7 @@ class ObjectConstructorX {
   };
 }
 
-Reflect.safeExtendRaw(Object,ObjectConstructorX);
+Reflector.safeExtendRaw(Object,ObjectConstructorX);
 
 // class ObjectX implements Iterable<any> {
 //   public [Symbol.iterator]() {

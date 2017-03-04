@@ -5,7 +5,6 @@ const deserializationTime = ProfileMemoryDeserialization();
 import "./extensions/";//Apply extension modules
 import { initVolatile, initTickVolatile } from "./globals/volatile";
 import { Kernel } from "./kernel/kernel";
-import { Processes } from "./kernel/processes";
 import { recordStats } from "./util/stats";
 import * as Profiler from "../lib/screeps-profiler";
 import * as Roles from "./roles";
@@ -26,8 +25,6 @@ if(Memory.config.profile) {
 	Profiler.registerClass(Roles.RoleBootstrapMiner, "RoleBootstrapMiner");
 	Profiler.registerFN(recordStats, "RecordStats");
 }
-
-Processes.RegisterAll();
 
 if((<KernelMemory>Memory).pmem == null) { (<KernelMemory>Memory).pmem = {}; }
 const kernel: IKernel = global.kernel = new Kernel(() => (<KernelMemory>Memory));

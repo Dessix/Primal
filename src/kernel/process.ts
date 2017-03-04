@@ -38,7 +38,7 @@ export abstract class Process<TMemory extends ProcessMemory = ProcessMemory> imp
   }
 
   public spawnIndependentProcess<TPROCESS,TCPROC extends TPROCESS & IProcess>(processCtor: MetaProcessCtor<TPROCESS,TCPROC>): TPROCESS {
-    return this.kernel.spawnProcess<TCPROC,TCPROC>(processCtor,0);
+    return this.kernel.spawnProcess<TCPROC,TCPROC>(processCtor,<ProcessId>0);
   }
 
   public assertParentProcess(): void {

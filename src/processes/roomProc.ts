@@ -14,7 +14,7 @@ export class RoomProc extends Process<RoomProcMemory> implements IRoomProc {
     return this;
   }
 
-  //TODO: @fromMemoryGet(undefined, (mem: typeof RoomProcMemory) => mem)
+  //TODO: @fromMemoryGet<RoomProcMemory>(undefined, function(mem) { return Game.rooms[mem.r] })
   public get room(): Room | undefined {
     return Game.rooms[this.memory.r];
   }
@@ -47,6 +47,7 @@ export class RoomProc extends Process<RoomProcMemory> implements IRoomProc {
     //Repairers - Builders do this. No more kidding around.
     //FlowerChildren - Extension Manager ("Garden") is spawned here. It spawns flower managers per-flower. They spawn flowerchildren.
     //Crane Enable - Process finds crane-spots, and requests cranes to be spawned as needed to refill each.
-    //Couriers - Moria will require access to the courier process in order to queue up courier missions, but will not control these individually.
+    //Couriers - Moria will control its own couriers, which will be managed by a subproces that performs coordination and spawning; moria plans routes.
+    //Clink - Manages links. Accessed by Moria in order to identify mining links. Accesses Garden to identify flower links.
   }
 }

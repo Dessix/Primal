@@ -1,22 +1,26 @@
 import { RoleListing } from "./../ipc/roleListing";
 import * as Roles from "../roles";
-import { Process } from "../kernel/process";
+import { Process,registerProc } from "../kernel/process";
 import { MiningScanner } from "../util/miningScanner";
 
-interface SpawnerMemory {
+interface SpawnProcMemory {
 }
 
-export class PSpawner extends Process<SpawnerMemory> {
+@registerProc
+export class SpawnProc extends Process<SpawnProcMemory> implements ISpawnRequestingProcess {
+
   public static className: string = "Spawner";
   public baseHeat: number = 5;
-
-  public constructor(pid: ProcessId, parentPid: ProcessId) { super(pid, parentPid); }
 
   public isAliveEnough(creep: Creep): boolean {
     return creep.ticksToLive <= 25;
   }
+  
+  public createProcessForCreep<TCreepProcess extends ICreepProcess>(creep: Creep,cmem: CreepMemory<TCreepProcess>): TCreepProcess {
+    throw new Error("Method not implemented.");
+  }
 
-  public run(pmem: SpawnerMemory): void {
+  public run(): void {
     const creeps = RoleListing.getAllCreeps();
 
     const drills = Array.from(RoleListing.getByRole(Roles.RoleDrill));
@@ -88,80 +92,5 @@ export class PSpawner extends Process<SpawnerMemory> {
         }
       }
     }
-
-
-  }
-
-  private trySpawnCourier(spawn: Spawn, energyAvailable: number, energyCapacityAvailable: number): boolean {
-    const chosenBody = Roles.RoleCourier.chooseBody(energyAvailable);
-    if (chosenBody !== undefined) {
-      const creepMemory: CreepMemory = {
-        spawnName: spawn.name,
-        role: Roles.RoleCourier.RoleTag,
-        homeRoomName: spawn.room.name,
-      };
-      const success = spawn.createCreep(
-        chosenBody,
-        Roles.RoleCourier.generateName(Roles.RoleCourier, creepMemory),
-        creepMemory
-      );
-      if (typeof success === "number") {
-        console.log(`Spawn failure: ${success}`);
-      } else {
-        console.log(`Spawning ${global.sinspect(chosenBody)}\n${global.sinspect(creepMemory)}`);
-        //only work with the first to succeed
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private trySpawnDrill(spawn: Spawn, energyAvailable: number, energyCapacityAvailable: number): boolean {
-    const chosenBody = Roles.RoleDrill.chooseBody(energyAvailable);
-    if (chosenBody !== undefined) {
-      //TODO: Get source info from MiningScanner and have it manage the complexities of making sure variables are set
-      const roomSourceInfo = MiningScanner.getScanInfoForRoom(spawn.room);
-      const creepMemory: CreepMemory = Roles.RoleDrill.createInitialMemory(spawn, spawn.room, ++(roomSourceInfo.lastSourceIndex));
-      const success = spawn.createCreep(
-        chosenBody,
-        Roles.RoleDrill.generateName(Roles.RoleDrill, creepMemory),
-        creepMemory
-      );
-      if (typeof success === "number") {
-        console.log(`Spawn failure: ${success}`);
-      } else {
-        console.log(`Spawning ${global.sinspect(chosenBody)}\n${global.sinspect(creepMemory)}`);
-        //only work with the first to succeed
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private trySpawnBootstrap(spawn: Spawn, energyAvailable: number, energyCapacityAvailable: number): boolean {
-    const chosenBody = Roles.RoleBootstrapMiner.chooseBody(energyAvailable);
-    if (chosenBody === undefined) {
-      return false;
-    }
-    //TODO: Get source info from MiningScanner and have it manage the complexities of making sure variables are set
-    const roomSourceInfo = MiningScanner.getScanInfoForRoom(spawn.room);
-    const creepMemory: CreepMemory = {
-      spawnName: spawn.name,
-      role: Roles.RoleBootstrapMiner.RoleTag,
-      homeRoomName: spawn.room.name,
-    };
-    const success = spawn.createCreep(
-      chosenBody,
-      Roles.RoleBootstrapMiner.generateName(Roles.RoleBootstrapMiner, creepMemory),
-      creepMemory
-    );
-    if (typeof success === "number") {
-      console.log(`Spawn failure: ${success}`);
-    } else {
-      console.log(`Spawning ${global.sinspect(chosenBody)}\n${global.sinspect(creepMemory)}`);
-      //only work with the first to succeed
-      return true;
-    }
-    return false;
   }
 }
