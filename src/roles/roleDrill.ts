@@ -1,4 +1,4 @@
-import { FsmRole } from "./";
+import { FsmRole } from "./fsmRole";
 import { MiningScanner } from "./../util/miningScanner";
 
 enum DrillState {

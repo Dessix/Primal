@@ -1,13 +1,3 @@
-export interface BaseCreep extends Array<BODYPART> {
-}
-
-interface BodyOpts {
-  travel?: TravelCondition;
-  maxCarry?: number;
-  maxMove?: number;
-  maxWork?: number;
-}
-
 export class BodyBuilder {
 	private static partCost(p: BODYPART) {
 		return BODYPART_COST[p];

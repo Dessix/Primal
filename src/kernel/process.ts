@@ -27,8 +27,9 @@ export abstract class Process<TMemory extends ProcessMemory = ProcessMemory> imp
   public readonly parentPid: ProcessId;
   public readonly kernel: IKernel;
   public get memory(): TMemory {
-    //Cache memory for one tick, flushing if reset? What if kernel resets it instead?
-    return this.kernel.getProcessMemory<TMemory>(this.pid);
+    const mem = this.kernel.getProcessMemory<TMemory>(this.pid);
+    Reflect.defineProperty(this, "memory", { value: mem });//TODO: Create @cachedGetter decorator for this behaviour
+    return mem;
   }
   public readonly baseHeat: number = 10;
   public readonly service: boolean = false;
@@ -38,7 +39,7 @@ export abstract class Process<TMemory extends ProcessMemory = ProcessMemory> imp
   }
 
   public spawnIndependentProcess<TPROCESS,TCPROC extends TPROCESS & IProcess>(processCtor: MetaProcessCtor<TPROCESS,TCPROC>): TPROCESS {
-    return this.kernel.spawnProcess<TCPROC,TCPROC>(processCtor,<ProcessId>0);
+    return this.kernel.spawnProcess<TCPROC,TCPROC>(processCtor,<ProcessId><any>0);
   }
 
   public assertParentProcess(): void {

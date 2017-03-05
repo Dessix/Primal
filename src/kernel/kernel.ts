@@ -1,12 +1,6 @@
 import { ScreepsColorToHex,StaticLogger } from "../util/logger";
 import { ProcessRegistry } from "./processRegistry";
 
-//TODO: Wtf is this for?
-const enum ProcessRunState {
-  CPU_OVERLOAD = -1,
-  CONTINUE = 0,
-}
-
 interface KernelRecord {
   heat: number;
   service: boolean;
@@ -32,16 +26,16 @@ export class Kernel implements IKernel {
   }
 
   private loadProcessEntry(entry: SerializedProcess): KernelRecord | null {
-    const processConstructor = ProcessRegistry.fetch(entry.className);//TODO: Rename ClassName to 'ex'
-    if(processConstructor === undefined) {
-      console.log(`Error: No constructor found for process class "${entry.className}"!`);
+    const pctor = ProcessRegistry.fetch(entry.ex);
+    if(pctor === undefined) {
+      console.log(`Error: No constructor found for executable "${entry.ex}"!`);
       return null;
     }
     return {
-      process: new processConstructor(this,entry.pid,entry.parentPid),
-      processCtor: processConstructor,
-      heat: entry.heat,
-      service: entry.service,
+      process: new pctor(this,entry.id,entry.pa),
+      processCtor: pctor,
+      heat: entry.he,
+      service: entry.se,
     };
   }
 
@@ -57,7 +51,7 @@ export class Kernel implements IKernel {
       const entry = proc[i];
       const record = this.loadProcessEntry(entry);
       if(record !== null) {
-        this.processTable.set(entry.pid,record);
+        this.processTable.set(entry.id,record);
       }
     }
   }
@@ -74,11 +68,11 @@ export class Kernel implements IKernel {
           continue;
       }
       const produced: SerializedProcess = {
-        pid: record.process.pid,
-        parentPid: record.process.parentPid,
-        className: record.process.className,
-        heat: record.heat,
-        service: record.service,
+        id: record.process.pid,
+        pa: record.process.parentPid,
+        ex: record.process.className,
+        he: record.heat,
+        se: record.service,
       };
     }
     this.getKmem().proc = table;
@@ -130,7 +124,7 @@ export class Kernel implements IKernel {
     if(parentPid === undefined) { parentPid = <ProcessId><any>0; }
     const processCtor = ProcessRegistry.fetch(processName);
     if(processCtor === undefined) {
-      console.log("Ω ClassName not defined");
+      console.log("\u1F53B ClassName not defined");
       return;
     }
     return this.spawnProcess(processCtor,parentPid);
@@ -187,7 +181,7 @@ export class Kernel implements IKernel {
   public getProcessesByClassName<T>(className: string): IProcess[] {
     const processCtor = ProcessRegistry.fetch(className);
     if(processCtor === undefined) {
-      console.log(`Ω ClassName ${className} not defined`);
+      console.log(`\u1F53B ClassName ${className} not defined`);
       return [];
     }
     return this.getProcessesByClass(processCtor);
@@ -236,7 +230,7 @@ export class Kernel implements IKernel {
   private tryRunProc(process: IProcess): number {
     const e = this.tryCallProc(process);
     if(e !== undefined) {
-      console.log(`Ω Failed to run service ${process.pid}:${process.className}: ${e}`);
+      console.log(`\u1F53B Failed to run service ${process.pid}:${process.className}: ${e}`);
       const stackTrace = e.stack;
       if(stackTrace) { console.log("Stack Trace:\n" + stackTrace.toString()); }
       return -1;
@@ -256,7 +250,7 @@ export class Kernel implements IKernel {
         --i;
         if(returnCode === -2) {
           this.killProcess(process.pid);
-          console.log(`Ω Service ${process.pid}:${process.className} exited with status ${process.status}.`);
+          console.log(`\u1F53B Service ${process.pid}:${process.className} exited with status ${process.status}.`);
         }
       }
     }
@@ -279,7 +273,7 @@ export class Kernel implements IKernel {
 
       if(this.tryRunProc(process) === -2) {
         this.killProcess(process.pid);
-        console.log(`Ω Process ${process.pid}:${process.className} exited with status ${process.status}.`);
+        console.log(`\u1F53B Process ${process.pid}:${process.className} exited with status ${process.status}.`);
         continue;
       }
     }

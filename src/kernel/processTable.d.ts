@@ -2,14 +2,11 @@ interface ProcessMemory {
 }
 
 type SerializedProcess = {
-	pid: ProcessId;
-	parentPid: ProcessId;
-	heat: number;
-	service: boolean;
-	className: string;
+	id: ProcessId;
+	pa: ProcessId;
+	he: number;
+	se: boolean;
+	ex: string;
 };
 
-interface SerializedProcessTable extends Array<SerializedProcess> {
-}
-
-//interface Memory extends KernelMemory { }
+type SerializedProcessTable = SerializedProcess[];

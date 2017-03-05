@@ -1,7 +1,7 @@
 import { CleanMemoryProc } from "./cleanMemoryProc";
 import { RoomProc } from "./roomProc";
-import { PRecycle } from "../roles";
 import { Process,registerProc } from "../kernel/process";
+import { RecycleProc } from "./roleRecycle";
 
 interface InitProcMemory extends ProcessMemory {
   mc?: ProcessId<CleanMemoryProc>;
@@ -54,7 +54,7 @@ export class InitProc extends Process<InitProcMemory> implements IColonizer {
           if(spawner !== undefined) {
             cmem.c = spawner.createProcessForCreep(creep,cmem).pid;
           } else {
-            cmem.c = this.spawnChildProcess(PRecycle).init(creep).pid;
+            cmem.c = this.spawnChildProcess(RecycleProc).init(creep).pid;
           }
         }
       }
