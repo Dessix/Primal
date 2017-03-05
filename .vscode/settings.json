@@ -1,31 +1,33 @@
 // Place your settings in this file to overwrite default and user settings.
 {
-	"files.exclude": {
-		"dist": true,
-		"node_modules": true,
-		"**/.git": true,
-		"**/.svn": true,
-		"**/.DS_Store": true
-	},
-	"tslint.enable": true,
-	"tslint.exclude": [
-		"dist",
-		"node_modules",
-		"thirdparty",
-		"lib",
-		"**/.git",
-		"**/.svn",
-		"**/.DS_Store",
-		"test/**.js"
-	],
-	//"editor.formatOnSave": false,
-	"editor.insertSpaces": true,
-	"editor.tabSize": 2,
-	"editor.mouseWheelZoom": false,
-	"editor.trimAutoWhitespace": true,
-	"editor.codeLens": true,
-	"diffEditor.renderSideBySide": true,
-	"html.format.endWithNewline": true,
-	"javascript.format.insertSpaceAfterKeywordsInControlFlowStatements": false,
-	"typescript.format.insertSpaceAfterKeywordsInControlFlowStatements": false
+  "files.exclude": {
+    "dist": true,
+    "node_modules": true,
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.DS_Store": true
+  },
+  "tslint.enable": true,
+  "tslint.exclude": [
+    "dist",
+    "node_modules",
+    "thirdparty",
+    "lib",
+    "**/.git",
+    "**/.svn",
+    "**/.DS_Store",
+    "test/**.js"
+  ],
+  "typescript.format.enable": true,
+  //"editor.formatOnSave": false,
+  "editor.insertSpaces": true,
+  "editor.tabSize": 2,
+  "editor.useTabStops": true,
+  "editor.mouseWheelZoom": false,
+  "editor.trimAutoWhitespace": true,
+  "editor.codeLens": true,
+  "diffEditor.renderSideBySide": true,
+  "html.format.endWithNewline": true,
+  "javascript.format.insertSpaceAfterKeywordsInControlFlowStatements": false,
+  "typescript.format.insertSpaceAfterKeywordsInControlFlowStatements": false
 }

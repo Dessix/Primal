@@ -2,115 +2,115 @@ import { BuilderMemory } from "../processes/buildProc";
 import { BaseRole } from "./baseRole";
 
 export class RoleBuilder extends BaseRole<BuilderMemory> {
-    public static RoleTag: string = "bild";
+  public static RoleTag: string = "bild";
 
-    private static _instance: RoleBuilder | undefined;
-    public static get Instance(): RoleBuilder {
-        const instance = RoleBuilder._instance;
-        if (instance === undefined) {
-            return (RoleBuilder._instance = new RoleBuilder());
-        }
-        return instance;
+  private static _instance: RoleBuilder | undefined;
+  public static get Instance(): RoleBuilder {
+    const instance = RoleBuilder._instance;
+    if(instance === undefined) {
+      return (RoleBuilder._instance = new RoleBuilder());
     }
+    return instance;
+  }
 
-    public static chooseBody(energyAvailable: number): BODYPART[] | undefined {
-        let chosenBody: string[];
-        if (energyAvailable >= 750) {
-            chosenBody = [
-                MOVE, MOVE, MOVE, MOVE,//4 = 200
-                CARRY, CARRY, CARRY, CARRY, CARRY, //5 = 250
-                WORK, WORK, WORK, //3 = 300
-            ];
-        } else if (energyAvailable >= 550) {
-            chosenBody = [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, WORK, WORK];
-        } else if (energyAvailable >= 400) {
-            chosenBody = [MOVE, MOVE, CARRY, CARRY, WORK, WORK];
-        } else if (energyAvailable >= 300) {
-            chosenBody = [MOVE, MOVE, CARRY, CARRY, WORK];
+  public static chooseBody(energyAvailable: number): BODYPART[] | undefined {
+    let chosenBody: string[];
+    if(energyAvailable >= 750) {
+      chosenBody = [
+        MOVE,MOVE,MOVE,MOVE,//4 = 200
+        CARRY,CARRY,CARRY,CARRY,CARRY, //5 = 250
+        WORK,WORK,WORK, //3 = 300
+      ];
+    } else if(energyAvailable >= 550) {
+      chosenBody = [MOVE,MOVE,MOVE,CARRY,CARRY,CARRY,CARRY,WORK,WORK];
+    } else if(energyAvailable >= 400) {
+      chosenBody = [MOVE,MOVE,CARRY,CARRY,WORK,WORK];
+    } else if(energyAvailable >= 300) {
+      chosenBody = [MOVE,MOVE,CARRY,CARRY,WORK];
+    } else {
+      return undefined;
+    }
+    return <BODYPART[]>chosenBody;
+  }
+
+  private getResources(creep: Creep,cmem: BuilderMemory): void {
+    const spawn = creep.spawn;
+
+    let container: StructureContainer | StructureStorage | undefined;
+
+    {
+      const containers = new Array<StructureContainer>();
+      //Try flagged storage containers
+      const flags = spawn.room.find(FIND_FLAGS);
+      for(let flag of flags) {
+        if(
+          flag.color !== COLOR_GREY || flag.secondaryColor !== COLOR_YELLOW
+        ) {
+          continue;
+        }
+        const testContainer = flag.lookForStructureAtPosition<StructureContainer>(STRUCTURE_CONTAINER);
+        if(testContainer !== undefined && testContainer.store["energy"] > 0) {
+          containers.push(testContainer);
+        }
+      }
+
+      if(containers.length !== 0) {
+        if(containers.length === 1) {
+          container = containers[0];
         } else {
-            return undefined;
+          const fullest = containers.sort(function(a,b) { return b.store["energy"] - a.store["energy"]; })[0];
+          container = fullest;
         }
-        return <BODYPART[]>chosenBody;
+      } else {
+        const storage = spawn.room.storage;
+        if(storage !== undefined && storage.store.energy > 0) {
+          container = storage;
+        }
+      }
     }
 
-    private getResources(creep: Creep, cmem: BuilderMemory): void {
-        const spawn = creep.spawn;
-
-        let container: StructureContainer | StructureStorage | undefined;
-
-        {
-            const containers = new Array<StructureContainer>();
-            //Try flagged storage containers
-            const flags = spawn.room.find(FIND_FLAGS);
-            for (let flag of flags) {
-                if (
-                    flag.color !== COLOR_GREY || flag.secondaryColor !== COLOR_YELLOW
-                ) {
-                    continue;
-                }
-                const testContainer = flag.lookForStructureAtPosition<StructureContainer>(STRUCTURE_CONTAINER);
-                if (testContainer !== undefined && testContainer.store["energy"] > 0) {
-                    containers.push(testContainer);
-                }
-            }
-
-            if (containers.length !== 0) {
-                if (containers.length === 1) {
-                    container = containers[0];
-                } else {
-                    const fullest = containers.sort(function (a, b) { return b.store["energy"] - a.store["energy"]; })[0];
-                    container = fullest;
-                }
-            } else {
-                const storage = spawn.room.storage;
-                if (storage !== undefined && storage.store.energy > 0) {
-                    container = storage;
-                }
-            }
-        }
-
-        if (container === undefined) {
-            //Try any container
-            container = spawn.room.findFirstStructureOfTypeMatching<StructureContainer, STRUCTURE_CONTAINER>(STRUCTURE_CONTAINER, c => c.store.energy > 0, false);
-        }
-
-        if (container !== undefined) {
-            if (container.transfer(creep, "energy") === ERR_NOT_IN_RANGE) {
-                creep.moveTo(container);
-            }
-        }
+    if(container === undefined) {
+      //Try any container
+      container = spawn.room.findFirstStructureOfTypeMatching<StructureContainer,STRUCTURE_CONTAINER>(STRUCTURE_CONTAINER,c => c.store.energy > 0,false);
     }
 
-    public onRun(creep: Creep, cmem: BuilderMemory): void {
-        if (creep.spawning) { return; }
-        if (cmem.bild_building && creep.carry.energy === 0) {
-            cmem.bild_building = false;
-            creep.say("energy");
-        }
-        if (!cmem.bild_building && creep.carry.energy === creep.carryCapacity) {
-            cmem.bild_building = true;
-            creep.say("production");
-        }
+    if(container !== undefined) {
+      if(container.transfer(creep,"energy") === ERR_NOT_IN_RANGE) {
+        creep.moveTo(container);
+      }
+    }
+  }
 
-        if (cmem.bild_building) {
-            const targets = creep.room.find(FIND_CONSTRUCTION_SITES);
-            if (targets.length !== 0) {
-                if (creep.build(targets[0]) === ERR_NOT_IN_RANGE) {
-                    creep.moveTo(targets[0]);
-                }
-            } else {
-                if (creep.carry.energy < creep.carryCapacity) {
-                    this.getResources(creep, cmem);
-                } else {
-                    const idleFlag = Game.spawns[cmem.spawnName].room.find(FIND_FLAGS).find(x => x.color === COLOR_BROWN && x.secondaryColor === COLOR_BROWN);
-                    if (idleFlag !== undefined) {
-                        creep.moveTo(idleFlag);
-                    }
-                }
-            }
+  public onRun(creep: Creep,cmem: BuilderMemory): void {
+    if(creep.spawning) { return; }
+    if(cmem.bild_building && creep.carry.energy === 0) {
+      cmem.bild_building = false;
+      creep.say("energy");
+    }
+    if(!cmem.bild_building && creep.carry.energy === creep.carryCapacity) {
+      cmem.bild_building = true;
+      creep.say("production");
+    }
+
+    if(cmem.bild_building) {
+      const targets = creep.room.find(FIND_CONSTRUCTION_SITES);
+      if(targets.length !== 0) {
+        if(creep.build(targets[0]) === ERR_NOT_IN_RANGE) {
+          creep.moveTo(targets[0]);
+        }
+      } else {
+        if(creep.carry.energy < creep.carryCapacity) {
+          this.getResources(creep,cmem);
         } else {
-            this.getResources(creep, cmem);
+          const idleFlag = Game.spawns[cmem.spawnName].room.find(FIND_FLAGS).find(x => x.color === COLOR_BROWN && x.secondaryColor === COLOR_BROWN);
+          if(idleFlag !== undefined) {
+            creep.moveTo(idleFlag);
+          }
         }
+      }
+    } else {
+      this.getResources(creep,cmem);
     }
+  }
 }
 

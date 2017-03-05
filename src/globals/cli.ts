@@ -1,8 +1,6 @@
-import * as Roles from "../roles";
-
 export default function initCli(g: Global, m: Memory, kernel: IKernel): void {
   g.reset = function (): void {
-    console.log("Ω Rebooting...");
+    console.log("\u1F53B Rebooting...");
     kernel.mem.proc = null;
     kernel.mem.pmem = {};
     kernel.reboot();
@@ -21,54 +19,29 @@ export default function initCli(g: Global, m: Memory, kernel: IKernel): void {
     },
   });
 
-  g.launchNew = function (className: string): number | undefined {
-    const procId = kernel.spawnProcessByClassName(className, 0);
-    if (procId === undefined) {
+  g.launchNew = function (className: string): ProcessId | undefined {
+    const p = kernel.spawnProcessByClassName(className, <ProcessId><any>0);
+    if (p === undefined) {
+      kernel.log(LogLevel.Error, "\u1F53B Could not find specified process to spawn.");
       return;
     }
-    kernel.saveProcessTable();
-    return procId;
+    kernel.log(LogLevel.Info, `\u1F53B Spawned process ${p.pid}:${p.className}`);
+    kernel.saveProcessTable();//Because we're called after the kernel for some reason (TODO: Verify still true, it's been a while)
+    return p.pid;
   };
 
-  if (!g.c) { Object.defineProperty(g, "c", { get: () => Game.creeps }); }
-  if (!g.s) { Object.defineProperty(g, "s", { get: () => Game.spawns }); }
-  if (!g.f) { Object.defineProperty(g, "f", { get: () => Game.flags }); }
-
-  g.spawnBard = function () {
-    const spawn = Game.spawns["Hive"];
-    const room = spawn.room;
-    const energyAvailable = room.energyAvailable;
-    const energyCapacityAvailable = room.energyCapacityAvailable;
-    const chosenBody = Roles.RoleBard.chooseBody(energyAvailable);
-    if (chosenBody === undefined) {
-      //console.log("No body could be chosen");
-      return;
-    }
-    const creepMemory: CreepMemory = {
-      spawnName: spawn.name,
-      role: Roles.RoleBard.RoleTag,
-      homeRoomName: spawn.room.name,
-    };
-    const success = spawn.createCreep(
-      chosenBody,
-      Roles.RoleBard.generateName(Roles.RoleBard, creepMemory),
-      creepMemory
-    );
-    if (typeof success === "number") {
-      //console.log(`Spawn failure: ${success}`);
-      return;
-    }
-    console.log(g.sinspect(spawn.spawning));
-  };
+  if (!g.c) { Reflect.defineProperty(g, "c", { get: () => Game.creeps }); }
+  if (!g.s) { Reflect.defineProperty(g, "s", { get: () => Game.spawns }); }
+  if (!g.f) { Reflect.defineProperty(g, "f", { get: () => Game.flags }); }
 
   g.showBuildQueue = function (room: Room): void {
     const buildQueue = room.find(FIND_CONSTRUCTION_SITES);
-    let str: string | null = "<table>\n";
+    let html: string | null = "<table>\n";
     for (let i = 0, n = buildQueue.length; i < n; ++i) {
-      str = str + `<tr><td>${i + 1}:</td><td>${buildQueue[i].structureType}</td></tr>\n`;
+      html += `\t<tr><td>${i + 1}:</td><td>${buildQueue[i].structureType}</td></tr>\n`;
     }
-    str = str + "</table>\n";
-    console.log(str);
-    str = null;
+    html += "</table>\n";
+    console.log(html);
+    html = null;
   };
 };

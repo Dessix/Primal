@@ -52,6 +52,7 @@
     "tslint": "^4.3.0-dev.0",
     "tslint-loader": "^3.3.0",
     "typescript": "^2.2.1",
+    "typescript-formatter": "^5.1.0",
     "typings": "*",
     "vinyl-named": "^1.1.0",
     "webpack": "2.*"

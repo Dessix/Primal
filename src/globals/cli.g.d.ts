@@ -1,12 +1,12 @@
 interface CliIdProxy {
-  (id: string): RoomObject | undefined;
+  (id: string | IdFor<RoomObject> | null | undefined): RoomObject | undefined;
   [id: string]: RoomObject | undefined;
 }
 
 interface Global {
   kernel: IKernel;
   k: IKernel;
-  launchNew(className: string): number | undefined;
+  launchNew(className: string): ProcessId | undefined;
   reset(): void;
   spawnBard(): void;
   showBuildQueue(room: Room): void;

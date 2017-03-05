@@ -1,5 +1,5 @@
 import { fromMemory } from "../../util/fromMemory";
-import { Process,registerProc } from "../../kernel/process";
+import { Process, registerProc } from "../../kernel/process";
 
 export interface MoriaProcMemory extends ProcessMemory {
   /**Name of the main room for this mining operation*/
@@ -19,7 +19,7 @@ export class MoriaProc extends Process<MoriaProcMemory> {
     return this;
   }
 
-  @fromMemory({key: "r", get: (r?: typeof Room.name) => r ? Game.rooms[r] : undefined, set: (r?: Room) => r ? r.name : undefined })
+  @fromMemory({ key: "r", get: (r?: typeof Room.name) => r ? Game.rooms[r] : undefined, set: (r?: Room) => r ? r.name : undefined })
   public room?: Room;
 
   private get parent(): IRoomProc {
@@ -28,7 +28,7 @@ export class MoriaProc extends Process<MoriaProcMemory> {
 
   private _pSpawnCache?: ISpawnerProcess = undefined;
   private get parentSpawner(): ISpawnerProcess {
-    if (this._pSpawnCache !== undefined) { return this._pSpawnCache; }
+    if(this._pSpawnCache !== undefined) { return this._pSpawnCache; }
     let spawnProc: ISpawnerProcess | undefined;
     if(this.memory.s && (spawnProc = this.kernel.getProcessById(this.memory.s)) !== undefined) { return spawnProc; }
     const psp = this.parent.spawnerProcess;
