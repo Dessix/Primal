@@ -4,14 +4,8 @@ interface Memory {
 
 interface SourceInfo {
     id: string;
-    position: {
-        x: number;
-        y: number;
-    };
-    miningPosition: {
-        x: number;
-        y: number;
-    };
+    position: PointLike;
+    miningPosition: PointLike;
 }
 
 interface SourceScanInfo {

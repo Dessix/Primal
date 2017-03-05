@@ -18,7 +18,7 @@ export class Wayfarer {
   }
 
   /**
-   * @return string[] of whitespace-right-padded ROOM_TAG_LENGTH characters roomName followed by
+   * @return {string[]} of whitespace-right-padded ROOM_TAG_LENGTH characters roomName followed by
    * 1 character per position in each room per string. One string per room in path.
    */
   public static serializePath(this: void, positions: RoomPositionLike[]): string[] {

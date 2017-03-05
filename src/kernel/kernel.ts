@@ -1,5 +1,7 @@
+import { ScreepsColorToHex,StaticLogger } from "../util/logger";
 import { ProcessRegistry } from "./processRegistry";
 
+//TODO: Wtf is this for?
 const enum ProcessRunState {
   CPU_OVERLOAD = -1,
   CONTINUE = 0,
@@ -14,32 +16,23 @@ interface KernelRecord {
 
 export class Kernel implements IKernel {
   private processTable: (Map<ProcessId,KernelRecord>);
-  private lastPidRun: ProcessId = -1;
+  private lastPidRun: ProcessId = <ProcessId><any>-1;
   private readonly getKmem: () => KernelMemory;
 
-  public get mem(): KernelMemory {
-    return this.getKmem();
+  //TODO: extract to BaseLogger in a utils file, keep here for process use.
+  public log(logLevel: LogLevel, message: string, color?: COLOR, highlight?: boolean): void {
+    return StaticLogger.log(logLevel, message, color, highlight);
   }
+
+  public get mem(): KernelMemory { return this.getKmem(); }
 
   public constructor(fetchKmem: () => KernelMemory) {
     this.processTable = new Map<ProcessId,KernelRecord>();
     this.getKmem = fetchKmem;
   }
 
-  private spawnNewProcessTable(): SerializedProcessTable {
-    console.log("Ω Spawning new process table");
-    const procInst: SerializedProcess = {
-      className: "Root",
-      pid: 0,
-      parentPid: 0,
-      heat: 1000,
-      service: true,
-    };
-    return [procInst];
-  }
-
   private loadProcessEntry(entry: SerializedProcess): KernelRecord | null {
-    const processConstructor = ProcessRegistry.fetch(entry.className);
+    const processConstructor = ProcessRegistry.fetch(entry.className);//TODO: Rename ClassName to 'ex'
     if(processConstructor === undefined) {
       console.log(`Error: No constructor found for process class "${entry.className}"!`);
       return null;
@@ -56,7 +49,8 @@ export class Kernel implements IKernel {
     const mem = this.getKmem();
     let proc = mem.proc;
     if(proc == null) {
-      mem.proc = proc = this.spawnNewProcessTable();
+      this.log(LogLevel.Info,"\u1F53B Spawning new process table")
+      mem.proc = proc = [];
     }
     this.processTable.clear();
     for(let i = 0,n = proc.length;i < n;++i) {
@@ -93,11 +87,11 @@ export class Kernel implements IKernel {
   public getFreePid(): ProcessId {
     const currentPids = Array.from(this.processTable.keys()).sort();
     for(let i = 0;i < currentPids.length;++i) {
-      if(currentPids[i] !== i) {
-        return i;
+      if(currentPids[i] !== <ProcessId><any>i) {
+        return <ProcessId><any>i;
       }
     }
-    return currentPids.length;
+    return <ProcessId><any>currentPids.length;
   }
 
   public reboot(): void {
@@ -113,8 +107,8 @@ export class Kernel implements IKernel {
     const mem = this.getKmem();
     let pmem = mem.pmem;
     if(pmem === undefined) { mem.pmem = pmem = {}; }
-    let pmemi = pmem[processId];
-    if(pmemi === undefined || pmemi === null) { pmem[processId] = pmemi = {}; }
+    let pmemi = pmem[<number><any>processId];
+    if(pmemi === undefined || pmemi === null) { pmem[<number><any>processId] = pmemi = {}; }
     return pmemi;
   }
 
@@ -122,18 +116,18 @@ export class Kernel implements IKernel {
     const mem = this.getKmem();
     let pmem = mem.pmem;
     if(pmem === undefined) { mem.pmem = pmem = {}; }
-    pmem[pid] = memory;
+    pmem[<number><any>pid] = memory;
   }
 
   public deleteProcessMemory(pid: ProcessId): void {
     const mem = this.getKmem();
     if(mem.pmem !== undefined) {
-      delete mem.pmem[pid];
+      delete mem.pmem[<number><any>pid];
     }
   }
 
   public spawnProcessByClassName(processName: string, parentPid?: ProcessId): IProcess | undefined {
-    if(parentPid === undefined) { parentPid = 0; }
+    if(parentPid === undefined) { parentPid = <ProcessId><any>0; }
     const processCtor = ProcessRegistry.fetch(processName);
     if(processCtor === undefined) {
       console.log("Ω ClassName not defined");
@@ -268,7 +262,7 @@ export class Kernel implements IKernel {
     }
   }
 
-  private runAllProcesses(processes: KernelRecord[],maxCpu: number,lastPidRun: number): void {
+  private runAllProcesses(processes: KernelRecord[],maxCpu: number,lastPidRun: ProcessId): void {
     let overheat: boolean = false;
     let i: number = 0;
     let n = processes.length;

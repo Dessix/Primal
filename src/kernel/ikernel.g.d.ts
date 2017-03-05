@@ -60,7 +60,7 @@ interface KernelMemory {
   pmem?: { [pid: number/** {ProcessId} */]: ProcessMemory | null | undefined };
 }
 
-interface IKernel extends ITaskManager, IMemoryManager {
+interface IKernel extends ITaskManager, IMemoryManager, ILogger {
   readonly mem: KernelMemory;
 
   loadProcessTable(): void;

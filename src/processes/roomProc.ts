@@ -1,16 +1,18 @@
+import { MoriaProc, MoriaProcMemory } from "./moria/moriaProc";
 import { TowerProc } from "./towerProc";
-import { Process, registerProc } from "../kernel/process";
+import { Process,registerProc } from "../kernel/process";
 
-interface RoomProcMemory extends ProcessMemory {
+export interface RoomProcMemory extends ProcessMemory {
   r: string;//RoomName;
   t?: ProcessId<TowerProc>;
+  m?: ProcessId<MoriaProc>;
 }
 
 @registerProc
 export class RoomProc extends Process<RoomProcMemory> implements IRoomProc {
   public init(room: Room): RoomProc {
     this.memory.r = room.name;
-    console.log("Spawned process for room %s",room.name);
+    this.kernel.log("Spawned process for room %s",room.name);
     return this;
   }
 
@@ -22,7 +24,7 @@ export class RoomProc extends Process<RoomProcMemory> implements IRoomProc {
   public run() {
     const room = this.room;
     if(!room || !room.controller || !room.controller.my) { this.status = ProcessStatus.EXIT; return; }//Room either no longer visible or no longer owned
-    const memory = this.memory, controller = room.controller;
+    const memory = this.memory,controller = room.controller;
 
     //Tower Defense - Spawns a process per tower in the room if not present
     {
@@ -39,9 +41,16 @@ export class RoomProc extends Process<RoomProcMemory> implements IRoomProc {
       }
     }
 
+    //Moria - mining management
+    {
+      const moria = memory.m && this.kernel.getProcessById(memory.m);
+      if(moria === undefined) {
+        memory.m = this.spawnChildProcess(MoriaProc).init(room).pid;
+      }
+    }
+    
     //TODO:
     //Spawner? Use BodyBuilder if possible
-    //Moria - mining management
     //Upgraders - Outputs rally at a point, and fetch material from a central location chosen by the process- which may change over time
     //Builders - Same about material source, doubly so for target to build
     //Repairers - Builders do this. No more kidding around.

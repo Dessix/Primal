@@ -21,7 +21,7 @@ export class CleanMemoryProc extends Process<ProcessMemory> {
       }
     }
     {
-      const mCreeps = Memory.creeps, gCreeps = Game.creeps;
+      const mCreeps = Memory.creeps,gCreeps = Game.creeps;
       const creepNames = Object.keys(mCreeps);
       for(let i = 0,n = creepNames.length;i < n;++i) {
         const creepName = creepNames[i];

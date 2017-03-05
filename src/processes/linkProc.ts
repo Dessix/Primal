@@ -24,11 +24,11 @@ export class LinkProc extends Process<LinkProcMemory> {
     return Game.rooms[this.memory.roomName]
   }
 
-  private rescanRoom(room: Room, mem: LinkProcMemory) {
+  private rescanRoom(room: Room,mem: LinkProcMemory) {
     const structures = room.find(FIND_MY_STRUCTURES);
-    for (let i = 0; i < structures.length; ++i) {
+    for(let i = 0;i < structures.length;++i) {
       const s = structures[i];
-      if (!(s instanceof StructureLink)) { continue; }
+      if(!(s instanceof StructureLink)) { continue; }
       const linkId = <LinkId & string>s.id;
       //if (mem.miningLinks.indexOf(linkId) >= 0) { continue; }
       //mem.miningLinks.push(linkId);
@@ -47,14 +47,14 @@ export class LinkProc extends Process<LinkProcMemory> {
   }
 
   public run(): void {
-    if (this.kernel.getProcessById(this.parentPid) === undefined) { this.status = ProcessStatus.EXIT; return; }
-    const mem = this.memory, room = this.room, gTime = Game.time;
-    
-    if (mem.nextScan === undefined || gTime >= mem.nextScan) {
-      this.rescanRoom(room, mem);
+    if(this.kernel.getProcessById(this.parentPid) === undefined) { this.status = ProcessStatus.EXIT; return; }
+    const mem = this.memory,room = this.room,gTime = Game.time;
+
+    if(mem.nextScan === undefined || gTime >= mem.nextScan) {
+      this.rescanRoom(room,mem);
       mem.nextScan = gTime + this.LinkScanTickrate;
     }
-    
+
 
     // for (let i = pmem.towers.length; i-- > 0;) {
     //     const towerId = pmem.towers[i];
@@ -93,21 +93,21 @@ export class LinkProc extends Process<LinkProcMemory> {
 
   private findLinks(miningPosition: RoomPosition): (string & IdFor<StructureLink>) | undefined {
     const room = Game.rooms[miningPosition.roomName];
-    if (room === undefined) { throw new Error("Room inaccessible"); }
+    if(room === undefined) { throw new Error("Room inaccessible"); }
     // const storage = room.storage;
     // if (storage === undefined) {
     //     return undefined;
     // }
     const links = room.find(FIND_STRUCTURES).filter(s => s.structureType === STRUCTURE_LINK);
     const closest = miningPosition.getClosest(links);
-    if (closest === undefined) {
+    if(closest === undefined) {
       return;
     }
     const distanceToClosest = miningPosition.getRangeTo(closest);
-    if (distanceToClosest > 1) {
+    if(distanceToClosest > 1) {
       return;
     }
-    if (links.length > 0) {
+    if(links.length > 0) {
       return <IdFor<StructureLink> & typeof StructureLink.prototype.id>links[0].id;
     }
     return;

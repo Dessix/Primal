@@ -1,13 +1,15 @@
+//TODO: This probably doesn't actually occur "first", due to es6 imports. Check, and, if needed, find a solution.
 const cpuOverhead = Game.cpu.getUsed();
 function ProfileMemoryDeserialization(): number { const start = Game.cpu.getUsed(); Memory; return Game.cpu.getUsed() - start; }
 const deserializationTime = ProfileMemoryDeserialization();
 
-import "./extensions/";//Apply extension modules
+import "./globals";
+import "./extensions";
 import { initVolatile, initTickVolatile } from "./globals/volatile";
 import { Kernel } from "./kernel/kernel";
 import { recordStats } from "./util/stats";
 import * as Profiler from "../lib/screeps-profiler";
-import * as Roles from "./roles";
+
 import initCli from "./globals/cli";
 import initConfig from "./util/config";
 
@@ -17,12 +19,7 @@ initConfig(global, Memory);
 //Enable profiler if configured
 if(Memory.config.profile) {
 	Profiler.enable();
-	Profiler.registerClass(Roles.FsmRole, "FsmRole");
-	Profiler.registerClass(Roles.RoleCourier, "RoleCourier");
-	Profiler.registerClass(Roles.RoleBuilder, "RoleBuilder");
-	Profiler.registerClass(Roles.RoleUpgrader, "RoleUpgrader");
-	Profiler.registerClass(Roles.RoleRepairer, "RoleRepairer");
-	Profiler.registerClass(Roles.RoleBootstrapMiner, "RoleBootstrapMiner");
+	//TODO: enable usage of a profiler annotation
 	Profiler.registerFN(recordStats, "RecordStats");
 }
 

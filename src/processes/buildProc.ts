@@ -3,8 +3,8 @@ import { CreepProcess } from "../kernel/creepProcess";
 import { registerProc } from "../kernel/process";
 
 export interface BuilderMemory extends CreepProcessMemory {
-    bild_building?: boolean;
-    spawnName: typeof StructureSpawn.name;
+  bild_building?: boolean;
+  spawnName: typeof StructureSpawn.name;
 }
 
 @registerProc
@@ -18,10 +18,10 @@ export class BuildProc extends CreepProcess<BuilderMemory> {
 
   public run(): void {
     const creep = this.creep;
-    if (creep === undefined) {
+    if(creep === undefined) {
       this.status = ProcessStatus.EXIT;
       return;
     }
-    RoleBuilder.Instance.run(creep, this.memory);
+    RoleBuilder.Instance.run(creep,this.memory);
   }
 }
